@@ -1,0 +1,230 @@
+name: Project Automation (Backlog/In Progress)
+
+on:
+  issues:
+    types: [opened, assigned, labeled, closed]
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+  projects: write
+
+env:
+  PROJECT_URL: https://github.com/orgs/<your-org-or-user>/projects/<project-number>
+  STATUS_FIELD_NAME: Status
+  BACKLOG_STATUS_OPTION: Backlog
+  INPROGRESS_STATUS_OPTION: In Progress
+  DONE_STATUS_OPTION: Done
+
+jobs:
+  add_to_project_and_set_status:
+    name: Add to Project + Set Status
+    runs-on: ubuntu-latest
+    steps:
+      - name: Add issue to Project (when opened or labeled task)
+        if: github.event.action == 'opened' || (github.event.action == 'labeled' && github.event.label.name == 'task')
+        id: add
+        uses: actions/add-to-project@v0.5.0
+        with:
+          project-url: ${{ env.PROJECT_URL }}
+          github-token: ${{ secrets.ORG_PROJECTS_TOKEN }}
+
+      - name: Set Status = Backlog (when opened or labeled task)
+        if: github.event.action == 'opened' || (github.event.action == 'labeled' && github.event.label.name == 'task')
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.ORG_PROJECTS_TOKEN }}
+          script: |
+            const projectUrl = process.env.PROJECT_URL;
+            const statusFieldName = process.env.STATUS_FIELD_NAME;
+            const statusOptionName = process.env.BACKLOG_STATUS_OPTION;
+            const contentId = context.payload.issue.node_id;
+
+            function parseProjectUrl(url) {
+              // Supports org-level and user-level Projects v2 URLs
+              let m = url.match(/github.com\/orgs\/(.+)\/projects\/(\d+)/);
+              if (m) return { type: 'org', owner: m[1], number: parseInt(m[2], 10) };
+              m = url.match(/github.com\/users\/(.+)\/projects\/(\d+)/);
+              if (m) return { type: 'user', owner: m[1], number: parseInt(m[2], 10) };
+              throw new Error('PROJECT_URL must be org or user Project v2 URL');
+            }
+            const parsed = parseProjectUrl(projectUrl);
+
+            let project; let statusField;
+            if (parsed.type === 'org') {
+              const res = await github.graphql(`
+                query($owner: String!, $number: Int!) {
+                  organization(login: $owner) {
+                    projectV2(number: $number) {
+                      id
+                      fields(first: 50) { nodes { ... on ProjectV2SingleSelectField { id name options { id name } } } }
+                    }
+                  }
+                }
+              `, { owner: parsed.owner, number: parsed.number });
+              project = res.organization.projectV2;
+            } else {
+              const res = await github.graphql(`
+                query($owner: String!, $number: Int!) {
+                  user(login: $owner) {
+                    projectV2(number: $number) {
+                      id
+                      fields(first: 50) { nodes { ... on ProjectV2SingleSelectField { id name options { id name } } } }
+                    }
+                  }
+                }
+              `, { owner: parsed.owner, number: parsed.number });
+              project = res.user.projectV2;
+            }
+            if (!project) throw new Error('Project not found. Check PROJECT_URL');
+            statusField = project.fields.nodes.find(f => f && f.name === statusFieldName);
+            if (!statusField) throw new Error('Status field not found');
+            const option = statusField.options.find(o => o.name === statusOptionName);
+            if (!option) throw new Error(`Status option not found: ${statusOptionName}`);
+
+            // Add content to project if not already added (opened path uses action output, but we ensure)
+            const addItemRes = await github.graphql(`
+              mutation($projectId: ID!, $contentId: ID!) { addProjectV2ItemById(input: { projectId: $projectId, contentId: $contentId }) { item { id } } }
+            `, { projectId: project.id, contentId });
+            const itemId = addItemRes.addProjectV2ItemById.item.id;
+
+            // Set Status field value
+            await github.graphql(`
+              mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) {
+                updateProjectV2ItemFieldValue(input: { projectId: $projectId, itemId: $itemId, fieldId: $fieldId, value: { singleSelectOptionId: $optionId } }) { projectV2Item { id } }
+              }
+            `, { projectId: project.id, itemId, fieldId: statusField.id, optionId: option.id });
+
+      - name: Set Status = Done (when closed)
+        if: github.event.action == 'closed'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.ORG_PROJECTS_TOKEN }}
+          script: |
+            const projectUrl = process.env.PROJECT_URL;
+            const statusFieldName = process.env.STATUS_FIELD_NAME;
+            const statusOptionName = process.env.DONE_STATUS_OPTION;
+            const contentId = context.payload.issue.node_id;
+
+            function parseProjectUrl(url) {
+              let m = url.match(/github.com\/orgs\/(.+)\/projects\/(\d+)/);
+              if (m) return { type: 'org', owner: m[1], number: parseInt(m[2], 10) };
+              m = url.match(/github.com\/users\/(.+)\/projects\/(\d+)/);
+              if (m) return { type: 'user', owner: m[1], number: parseInt(m[2], 10) };
+              throw new Error('PROJECT_URL must be org or user Project v2 URL');
+            }
+            const parsed = parseProjectUrl(projectUrl);
+
+            let project; let statusField; let itemId;
+            if (parsed.type === 'org') {
+              const res = await github.graphql(`
+                query($owner: String!, $number: Int!) {
+                  organization(login: $owner) {
+                    projectV2(number: $number) {
+                      id
+                      fields(first: 50) { nodes { ... on ProjectV2SingleSelectField { id name options { id name } } } }
+                      items(first: 100) { nodes { id content { ... on Issue { id } } } }
+                    }
+                  }
+                }
+              `, { owner: parsed.owner, number: parsed.number });
+              project = res.organization.projectV2;
+            } else {
+              const res = await github.graphql(`
+                query($owner: String!, $number: Int!) {
+                  user(login: $owner) {
+                    projectV2(number: $number) {
+                      id
+                      fields(first: 50) { nodes { ... on ProjectV2SingleSelectField { id name options { id name } } } }
+                      items(first: 100) { nodes { id content { ... on Issue { id } } } }
+                    }
+                  }
+                }
+              `, { owner: parsed.owner, number: parsed.number });
+              project = res.user.projectV2;
+            }
+
+            statusField = project.fields.nodes.find(f => f && f.name === statusFieldName);
+            const option = statusField.options.find(o => o.name === statusOptionName);
+            const item = project.items.nodes.find(n => n.content && n.content.id === contentId);
+            if (!item) {
+              const addItemRes = await github.graphql(`
+                mutation($projectId: ID!, $contentId: ID!) { addProjectV2ItemById(input: { projectId: $projectId, contentId: $contentId }) { item { id } } }
+              `, { projectId: project.id, contentId });
+              itemId = addItemRes.addProjectV2ItemById.item.id;
+            } else {
+              itemId = item.id;
+            }
+
+            await github.graphql(`
+              mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) {
+                updateProjectV2ItemFieldValue(input: { projectId: $projectId, itemId: $itemId, fieldId: $fieldId, value: { singleSelectOptionId: $optionId } }) { projectV2Item { id } }
+              }
+            `, { projectId: project.id, itemId, fieldId: statusField.id, optionId: option.id });
+
+      - name: Set Status = In Progress (when assigned)
+        if: github.event.action == 'assigned'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.ORG_PROJECTS_TOKEN }}
+          script: |
+            const projectUrl = process.env.PROJECT_URL;
+            const statusFieldName = process.env.STATUS_FIELD_NAME;
+            const statusOptionName = process.env.INPROGRESS_STATUS_OPTION;
+            const contentId = context.payload.issue.node_id;
+
+            function parseProjectUrl(url) {
+              let m = url.match(/github.com\/orgs\/(.+)\/projects\/(\d+)/);
+              if (m) return { type: 'org', owner: m[1], number: parseInt(m[2], 10) };
+              m = url.match(/github.com\/users\/(.+)\/projects\/(\d+)/);
+              if (m) return { type: 'user', owner: m[1], number: parseInt(m[2], 10) };
+              throw new Error('PROJECT_URL must be org or user Project v2 URL');
+            }
+            const parsed = parseProjectUrl(projectUrl);
+
+            let project; let statusField; let itemId;
+            if (parsed.type === 'org') {
+              const res = await github.graphql(`
+                query($owner: String!, $number: Int!, $contentId: ID!) {
+                  organization(login: $owner) {
+                    projectV2(number: $number) {
+                      id
+                      fields(first: 50) { nodes { ... on ProjectV2SingleSelectField { id name options { id name } } } }
+                      items(first: 100) { nodes { id content { ... on Issue { id } } } }
+                    }
+                  }
+                }
+              `, { owner: parsed.owner, number: parsed.number, contentId });
+              project = res.organization.projectV2;
+            } else {
+              const res = await github.graphql(`
+                query($owner: String!, $number: Int!, $contentId: ID!) {
+                  user(login: $owner) {
+                    projectV2(number: $number) {
+                      id
+                      fields(first: 50) { nodes { ... on ProjectV2SingleSelectField { id name options { id name } } } }
+                      items(first: 100) { nodes { id content { ... on Issue { id } } } }
+                    }
+                  }
+                }
+              `, { owner: parsed.owner, number: parsed.number, contentId });
+              project = res.user.projectV2;
+            }
+            statusField = project.fields.nodes.find(f => f && f.name === statusFieldName);
+            const option = statusField.options.find(o => o.name === statusOptionName);
+            const item = project.items.nodes.find(n => n.content && n.content.id === contentId);
+            if (!item) {
+              const addItemRes = await github.graphql(`
+                mutation($projectId: ID!, $contentId: ID!) { addProjectV2ItemById(input: { projectId: $projectId, contentId: $contentId }) { item { id } } }
+              `, { projectId: project.id, contentId });
+              itemId = addItemRes.addProjectV2ItemById.item.id;
+            } else {
+              itemId = item.id;
+            }
+
+            await github.graphql(`
+              mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) {
+                updateProjectV2ItemFieldValue(input: { projectId: $projectId, itemId: $itemId, fieldId: $fieldId, value: { singleSelectOptionId: $optionId } }) { projectV2Item { id } }
+              }
+            `, { projectId: project.id, itemId, fieldId: statusField.id, optionId: option.id });

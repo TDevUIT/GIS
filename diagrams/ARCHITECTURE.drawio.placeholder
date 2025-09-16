@@ -1,0 +1,3 @@
+Draw.io/Excalidraw placeholder for architecture diagram.
+Boxes: Web_Client -> Web_Server -> (GIS_Server, Data_Processor)
+Data domains: infrastructure, population, traffic, land, environment.

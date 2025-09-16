@@ -1,0 +1,50 @@
+name: Task
+description: Create a task for the team backlog
+labels: ["task"]
+title: "[Task] <short description>"
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What, why, how (short)
+      placeholder: Provide a brief description of the task
+    validations:
+      required: true
+  - type: input
+    id: area
+    attributes:
+      label: Area/Team
+      placeholder: GIS_Server | Web_Server | Data_Processor | Web_Client
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      options:
+        - P0 - Critical
+        - P1 - High
+        - P2 - Medium
+        - P3 - Low
+      default: 2
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance Criteria
+      description: List clear, testable outcomes
+      placeholder: |
+        - When ..., then ...
+        - API returns ...
+  - type: textarea
+    id: checklist
+    attributes:
+      label: Checklist
+      description: Subtasks if any
+      placeholder: |
+        - [ ] ...
+        - [ ] ...
+  - type: textarea
+    id: references
+    attributes:
+      label: References
+      description: Links to docs, data sources, designs
+      placeholder: https://...

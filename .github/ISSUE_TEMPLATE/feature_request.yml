@@ -1,0 +1,37 @@
+name: Feature request
+description: Suggest an idea for this project
+labels: ["enhancement"]
+title: "[Feature] <short description>"
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem / Motivation
+      description: What problem does this feature solve?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+      description: Describe the solution you'd like
+      placeholder: |
+        - API endpoints: ...
+        - UI changes: ...
+        - Data impact: ...
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+  - type: textarea
+    id: risks
+    attributes:
+      label: Risks / Open Questions
+  - type: textarea
+    id: checklist
+    attributes:
+      label: Checklist
+      placeholder: |
+        - [ ] Update docs
+        - [ ] Add tests
+        - [ ] Consider backward compatibility

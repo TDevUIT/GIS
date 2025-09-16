@@ -1,0 +1,41 @@
+name: ie402
+
+networks:
+  ie402_net:
+    driver: bridge
+
+services:
+  web_server:
+    image: alpine:3.19 # placeholder image; replace with real build later
+    command: ["sh", "-c", "echo Web_Server placeholder running on ${WEB_SERVER_PORT} && sleep 3600"]
+    env_file:
+      - ./.env
+    ports:
+      - "${WEB_SERVER_PORT}:4000"
+    networks:
+      - ie402_net
+    depends_on:
+      - gis_server
+      - data_processor
+
+  gis_server:
+    image: alpine:3.19 # placeholder
+    command: ["sh", "-c", "echo GIS_Server placeholder && sleep 3600"]
+    networks:
+      - ie402_net
+
+  data_processor:
+    image: alpine:3.19 # placeholder
+    command: ["sh", "-c", "echo Data_Processor placeholder && sleep 3600"]
+    networks:
+      - ie402_net
+
+  web_client:
+    image: alpine:3.19 # placeholder
+    command: ["sh", "-c", "echo Web_Client placeholder running on ${WEB_CLIENT_PORT} && sleep 3600"]
+    env_file:
+      - ./.env
+    ports:
+      - "${WEB_CLIENT_PORT}:3000"
+    networks:
+      - ie402_net
