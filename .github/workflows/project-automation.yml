@@ -11,7 +11,14 @@ permissions:
   projects: write
 
 env:
-  PROJECT_URL: https://github.com/orgs/<your-org-or-user>/projects/<project-number>
+  # Configure your GitHub Projects v2 URL here. Prefer setting a repository variable named PROJECT_URL
+  # in GitHub: Settings -> Secrets and variables -> Actions -> Variables. Example user project URL:
+  #   https://github.com/users/TDevUIT/projects/<project-number>
+  # Or organization project URL:
+  #   https://github.com/orgs/<your-org>/projects/<project-number>
+  PROJECT_URL: ${{ vars.PROJECT_URL || 'https://github.com/orgs/TDevUIT/projects/5' }}
+
+  # Update these to match your Project field/option names exactly
   STATUS_FIELD_NAME: Status
   BACKLOG_STATUS_OPTION: Backlog
   INPROGRESS_STATUS_OPTION: In Progress
@@ -25,7 +32,10 @@ jobs:
       - name: Add issue to Project (when opened or labeled task)
         if: github.event.action == 'opened' || (github.event.action == 'labeled' && github.event.label.name == 'task')
         id: add
-        uses: actions/add-to-project@v0.5.0
+        # Requires a PAT in secrets.ORG_PROJECTS_TOKEN with access to Projects v2
+        # For user projects, use a classic PAT with 'project' scope (and 'repo' if private repos are involved),
+        # or a fine-grained PAT with read/write access to Projects for the target account.
+        uses: actions/add-to-project@v0.6.0
         with:
           project-url: ${{ env.PROJECT_URL }}
           github-token: ${{ secrets.ORG_PROJECTS_TOKEN }}
