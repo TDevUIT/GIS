@@ -1,5 +1,7 @@
 # IE402 - Microservices Monorepo Skeleton
 
+Repository: https://github.com/TDevUIT/IE402
+
 This repository hosts a monorepo for an urban GIS project of Ho Chi Minh City (HCMC) using a microservices approach:
 
 - GIS_Server: data discovery, curation, and GIS aggregation for districts (e.g., Q1, Binh Thanh, Q10, Thu Duc).
@@ -43,6 +45,7 @@ Note: The existing Next.js app in `ie402/` is currently used as the Web Client. 
 ## Guidelines
 - API conventions: see `docs/API_CONVENTIONS.md`.
 - Pull Request guidelines: see `docs/PR_GUIDE.md`.
+- Branching conventions: see `docs/BRANCHING_GUIDE.md`.
 
 ## Licensing
 TBD.
