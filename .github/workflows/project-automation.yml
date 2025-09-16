@@ -28,16 +28,44 @@ jobs:
     name: Add to Project + Set Status
     runs-on: ubuntu-latest
     steps:
-      - name: Add issue to Project (when opened or labeled task)
-        if: github.event.action == 'opened' || (github.event.action == 'labeled' && github.event.label.name == 'task')
-        id: add
-        # Requires a PAT in secrets.ORG_PROJECTS_TOKEN with access to Projects v2
-        # For user projects, use a classic PAT with 'project' scope (and 'repo' if private repos are involved),
-        # or a fine-grained PAT with read/write access to Projects for the target account.
-        uses: actions/add-to-project@v0.6.0
+      - name: Preflight - Validate access to Project URL
+        uses: actions/github-script@v7
         with:
-          project-url: ${{ env.PROJECT_URL }}
           github-token: ${{ secrets.ORG_PROJECTS_TOKEN }}
+          script: |
+            const url = process.env.PROJECT_URL;
+            function parse(url) {
+              let m = url.match(/github.com\/orgs\/(.+)\/projects\/(\d+)/);
+              if (m) return { type: 'org', owner: m[1], number: parseInt(m[2], 10) };
+              m = url.match(/github.com\/users\/(.+)\/projects\/(\d+)/);
+              if (m) return { type: 'user', owner: m[1], number: parseInt(m[2], 10) };
+              throw new Error('PROJECT_URL must be org or user Project v2 URL');
+            }
+            const p = parse(url);
+            let project;
+            if (p.type === 'org') {
+              const res = await github.graphql(`
+                query($owner: String!, $number: Int!) {
+                  organization(login: $owner) { projectV2(number: $number) { id title closed } }
+                }
+              `, { owner: p.owner, number: p.number });
+              project = res.organization && res.organization.projectV2;
+            } else {
+              const res = await github.graphql(`
+                query($owner: String!, $number: Int!) {
+                  user(login: $owner) { projectV2(number: $number) { id title closed } }
+                }
+              `, { owner: p.owner, number: p.number });
+              project = res.user && res.user.projectV2;
+            }
+            if (!project) {
+              core.setFailed(`Project not found or token lacks access for ${url}. Check: PROJECT_URL, token scopes (project, repo, read:org), org membership & SSO authorization.`);
+            } else if (project.closed) {
+              core.setFailed('Project is closed. Reopen the Project or update PROJECT_URL.');
+            } else {
+              core.info(`Project reachable. ID=${project.id}`);
+              core.exportVariable('PROJECT_ID', project.id);
+            }
 
       - name: Set Status = Backlog (when opened or labeled task)
         if: github.event.action == 'opened' || (github.event.action == 'labeled' && github.event.label.name == 'task')
