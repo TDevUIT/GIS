@@ -10,14 +10,9 @@ permissions:
   pull-requests: write
 
 env:
-  # Configure your GitHub Projects v2 URL here. Prefer setting a repository variable named PROJECT_URL
-  # in GitHub: Settings -> Secrets and variables -> Actions -> Variables. Example user project URL:
-  #   https://github.com/users/TDevUIT/projects/<project-number>
-  # Or organization project URL:
-  #   https://github.com/orgs/<your-org>/projects/<project-number>
+
   PROJECT_URL: ${{ vars.PROJECT_URL || 'https://github.com/orgs/TDevUIT/projects/5' }}
 
-  # Update these to match your Project field/option names exactly
   STATUS_FIELD_NAME: Status
   BACKLOG_STATUS_OPTION: Backlog
   INPROGRESS_STATUS_OPTION: In Progress
@@ -223,7 +218,7 @@ jobs:
             let project; let statusField; let itemId;
             if (parsed.type === 'org') {
               const res = await github.graphql(`
-                query($owner: String!, $number: Int!, $contentId: ID!) {
+                query($owner: String!, $number: Int!) {
                   organization(login: $owner) {
                     projectV2(number: $number) {
                       id
@@ -232,11 +227,11 @@ jobs:
                     }
                   }
                 }
-              `, { owner: parsed.owner, number: parsed.number, contentId });
+              `, { owner: parsed.owner, number: parsed.number });
               project = res.organization.projectV2;
             } else {
               const res = await github.graphql(`
-                query($owner: String!, $number: Int!, $contentId: ID!) {
+                query($owner: String!, $number: Int!) {
                   user(login: $owner) {
                     projectV2(number: $number) {
                       id
@@ -245,7 +240,7 @@ jobs:
                     }
                   }
                 }
-              `, { owner: parsed.owner, number: parsed.number, contentId });
+              `, { owner: parsed.owner, number: parsed.number });
               project = res.user.projectV2;
             }
             statusField = project.fields.nodes.find(f => f && f.name === statusFieldName);
