@@ -1,0 +1,116 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/require-await */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+import {
+  Controller,
+  Post,
+  Body,
+  Res,
+  UseGuards,
+  Get,
+  Req,
+  Patch,
+} from '@nestjs/common';
+import type { Response, Request } from 'express';
+import { AuthService } from './auth.service';
+import { AuthGuard } from '@nestjs/passport';
+import { Role } from '../../generated/prisma';
+import { AdminGuard } from './admin.gaurd';
+
+@Controller('auth')
+export class AuthController {
+  constructor(private authService: AuthService) {}
+
+  @Post('signup')
+  async signup(
+    @Body()
+    body: { name: string; email: string; password: string; phone?: string },
+    @Res() res: Response,
+  ) {
+    const tokens = await this.authService.signup(body);
+    this.setAuthCookies(res, tokens);
+    return res.send({ message: 'Signup successful' });
+  }
+
+  @Post('login')
+  async login(
+    @Body() body: { email: string; password: string },
+    @Res() res: Response,
+  ) {
+    const tokens = await this.authService.login(body);
+    this.setAuthCookies(res, tokens);
+    return res.send({ message: 'Login successful' });
+  }
+
+  @Get('profile')
+  @UseGuards(AuthGuard('jwt'))
+  async getProfile(@Req() req) {
+    return req.user;
+  }
+
+  @Post('refresh')
+  async refresh(@Req() req: Request, @Res() res: Response) {
+    const refreshToken = req.cookies.refreshToken;
+    if (!refreshToken)
+      return res.status(401).send({ message: 'No refresh token' });
+
+    const tokens = await this.authService.refreshToken(refreshToken);
+    this.setAuthCookies(res, tokens);
+    return res.send({ message: 'Token refreshed' });
+  }
+
+  @Post('logout')
+  async logout(@Res({ passthrough: true }) res: Response) {
+    const cookieOptions = {
+      httpOnly: true,
+      secure: false,
+      sameSite: 'lax' as const,
+      path: '/',
+    };
+    res.clearCookie('accessToken', cookieOptions);
+    res.clearCookie('refreshToken', cookieOptions);
+    return { message: 'Logged out successfully' };
+  }
+
+  @Patch('rule')
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
+  async rulePermissions(
+    @Body() body: { userId: string; role: Role },
+    @Req() req: any,
+  ) {
+    const { userId, role } = body;
+    if (!userId || !role) {
+      return { message: 'User ID and role are required' };
+    }
+    if (userId === req.user.id) {
+      return { message: 'You cannot change your own role' };
+    }
+    const result = await this.authService.rulePermission(userId, role);
+    return { message: result.message };
+  }
+
+  private setAuthCookies(
+    res: Response,
+    tokens: { accessToken: string; refreshToken: string },
+  ) {
+    const isProduction = process.env.NODE_ENV === 'production';
+    const secureFlag = isProduction;
+
+    res.cookie('accessToken', tokens.accessToken, {
+      httpOnly: true,
+      secure: secureFlag,
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 24 * 60 * 60 * 1000,
+    });
+
+    res.cookie('refreshToken', tokens.refreshToken, {
+      httpOnly: true,
+      secure: secureFlag,
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+  }
+}
