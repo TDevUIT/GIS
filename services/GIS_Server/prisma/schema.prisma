@@ -1,0 +1,286 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["extendedWhereUnique"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+}
+
+model District {
+  id                String    @id @default(cuid())
+  code              String    @unique
+  name              String
+  areaKm2           Float?    @map("area_km2")
+  densityPerKm2     Float?    @map("density_per_km2")
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  geom              String?
+  wards             Ward[]
+  infrastructures   Infrastructure[]
+  populations       Population[]
+  traffics          Traffic[]
+  publicTransports  PublicTransport[]
+  landUses          LandUse[]
+  urbanPlans        UrbanPlan[]
+  terrains          Terrain[]
+  airQualities      AirQuality[]
+  waterQualities    WaterQuality[]
+  @@map("districts")
+}
+
+model Ward {
+  id          String   @id @default(cuid())
+  name        String
+  code        String   @unique
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  districtId  String
+  district    District @relation(fields: [districtId], references: [id], onDelete: Cascade)
+  geom        String?
+  @@map("wards")
+}
+
+model Infrastructure {
+  id         String   @id @default(cuid())
+  name       String
+  address    String?
+  category   InfraCategory
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  geom       String?
+  districtId String
+  district   District @relation(fields: [districtId], references: [id], onDelete: Cascade)
+  school     School?
+  hospital   Hospital?
+  park       Park?
+  market     Market?
+  utility    Utility?
+  @@map("infrastructures")
+}
+
+model School {
+  id               String      @id @default(cuid())
+  studentCapacity  Int?        @map("student_capacity")
+  teacherCount     Int?        @map("teacher_count")
+  level            SchoolLevel
+  infraId          String      @unique
+  infrastructure   Infrastructure @relation(fields: [infraId], references: [id], onDelete: Cascade)
+  @@map("schools")
+}
+
+model Hospital {
+  id             String        @id @default(cuid())
+  bedCapacity    Int?          @map("bed_capacity")
+  doctorCount    Int?          @map("doctor_count")
+  type           HospitalType
+  infraId        String        @unique
+  infrastructure Infrastructure @relation(fields: [infraId], references: [id], onDelete: Cascade)
+  @@map("hospitals")
+}
+
+model Park {
+  id             String         @id @default(cuid())
+  area           Float?
+  infraId        String         @unique
+  infrastructure Infrastructure  @relation(fields: [infraId], references: [id], onDelete: Cascade)
+  @@map("parks")
+}
+
+model Market {
+  id             String       @id @default(cuid())
+  stallCount     Int?         @map("stall_count")
+  type           MarketType
+  infraId        String       @unique
+  infrastructure Infrastructure @relation(fields: [infraId], references: [id], onDelete: Cascade)
+  @@map("markets")
+}
+
+model Utility {
+  id             String      @id @default(cuid())
+  capacity       Float?
+  type           UtilityType
+  infraId        String      @unique
+  infrastructure Infrastructure @relation(fields: [infraId], references: [id], onDelete: Cascade)
+  @@map("utilities")
+}
+
+model Population {
+  id              String         @id @default(cuid())
+  year            Int
+  populationTotal Int            @map("population_total")
+  householdsTotal Int            @map("households_total")
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  districtId      String
+  district        District       @relation(fields: [districtId], references: [id], onDelete: Cascade)
+  households      Household[]
+  demographics    Demographic[]
+  @@unique([districtId, year])
+  @@map("populations")
+}
+
+model Household {
+  id             String        @id @default(cuid())
+  householdSize  Int           @map("household_size")
+  incomeLevel    String?       @map("income_level")
+  housingType    String?       @map("housing_type")
+  populationId   String
+  population     Population    @relation(fields: [populationId], references: [id], onDelete: Cascade)
+  @@map("households")
+}
+
+model Demographic {
+  id           String     @id @default(cuid())
+  ageGroup     String     @map("age_group")
+  male         Int
+  female       Int
+  populationId String
+  population   Population @relation(fields: [populationId], references: [id], onDelete: Cascade)
+  @@map("demographics")
+}
+
+model Terrain {
+  id         String   @id @default(cuid())
+  elevation  Float?
+  slope      Float?
+  soilType   String?  @map("soil_type")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  geom       String?
+  districtId String
+  district   District @relation(fields: [districtId], references: [id], onDelete: Cascade)
+  @@map("terrains")
+}
+
+model AirQuality {
+  id          String   @id @default(cuid())
+  pm25        Float?
+  co2         Float?
+  no2         Float?
+  recordedAt  DateTime @map("recorded_at")
+  geom        String?
+  districtId  String
+  district    District @relation(fields: [districtId], references: [id], onDelete: Cascade)
+  @@map("air_qualities")
+}
+
+model WaterQuality {
+  id                  String   @id @default(cuid())
+  ph                  Float?
+  turbidity           Float?
+  contaminationIndex  Float?   @map("contamination_index")
+  recordedAt          DateTime @map("recorded_at")
+  geom                String?
+  districtId          String
+  district            District @relation(fields: [districtId], references: [id], onDelete: Cascade)
+  @@map("water_qualities")
+}
+
+model Traffic {
+  id             String      @id @default(cuid())
+  roadName       String      @map("road_name")
+  trafficVolume  Int?        @map("traffic_volume")
+  updatedAt      DateTime    @updatedAt
+  geom           String?
+  districtId     String
+  district       District    @relation(fields: [districtId], references: [id], onDelete: Cascade)
+  accidents      Accident[]
+  @@map("traffics")
+}
+
+model Accident {
+  id            String   @id @default(cuid())
+  accidentDate  DateTime @map("accident_date")
+  severity      String
+  casualties    Int
+  trafficId     String
+  traffic       Traffic  @relation(fields: [trafficId], references: [id], onDelete: Cascade)
+  @@map("accidents")
+}
+
+model PublicTransport {
+  id          String       @id @default(cuid())
+  routeName   String       @map("route_name")
+  mode        TransportMode
+  capacity    Int?
+  geom        String?
+  districtId  String
+  district    District     @relation(fields: [districtId], references: [id], onDelete: Cascade)
+  @@map("public_transports")
+}
+
+model LandUse {
+  id        String   @id @default(cuid())
+  type      String
+  areaKm2   Float    @map("area_km2")
+  year      Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  geom       String?
+  districtId String
+  district   District @relation(fields: [districtId], references: [id], onDelete: Cascade)
+  @@unique([districtId, type, year])
+  @@map("land_uses")
+}
+
+model UrbanPlan {
+  id          String   @id @default(cuid())
+  planName    String   @map("plan_name")
+  zoningType  String   @map("zoning_type")
+  description String?  @db.Text
+  issuedDate  DateTime @map("issued_date")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  geom        String?
+  districtId  String
+  district    District @relation(fields: [districtId], references: [id], onDelete: Cascade)
+  @@map("urban_plans")
+}
+
+enum InfraCategory {
+  SCHOOL
+  HOSPITAL
+  PARK
+  MARKET
+  UTILITY
+  ADMINISTRATIVE
+  OTHER
+}
+
+enum SchoolLevel {
+  PRESCHOOL
+  PRIMARY
+  SECONDARY
+  HIGH_SCHOOL
+  UNIVERSITY
+  VOCATIONAL
+}
+
+enum HospitalType {
+  GENERAL
+  SPECIALIZED
+  TRADITIONAL_MEDICINE
+}
+
+enum MarketType {
+  TRADITIONAL
+  SUPERMARKET
+  MALL
+}
+
+enum UtilityType {
+  WATER_SUPPLY
+  SEWAGE_TREATMENT
+  WASTE_TREATMENT
+  POWER_PLANT
+  GAS_STATION
+}
+
+enum TransportMode {
+  BUS
+  METRO
+  BRT
+  WATERWAY
+}
