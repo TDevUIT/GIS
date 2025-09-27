@@ -1,0 +1,37 @@
+services:
+  postgis_db:
+    image: postgis/postgis:15-3.4
+    container_name: gis_server_postgis
+    restart: always
+    environment:
+      POSTGRES_USER: gis_user
+      POSTGRES_PASSWORD: gis_password
+      POSTGRES_DB: gis_db
+    ports:
+      - '5433:5432' 
+    volumes:
+      - gis_server_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gis_user -d gis_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  pgadmin_gis:
+    image: dpage/pgadmin4
+    container_name: gis_server_pgadmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: mrtaivietbac@gmail.com
+      PGADMIN_DEFAULT_PASSWORD: tester
+    ports:
+      - '5051:80' 
+    depends_on:
+      postgis_db:
+        condition: service_healthy
+    volumes:
+      - pgadmin_gis_data:/var/lib/pgadmin
+
+volumes:
+  gis_server_data:
+  pgadmin_gis_data:
