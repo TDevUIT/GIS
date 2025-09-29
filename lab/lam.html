@@ -1,0 +1,603 @@
+  <html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>ArcGIS JavaScript Tutorials: Create a Starter App</title>
+    <style>
+      html, body, #viewDiv {
+        padding: 0;
+        margin: 0;
+        height: 100%;
+        width: 100%;
+      }
+    </style>
+
+      <link rel="stylesheet" href="https://js.arcgis.com/4.26/esri/themes/light/main.css">
+    <script src="https://js.arcgis.com/4.26/"></script>
+
+    <script>
+    var point_template_tree = {
+            title: "{Name}",
+            content: "Cây này ở <b>{Location}</b>."
+          };
+    var point_template_light = {
+            title: "{Name}",
+            content: "Bóng đèn này ở <b>{Location}</b>."
+          };
+    var point_template_chair = {
+            title: "{Name}",
+            content: "Cái ghế này ở <b>{Location}</b>."
+          };
+    var point_template_area = {
+            title: "{Name}",
+            content: "Khu vực này ở <b>{Location}</b>."
+          };
+    var point_template_university = {
+            title: "{Name}",
+            content: "Trường ở <b>{Location}</b>."
+          };
+    var jsondata = {
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Đường ranh giới",
+        "description": "Đường ranh giới khu vực UBND TP.HCM"
+      },
+      "geometry": {
+        "coordinates": [
+         [
+            106.66298963055749,
+            10.759711636330792
+          ],
+          [
+            106.66281213772692,
+            10.759684021742615
+          ],
+          [
+            106.66246603481721,
+            10.76140532276888
+          ],
+          [
+            106.66332382746538,
+            10.76163449998785
+          ],
+          [
+            106.66370455297721,
+            10.761465794326085
+          ],
+          [
+            106.66384318759202,
+            10.76128023597414
+          ],
+          [
+            106.66392427946658,
+            10.76112061063975
+          ],
+          [
+            106.66405025538535,
+            10.760520083106812
+          ],
+          [
+            106.66402002368716,
+            10.760513545061286
+          ],
+          [
+            106.66400757723795,
+            10.760271280253775
+          ],
+          [
+            106.66396236858265,
+            10.760280895600488
+          ],
+          [
+            106.66392203407179,
+            10.76009905950886
+          ],
+          [
+            106.66380458478619,
+            10.75997039690074
+          ],
+          [
+            106.66367470731547,
+            10.759883356685307
+          ],
+          [
+            106.66347696485428,
+            10.759819653398338
+          ],
+          [
+            106.6633017230618,
+            10.75980545929177
+          ],
+          [
+            106.66310065772899,
+            10.759858766405117
+          ],
+          [
+            106.66305684679412,
+            10.759877378583838
+          ],
+          [
+            106.66305329455622,
+            10.759812235954442
+          ],
+          [
+            106.66302250849407,
+            10.759812235954442
+          ],
+          [
+            106.66302606073202,
+            10.759761052450884
+          ],
+          [
+            106.6629822497984,
+            10.759763378974355
+          ],
+          [
+            106.66298817019401,
+            10.75971452198634
+          ]
+        ],
+        "type": "LineString"
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Sân vận động Thống Nhất",
+        "address": "138 Đ. Đào Duy Từ, Phường 6, Quận 10, Hồ Chí Minh, Việt Nam",
+        "type": "Stadium",
+        "established": "1931",
+        "area": "Khu vực thể thao, sự kiện"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "symbol": {
+          "type": "simple-fill",
+          "color": [227, 139, 79, 0.4],
+          "outline": {
+            "color": [255, 255, 255],
+            "width": 1
+          }
+        },
+        "coordinates": [
+         [
+            [
+              106.66330240673712,
+              10.760808631410846
+            ],
+            [
+              106.66329836430968,
+              10.76080843631129
+            ],
+            [
+              106.66329436081307,
+              10.760807852891546
+            ],
+            [
+              106.66329043480312,
+              10.76080688677026
+            ],
+            [
+              106.66328662408948,
+              10.760805547251712
+            ],
+            [
+              106.66328296537142,
+              10.760803847236211
+            ],
+            [
+              106.6632794938844,
+              10.760801803095834
+            ],
+            [
+              106.66327624306076,
+              10.760799434516779
+            ],
+            [
+              106.6632732442077,
+              10.760796764309765
+            ],
+            [
+              106.66327052620584,
+              10.760793818190352
+            ],
+            [
+              106.66326811523098,
+              10.760790624531287
+            ],
+            [
+              106.66326603450214,
+              10.760787214089262
+            ],
+            [
+              106.6632643040579,
+              10.760783619708706
+            ],
+            [
+              106.66326294056331,
+              10.760779876005472
+            ],
+            [
+              106.66326195714963,
+              10.760776019033475
+            ],
+            [
+              106.66326136328759,
+              10.760772085937464
+            ],
+            [
+              106.66326116469644,
+              10.760768114595313
+            ],
+            [
+              106.66326136328867,
+              10.760764143253214
+            ],
+            [
+              106.66326195715175,
+              10.760760210157358
+            ],
+            [
+              106.6632629405664,
+              10.760756353185615
+            ],
+            [
+              106.66326430406181,
+              10.760752609482719
+            ],
+            [
+              106.66326603450676,
+              10.760749015102572
+            ],
+            [
+              106.6632681152361,
+              10.76074560466102
+            ],
+            [
+              106.66327052621126,
+              10.760742411002466
+            ],
+            [
+              106.66327324421326,
+              10.760739464883583
+            ],
+            [
+              106.6632762430662,
+              10.7607367946771
+            ],
+            [
+              106.66327949388953,
+              10.760734426098558
+            ],
+            [
+              106.66328296537601,
+              10.760732381958652
+            ],
+            [
+              106.66328662409339,
+              10.760730681943562
+            ],
+            [
+              106.66329043480619,
+              10.760729342425353
+            ],
+            [
+              106.66329436081519,
+              10.76072837630432
+            ],
+            [
+              106.66329836431076,
+              10.760727792884728
+            ],
+            [
+              106.66330240673712,
+              10.760727597785227
+            ],
+            [
+              106.66330644916347,
+              10.760727792884728
+            ],
+            [
+              106.66331045265906,
+              10.76072837630432
+            ],
+            [
+              106.66331437866805,
+              10.760729342425353
+            ],
+            [
+              106.66331818938083,
+              10.760730681943562
+            ],
+            [
+              106.6633218480982,
+              10.760732381958652
+            ],
+            [
+              106.6633253195847,
+              10.760734426098558
+            ],
+            [
+              106.66332857040803,
+              10.7607367946771
+            ],
+            [
+              106.66333156926099,
+              10.760739464883583
+            ],
+            [
+              106.66333428726297,
+              10.760742411002466
+            ],
+            [
+              106.66333669823813,
+              10.76074560466102
+            ],
+            [
+              106.66333877896747,
+              10.760749015102572
+            ],
+            [
+              106.66334050941241,
+              10.760752609482719
+            ],
+            [
+              106.66334187290782,
+              10.760756353185615
+            ],
+            [
+              106.6633428563225,
+              10.760760210157358
+            ],
+            [
+              106.66334345018556,
+              10.760764143253214
+            ],
+            [
+              106.6633436487778,
+              10.760768114595313
+            ],
+            [
+              106.66334345018664,
+              10.760772085937464
+            ],
+            [
+              106.66334285632462,
+              10.760776019033475
+            ],
+            [
+              106.66334187291092,
+              10.760779876005472
+            ],
+            [
+              106.66334050941634,
+              10.760783619708706
+            ],
+            [
+              106.66333877897209,
+              10.760787214089262
+            ],
+            [
+              106.66333669824326,
+              10.760790624531287
+            ],
+            [
+              106.6633342872684,
+              10.760793818190352
+            ],
+            [
+              106.66333156926652,
+              10.760796764309765
+            ],
+            [
+              106.66332857041347,
+              10.760799434516779
+            ],
+            [
+              106.66332531958983,
+              10.760801803095834
+            ],
+            [
+              106.66332184810283,
+              10.760803847236211
+            ],
+            [
+              106.66331818938477,
+              10.760805547251712
+            ],
+            [
+              106.66331437867113,
+              10.76080688677026
+            ],
+            [
+              106.66331045266118,
+              10.760807852891546
+            ],
+            [
+              106.66330644916454,
+              10.76080843631129
+            ],
+            [
+              106.66330240673712,
+              10.760808631410846
+            ]
+          ] ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Sân vận động Thống Nhất",
+        "type": "Điểm trung tâm",
+        "description": "Vị trí trung tâm của khu vực SVĐ"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [106.6633032999685,
+          10.760766356826224]
+      }
+    }
+
+  ]
+};
+      require([
+        "esri/Map",
+        "esri/views/MapView",
+        "esri/Graphic",
+        "esri/layers/GraphicsLayer"
+      ], function(Map, MapView, Graphic, GraphicsLayer) {
+
+      var map = new Map({
+      basemap: "topo-vector"
+      });
+      map.on("load", function(){
+            map.graphics.enableMouseEvents();
+          });
+
+      var view = new MapView({
+      container: "viewDiv",
+      map: map,
+      center: [106.6633032999685,
+            10.760766356826224],
+      zoom: 17,
+            highlightOptions: {
+              color: "blue"
+            }
+      });
+      var graphicsLayer = new GraphicsLayer();
+
+      var lineSymbol = {
+        type: "simple-line",
+        color: [255, 87, 34],
+        width: 3,
+        style: "solid"
+      };
+
+      var polygonSymbol = {
+        type: "simple-fill",
+        color: [33, 150, 243, 0.6],
+        outline: {
+          color: [21, 101, 192],
+          width: 2
+        }
+      };
+
+      var pointSymbol = {
+        type: "picture-marker",
+        url: "https://cdn-icons-png.flaticon.com/512/5540/5540420.png",
+        width: "56px",
+        height: "56px"
+      };
+
+      jsondata.features.forEach(function(feature) {
+        var geometry;
+        var symbol;
+        var popupTemplate;
+
+        if (feature.geometry.type === "LineString") {
+          geometry = {
+            type: "polyline",
+            paths: [feature.geometry.coordinates]
+          };
+          symbol = lineSymbol;
+          popupTemplate = {
+            title: feature.properties.name,
+            content: "<b>Mô tả:</b> {description}<br/><b>Loại:</b> Đường ranh giới"
+          };
+
+          var lineGraphic = new Graphic({
+            geometry: geometry,
+            symbol: symbol,
+            attributes: feature.properties,
+            popupTemplate: popupTemplate
+          });
+          graphicsLayer.add(lineGraphic);
+
+          var polygonGeometry = {
+            type: "polygon",
+            rings: [feature.geometry.coordinates]
+          };
+
+          var polygonFill = {
+            type: "simple-fill",
+            color: [255, 193, 7, 0.4],
+            outline: {
+              color: [255, 152, 0],
+              width: 2
+            }
+          };
+
+          var polygonGraphic = new Graphic({
+            geometry: polygonGeometry,
+            symbol: polygonFill,
+            attributes: { name: feature.properties.name + " (fill)" },
+            popupTemplate: {
+              title: feature.properties.name,
+              content: "Đây là vùng được fill từ đường ranh giới."
+            }
+          });
+
+          graphicsLayer.add(polygonGraphic);
+
+          return;
+        } else if (feature.geometry.type === "Polygon") {
+          geometry = {
+            type: "polygon",
+            rings: feature.geometry.coordinates
+          };
+          symbol = polygonSymbol;
+          popupTemplate = {
+            title: feature.properties.name,
+            content: `
+              <div style="font-family: Arial, sans-serif;">
+                <p><b>📍 Địa chỉ:</b> {address}</p>
+                <p><b>🏛️ Loại:</b> {type}</p>
+                <p><b>📅 Thành lập:</b> {established}</p>
+                <p><b>🗺️ Khu vực:</b> {area}</p>
+                <p><b>ℹ️ Mô tả:</b> Trụ sở chính của chính quyền thành phố</p>
+              </div>
+            `
+          };
+        } else if (feature.geometry.type === "Point") {
+          geometry = {
+            type: "point",
+            longitude: feature.geometry.coordinates[0],
+            latitude: feature.geometry.coordinates[1]
+          };
+          symbol = pointSymbol;
+          popupTemplate = {
+            title: feature.properties.name,
+            content: `
+              <div style="font-family: Arial, sans-serif; text-align: center;">
+                <p><b>📍 {type}</b></p>
+                <p>{description}</p>
+                <p style="color: #1976D2;"><b>Tọa độ:</b><br/>
+                Kinh độ: ${feature.geometry.coordinates[0].toFixed(6)}<br/>
+                Vĩ độ: ${feature.geometry.coordinates[1].toFixed(6)}</p>
+              </div>
+            `
+          };
+        }
+
+        var graphic = new Graphic({
+          geometry: geometry,
+          symbol: symbol,
+          attributes: feature.properties,
+          popupTemplate: popupTemplate
+        });
+        graphicsLayer.add(graphic);
+      });
+
+      map.add(graphicsLayer);
+
+
+      });
+    </script>
+  </head>
+  <body>
+    <div id="viewDiv"></div>
+  </body>
+  </html>
