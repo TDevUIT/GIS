@@ -1,0 +1,355 @@
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>ArcGIS JavaScript Tutorials: Create a Starter App</title>
+  <style>
+    html, body, #viewDiv {
+      padding: 0;
+      margin: 0;
+      height: 100%;
+      width: 100%;
+    }
+  </style>
+
+    <link rel="stylesheet" href="https://js.arcgis.com/4.26/esri/themes/light/main.css">
+  <script src="https://js.arcgis.com/4.26/"></script>
+
+  <script>
+	var point_template_tree = {
+					title: "{Name}",
+					content: "Cây này ở <b>{Location}</b>."
+				};
+	var point_template_light = {
+					title: "{Name}",
+					content: "Bóng đèn này ở <b>{Location}</b>."
+				};
+	var point_template_chair = {
+					title: "{Name}",
+					content: "Cái ghế này ở <b>{Location}</b>."
+				};
+	var point_template_area = {
+					title: "{Name}",
+					content: "Khu vực này ở <b>{Location}</b>."
+				};
+	var point_template_university = {
+					title: "{Name}",
+					content: "Trường ở <b>{Location}</b>."
+				};
+	var jsondata = {
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Đường ranh giới",
+        "description": "Đường ranh giới khu vực UBND TP.HCM"
+      },
+      "geometry": {
+        "coordinates": [
+          [
+            106.70167734748838,
+            10.777185658338226
+          ],
+          [
+            106.70053803973724,
+            10.775851799512907
+          ],
+          [
+            106.70043770930977,
+            10.775869321506434
+          ],
+          [
+            106.70024819627821,
+            10.776316131990939
+          ],
+          [
+            106.7003106240997,
+            10.77640374181209
+          ],
+          [
+            106.70022590062717,
+            10.776465068672607
+          ],
+          [
+            106.70030616497081,
+            10.776552678450415
+          ],
+          [
+            106.69998287803452,
+            10.776800175935321
+          ],
+          [
+            106.70097828440589,
+            10.777806574929954
+          ],
+          [
+            106.70167711378917,
+            10.777185846755174
+          ]
+        ],
+        "type": "LineString"
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "UBND Thành Phố Hồ Chí Minh",
+        "address": "86 Lê Thánh Tôn, Phường Bến Nghé, Quận 1, TP.HCM",
+        "type": "Trụ sở chính quyền",
+        "established": "1975",
+        "area": "Khu vực hành chính trung tâm"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "symbol": {
+          "type": "simple-fill",
+          "color": [227, 139, 79, 0.4],
+          "outline": {
+            "color": [255, 255, 255],
+            "width": 1
+          }
+        },
+        "coordinates": [
+          [
+            [106.70098617037206, 10.776922363659576],
+            [106.70098508227218, 10.776922311147457],
+            [106.70098400465135, 10.776922154116829],
+            [106.70098294788755, 10.776921894079974],
+            [106.70098192215805, 10.776921533541199],
+            [106.70098093734119, 10.77692107597268],
+            [106.70098000292126, 10.776920525781058],
+            [106.70097912789727, 10.776919888264983],
+            [106.70097832069618, 10.776919169564076],
+            [106.70097758909175, 10.776918376599824],
+            [106.70097694012975, 10.776917517008904],
+            [106.70097638006004, 10.776916599069652],
+            [106.70097591427638, 10.776915631622323],
+            [106.70097554726453, 10.776914623983963],
+            [106.70097528255904, 10.776913585858683],
+            [106.70097512270914, 10.776912527244194],
+            [106.70097506925424, 10.776911458335537],
+            [106.70097512270921, 10.776910389426881],
+            [106.7009752825592, 10.776909330812403],
+            [106.70097554726476, 10.776908292687137],
+            [106.70097591427667, 10.776907285048805],
+            [106.70097638006038, 10.776906317601506],
+            [106.70097694013013, 10.776905399662287],
+            [106.70097758909215, 10.776904540071405],
+            [106.70097832069658, 10.776903747107193],
+            [106.70097912789767, 10.776903028406325],
+            [106.70098000292164, 10.776902390890283],
+            [106.70098093734151, 10.776901840698697],
+            [106.70098192215833, 10.776901383130209],
+            [106.70098294788777, 10.776901022591456],
+            [106.70098400465149, 10.776900762554622],
+            [106.70098508227227, 10.776900605524002],
+            [106.70098617037206, 10.77690055301189],
+            [106.70098725847184, 10.776900605524002],
+            [106.70098833609262, 10.776900762554622],
+            [106.70098939285636, 10.776901022591456],
+            [106.70099041858577, 10.776901383130209],
+            [106.70099140340261, 10.776901840698697],
+            [106.70099233782248, 10.776902390890283],
+            [106.70099321284644, 10.776903028406325],
+            [106.70099402004753, 10.776903747107193],
+            [106.70099475165196, 10.776904540071405],
+            [106.70099540061398, 10.776905399662287],
+            [106.70099596068374, 10.776906317601506],
+            [106.70099642646746, 10.776907285048805],
+            [106.70099679347935, 10.776908292687137],
+            [106.70099705818492, 10.776909330812403],
+            [106.70099721803493, 10.776910389426881],
+            [106.70099727148987, 10.776911458335537],
+            [106.700997218035, 10.776912527244194],
+            [106.70099705818507, 10.776913585858683],
+            [106.70099679347958, 10.776914623983963],
+            [106.70099642646773, 10.776915631622323],
+            [106.7009959606841, 10.776916599069652],
+            [106.70099540061436, 10.776917517008904],
+            [106.70099475165236, 10.776918376599824],
+            [106.70099402004794, 10.776919169564076],
+            [106.70099321284684, 10.776919888264983],
+            [106.70099233782285, 10.776920525781058],
+            [106.70099140340294, 10.77692107597268],
+            [106.70099041858604, 10.776921533541199],
+            [106.70098939285657, 10.776921894079974],
+            [106.70098833609279, 10.776922154116829],
+            [106.70098725847193, 10.776922311147457],
+            [106.70098617037206, 10.776922363659576]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Trung tâm UBND TP.HCM",
+        "type": "Điểm trung tâm",
+        "description": "Vị trí trung tâm của khu vực UBND"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [106.70098617037206, 10.776911458335537]
+      }
+    }
+
+  ]
+};
+    require([
+      "esri/Map",
+      "esri/views/MapView",
+      "esri/Graphic",
+      "esri/layers/GraphicsLayer"
+    ], function(Map, MapView, Graphic, GraphicsLayer) {
+
+		var map = new Map({
+		basemap: "topo-vector"
+		});
+		 map.on("load", function(){
+          map.graphics.enableMouseEvents();
+        });
+
+		var view = new MapView({
+		container: "viewDiv",
+		map: map,
+		center: [106.7009, 10.7769],
+		zoom: 17,
+          highlightOptions: {
+            color: "blue"
+          }
+		});
+		var graphicsLayer = new GraphicsLayer();
+
+		var lineSymbol = {
+			type: "simple-line",
+			color: [255, 87, 34],
+			width: 3,
+			style: "solid"
+		};
+
+		var polygonSymbol = {
+			type: "simple-fill",
+			color: [33, 150, 243, 0.6],
+			outline: {
+				color: [21, 101, 192],
+				width: 2
+			}
+		};
+
+		var pointSymbol = {
+			type: "picture-marker",
+			url: "https://cdn-icons-png.flaticon.com/128/619/619155.png",
+			width: "56px",
+			height: "56px"
+		};
+
+		jsondata.features.forEach(function(feature) {
+			var geometry;
+			var symbol;
+			var popupTemplate;
+
+			if (feature.geometry.type === "LineString") {
+				geometry = {
+					type: "polyline",
+					paths: [feature.geometry.coordinates]
+				};
+				symbol = lineSymbol;
+				popupTemplate = {
+					title: feature.properties.name,
+					content: "<b>Mô tả:</b> {description}<br/><b>Loại:</b> Đường ranh giới"
+				};
+
+				var lineGraphic = new Graphic({
+					geometry: geometry,
+					symbol: symbol,
+					attributes: feature.properties,
+					popupTemplate: popupTemplate
+				});
+				graphicsLayer.add(lineGraphic);
+
+				var polygonGeometry = {
+					type: "polygon",
+					rings: [feature.geometry.coordinates]
+				};
+
+				var polygonFill = {
+					type: "simple-fill",
+					color: [255, 193, 7, 0.4],
+					outline: {
+						color: [255, 152, 0],
+						width: 2
+					}
+				};
+
+				var polygonGraphic = new Graphic({
+					geometry: polygonGeometry,
+					symbol: polygonFill,
+					attributes: { name: feature.properties.name + " (fill)" },
+					popupTemplate: {
+						title: feature.properties.name,
+						content: "Đây là vùng được fill từ đường ranh giới."
+					}
+				});
+
+				graphicsLayer.add(polygonGraphic);
+
+				return;
+			} else if (feature.geometry.type === "Polygon") {
+				geometry = {
+					type: "polygon",
+					rings: feature.geometry.coordinates
+				};
+				symbol = polygonSymbol;
+				popupTemplate = {
+					title: feature.properties.name,
+					content: `
+						<div style="font-family: Arial, sans-serif;">
+							<p><b>📍 Địa chỉ:</b> {address}</p>
+							<p><b>🏛️ Loại:</b> {type}</p>
+							<p><b>📅 Thành lập:</b> {established}</p>
+							<p><b>🗺️ Khu vực:</b> {area}</p>
+							<p><b>ℹ️ Mô tả:</b> Trụ sở chính của chính quyền thành phố</p>
+						</div>
+					`
+				};
+			} else if (feature.geometry.type === "Point") {
+				geometry = {
+					type: "point",
+					longitude: feature.geometry.coordinates[0],
+					latitude: feature.geometry.coordinates[1]
+				};
+				symbol = pointSymbol;
+				popupTemplate = {
+					title: feature.properties.name,
+					content: `
+						<div style="font-family: Arial, sans-serif; text-align: center;">
+							<p><b>📍 {type}</b></p>
+							<p>{description}</p>
+							<p style="color: #1976D2;"><b>Tọa độ:</b><br/>
+							Kinh độ: ${feature.geometry.coordinates[0].toFixed(6)}<br/>
+							Vĩ độ: ${feature.geometry.coordinates[1].toFixed(6)}</p>
+						</div>
+					`
+				};
+			}
+
+			var graphic = new Graphic({
+				geometry: geometry,
+				symbol: symbol,
+				attributes: feature.properties,
+				popupTemplate: popupTemplate
+			});
+			graphicsLayer.add(graphic);
+		});
+
+		map.add(graphicsLayer);
+
+
+    });
+  </script>
+</head>
+<body>
+  <div id="viewDiv"></div>
+</body>
+</html>
