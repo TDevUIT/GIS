@@ -1,0 +1,619 @@
+  <html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>ArcGIS JavaScript Tutorials: Create a Starter App</title>
+    <style>
+      html, body, #viewDiv {
+        padding: 0;
+        margin: 0;
+        height: 100%;
+        width: 100%;
+      }
+    </style>
+
+      <link rel="stylesheet" href="https://js.arcgis.com/4.26/esri/themes/light/main.css">
+    <script src="https://js.arcgis.com/4.26/"></script>
+
+    <script>
+    var point_template_tree = {
+            title: "{Name}",
+            content: "Cây này ở <b>{Location}</b>."
+          };
+    var point_template_light = {
+            title: "{Name}",
+            content: "Bóng đèn này ở <b>{Location}</b>."
+          };
+    var point_template_chair = {
+            title: "{Name}",
+            content: "Cái ghế này ở <b>{Location}</b>."
+          };
+    var point_template_area = {
+            title: "{Name}",
+            content: "Khu vực này ở <b>{Location}</b>."
+          };
+    var point_template_university = {
+            title: "{Name}",
+            content: "Trường ở <b>{Location}</b>."
+          };
+    var jsondata = {
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Đường ranh giới",
+        "description": "Đường ranh giới khu vực Công viên Hoàng Văn Thụ"
+      },
+      "geometry": {
+        "coordinates": [
+         [
+            106.66445230734496,
+            10.804620633404426
+          ],
+          [
+            106.66436793138416,
+            10.80458650627989
+          ],
+          [
+            106.66433815163276,
+            10.804523127323307
+          ],
+          [
+            106.66416443641896,
+            10.803894212338676
+          ],
+          [
+            106.66403539083223,
+            10.803552940090668
+          ],
+          [
+            106.66394108828678,
+            10.803279922012408
+          ],
+          [
+            106.66384678574263,
+            10.803055656977875
+          ],
+          [
+            106.66371774015465,
+            10.802675381100258
+          ],
+          [
+            106.66363336419391,
+            10.80245111561294
+          ],
+          [
+            106.66293850333722,
+            10.80175394139809
+          ],
+          [
+            106.66240428031205,
+            10.801214606918336
+          ],
+          [
+            106.66224104549968,
+            10.80104634610447
+          ],
+          [
+            106.6623078233788,
+            10.800791254992092
+          ],
+          [
+            106.66683387955447,
+            10.800404973751924
+          ],
+          [
+            106.66688581790356,
+            10.800499722025947
+          ],
+          [
+            106.66678936096832,
+            10.800623623571326
+          ],
+          [
+            106.66584705091333,
+            10.801206688978112
+          ],
+          [
+            106.66571349515709,
+            10.801534662772909
+          ],
+          [
+            106.66553542081465,
+            10.801818906438058
+          ],
+          [
+            106.66532766741824,
+            10.802132302987943
+          ],
+          [
+            106.6651570128409,
+            10.802423834368255
+          ],
+          [
+            106.66500861755651,
+            10.80280282474014
+          ],
+          [
+            106.66481570368614,
+            10.80329113855231
+          ],
+          [
+            106.66474892580703,
+            10.803691992580298
+          ],
+          [
+            106.66463020958076,
+            10.804318781443044
+          ],
+          [
+            106.66457085146658,
+            10.804552004871198
+          ],
+          [
+            106.66445213523838,
+            10.804617598928033
+          ]
+        ],
+        "type": "LineString"
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Công viên Hoàng Văn Thụ",
+        "address": "Phường 2, Tân Bình, Hồ Chí Minh, Việt Nam",
+        "type": "Stadium",
+        "established": "1931",
+        "area": "Khu vực thể thao, sự kiện"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "symbol": {
+          "type": "simple-fill",
+          "color": [227, 139, 79, 0.4],
+          "outline": {
+            "color": [255, 255, 255],
+            "width": 1
+          }
+        },
+        "coordinates": [
+         [
+            [
+              106.66450382977877,
+              10.801941174117225
+            ],
+            [
+              106.66449394186532,
+              10.801940696962294
+            ],
+            [
+              106.66448414917795,
+              10.801939270092767
+            ],
+            [
+              106.66447454602573,
+              10.80193690725019
+            ],
+            [
+              106.66446522489234,
+              10.801933631190055
+            ],
+            [
+              106.6644562755454,
+              10.801929473462637
+            ],
+            [
+              106.66444778417218,
+              10.80192447410916
+            ],
+            [
+              106.6644398325492,
+              10.80191868127617
+            ],
+            [
+              106.66443249725499,
+              10.801912150751866
+            ],
+            [
+              106.66442584893247,
+              10.80190494542881
+            ],
+            [
+              106.6644199516086,
+              10.80189713469824
+            ],
+            [
+              106.66441486207779,
+              10.801888793781815
+            ],
+            [
+              106.66441062935499,
+              10.801880003007161
+            ],
+            [
+              106.66440729420357,
+              10.801870847034271
+            ],
+            [
+              106.66440488874275,
+              10.801861414040205
+            ],
+            [
+              106.66440343613837,
+              10.80185179486987
+            ],
+            [
+              106.66440295037974,
+              10.801842082161151
+            ],
+            [
+              106.66440343614488,
+              10.801832369452747
+            ],
+            [
+              106.6644048887555,
+              10.801822750283343
+            ],
+            [
+              106.66440729422204,
+              10.801813317290788
+            ],
+            [
+              106.66441062937854,
+              10.801804161319932
+            ],
+            [
+              106.66441486210547,
+              10.801795370547753
+            ],
+            [
+              106.66441995163935,
+              10.801787029634156
+            ],
+            [
+              106.66442584896514,
+              10.801779218906654
+            ],
+            [
+              106.66443249728829,
+              10.801772013586787
+            ],
+            [
+              106.66443983258185,
+              10.80176548306567
+            ],
+            [
+              106.66444778420293,
+              10.80175969023575
+            ],
+            [
+              106.66445627557309,
+              10.801754690885097
+            ],
+            [
+              106.66446522491587,
+              10.801750533160156
+            ],
+            [
+              106.66447454604423,
+              10.801747257102054
+            ],
+            [
+              106.66448414919071,
+              10.801744894260988
+            ],
+            [
+              106.66449394187181,
+              10.801743467392393
+            ],
+            [
+              106.66450382977877,
+              10.801742990237775
+            ],
+            [
+              106.66451371768572,
+              10.801743467392393
+            ],
+            [
+              106.66452351036683,
+              10.801744894260988
+            ],
+            [
+              106.6645331135133,
+              10.801747257102054
+            ],
+            [
+              106.66454243464166,
+              10.801750533160156
+            ],
+            [
+              106.66455138398445,
+              10.801754690885097
+            ],
+            [
+              106.6645598753546,
+              10.80175969023575
+            ],
+            [
+              106.66456782697568,
+              10.80176548306567
+            ],
+            [
+              106.66457516226924,
+              10.801772013586787
+            ],
+            [
+              106.6645818105924,
+              10.801779218906654
+            ],
+            [
+              106.66458770791819,
+              10.801787029634156
+            ],
+            [
+              106.66459279745206,
+              10.801795370547753
+            ],
+            [
+              106.664597030179,
+              10.801804161319932
+            ],
+            [
+              106.66460036533549,
+              10.801813317290788
+            ],
+            [
+              106.66460277080203,
+              10.801822750283343
+            ],
+            [
+              106.66460422341264,
+              10.801832369452747
+            ],
+            [
+              106.6646047091778,
+              10.801842082161151
+            ],
+            [
+              106.66460422341916,
+              10.80185179486987
+            ],
+            [
+              106.66460277081478,
+              10.801861414040205
+            ],
+            [
+              106.66460036535396,
+              10.801870847034271
+            ],
+            [
+              106.66459703020254,
+              10.801880003007161
+            ],
+            [
+              106.66459279747974,
+              10.801888793781815
+            ],
+            [
+              106.66458770794893,
+              10.80189713469824
+            ],
+            [
+              106.66458181062507,
+              10.80190494542881
+            ],
+            [
+              106.66457516230254,
+              10.801912150751866
+            ],
+            [
+              106.66456782700833,
+              10.80191868127617
+            ],
+            [
+              106.66455987538536,
+              10.80192447410916
+            ],
+            [
+              106.66455138401213,
+              10.801929473462637
+            ],
+            [
+              106.66454243466521,
+              10.801933631190055
+            ],
+            [
+              106.66453311353179,
+              10.80193690725019
+            ],
+            [
+              106.66452351037958,
+              10.801939270092767
+            ],
+            [
+              106.66451371769222,
+              10.801940696962294
+            ],
+            [
+              106.66450382977877,
+              10.801941174117225
+            ]
+          ] ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Công viên Hoàng Văn Thụ",
+        "type": "Điểm trung tâm",
+        "description": "Vị trí trung tâm của khu vực Công viên Hoàng Văn Thụ"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [106.6645040735894,
+          10.801840771323626]
+      }
+    }
+
+  ]
+};
+      require([
+        "esri/Map",
+        "esri/views/MapView",
+        "esri/Graphic",
+        "esri/layers/GraphicsLayer"
+      ], function(Map, MapView, Graphic, GraphicsLayer) {
+
+      var map = new Map({
+      basemap: "topo-vector"
+      });
+      map.on("load", function(){
+            map.graphics.enableMouseEvents();
+          });
+
+      var view = new MapView({
+      container: "viewDiv",
+      map: map,
+      center: [106.6645040735894,
+          10.801840771323626],
+      zoom: 17,
+            highlightOptions: {
+              color: "blue"
+            }
+      });
+      var graphicsLayer = new GraphicsLayer();
+
+      var lineSymbol = {
+        type: "simple-line",
+        color: [255, 87, 34],
+        width: 3,
+        style: "solid"
+      };
+
+      var polygonSymbol = {
+        type: "simple-fill",
+        color: [33, 150, 243, 0.6],
+        outline: {
+          color: [21, 101, 192],
+          width: 2
+        }
+      };
+
+      var pointSymbol = {
+        type: "picture-marker",
+        url: "https://cdn-icons-png.flaticon.com/512/532/532988.png",
+        width: "56px",
+        height: "56px"
+      };
+
+      jsondata.features.forEach(function(feature) {
+        var geometry;
+        var symbol;
+        var popupTemplate;
+
+        if (feature.geometry.type === "LineString") {
+          geometry = {
+            type: "polyline",
+            paths: [feature.geometry.coordinates]
+          };
+          symbol = lineSymbol;
+          popupTemplate = {
+            title: feature.properties.name,
+            content: "<b>Mô tả:</b> {description}<br/><b>Loại:</b> Đường ranh giới"
+          };
+
+          var lineGraphic = new Graphic({
+            geometry: geometry,
+            symbol: symbol,
+            attributes: feature.properties,
+            popupTemplate: popupTemplate
+          });
+          graphicsLayer.add(lineGraphic);
+
+          var polygonGeometry = {
+            type: "polygon",
+            rings: [feature.geometry.coordinates]
+          };
+
+          var polygonFill = {
+            type: "simple-fill",
+            color: [255, 193, 7, 0.4],
+            outline: {
+              color: [255, 152, 0],
+              width: 2
+            }
+          };
+
+          var polygonGraphic = new Graphic({
+            geometry: polygonGeometry,
+            symbol: polygonFill,
+            attributes: { name: feature.properties.name + " (fill)" },
+            popupTemplate: {
+              title: feature.properties.name,
+              content: "Đây là vùng được fill từ đường ranh giới."
+            }
+          });
+
+          graphicsLayer.add(polygonGraphic);
+
+          return;
+        } else if (feature.geometry.type === "Polygon") {
+          geometry = {
+            type: "polygon",
+            rings: feature.geometry.coordinates
+          };
+          symbol = polygonSymbol;
+          popupTemplate = {
+            title: feature.properties.name,
+            content: `
+              <div style="font-family: Arial, sans-serif;">
+                <p><b>📍 Địa chỉ:</b> {address}</p>
+                <p><b>🏛️ Loại:</b> {type}</p>
+                <p><b>📅 Thành lập:</b> {established}</p>
+                <p><b>🗺️ Khu vực:</b> {area}</p>
+                <p><b>ℹ️ Mô tả:</b> Trụ sở chính của chính quyền thành phố</p>
+              </div>
+            `
+          };
+        } else if (feature.geometry.type === "Point") {
+          geometry = {
+            type: "point",
+            longitude: feature.geometry.coordinates[0],
+            latitude: feature.geometry.coordinates[1]
+          };
+          symbol = pointSymbol;
+          popupTemplate = {
+            title: feature.properties.name,
+            content: `
+              <div style="font-family: Arial, sans-serif; text-align: center;">
+                <p><b>📍 {type}</b></p>
+                <p>{description}</p>
+                <p style="color: #1976D2;"><b>Tọa độ:</b><br/>
+                Kinh độ: ${feature.geometry.coordinates[0].toFixed(6)}<br/>
+                Vĩ độ: ${feature.geometry.coordinates[1].toFixed(6)}</p>
+              </div>
+            `
+          };
+        }
+
+        var graphic = new Graphic({
+          geometry: geometry,
+          symbol: symbol,
+          attributes: feature.properties,
+          popupTemplate: popupTemplate
+        });
+        graphicsLayer.add(graphic);
+      });
+
+      map.add(graphicsLayer);
+
+
+      });
+    </script>
+  </head>
+  <body>
+    <div id="viewDiv"></div>
+  </body>
+  </html>
