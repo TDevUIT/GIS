@@ -1,0 +1,588 @@
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>ArcGIS JavaScript Tutorials: Create a Starter App</title>
+    <style>
+        html,
+        body,
+        #viewDiv {
+            padding: 0;
+            margin: 0;
+            height: 100%;
+            width: 100%;
+        }
+    </style>
+
+    <link rel="stylesheet" href="https://js.arcgis.com/4.26/esri/themes/light/main.css">
+    <script src="https://js.arcgis.com/4.26/"></script>
+
+    <script>
+        var point_template_tree = {
+            title: "{Name}",
+            content: "Cây này ở <b>{Location}</b>."
+        };
+        var point_template_light = {
+            title: "{Name}",
+            content: "Bóng đèn này ở <b>{Location}</b>."
+        };
+        var point_template_chair = {
+            title: "{Name}",
+            content: "Cái ghế này ở <b>{Location}</b>."
+        };
+        var point_template_area = {
+            title: "{Name}",
+            content: "Khu vực này ở <b>{Location}</b>."
+        };
+        var point_template_university = {
+            title: "{Name}",
+            content: "Trường ở <b>{Location}</b>."
+        };
+        var jsondata = {
+            "type": "FeatureCollection",
+            "features": [
+                {
+                    "type": "Feature",
+                    "properties": {
+                        "name": "Đường ranh giới",
+                        "description": "Đường ranh giới sân golf Tân Sơn Nhất"
+                    },
+                    "geometry": {
+                        "coordinates": [
+                            [
+                                106.65698404043872,
+                                10.831618940917394
+                            ],
+                            [
+                                106.65568647884663,
+                                10.831655146706211
+                            ],
+                            [
+                                106.65262688759236,
+                                10.830988959494633
+                            ],
+                            [
+                                106.65253884808652,
+                                10.836528315566056
+                            ],
+                            [
+                                106.64659508357607,
+                                10.836685910463856
+                            ],
+                            [
+                                106.64468208327611,
+                                10.832104030830848
+                            ],
+                            [
+                                106.64431290777952,
+                                10.832235884462236
+                            ],
+                            [
+                                106.64423368351157,
+                                10.832278926995599
+                            ],
+                            [
+                                106.64420360733061,
+                                10.832168150966154
+                            ],
+                            [
+                                106.64425624064677,
+                                10.831850592789053
+                            ],
+                            [
+                                106.64259341055282,
+                                10.827922482735474
+                            ],
+                            [
+                                106.64379635694041,
+                                10.82741755542591
+                            ],
+                            [
+                                106.64261016968243,
+                                10.824459704722074
+                            ],
+                            [
+                                106.64711040850386,
+                                10.822594107177451
+                            ],
+                            [
+                                106.65654241379451,
+                                10.826250014643705
+                            ],
+                            [
+                                106.65702752963853,
+                                10.831623308819076
+                            ],
+                            [
+                                106.6569783286838,
+                                10.831620892600114
+                            ]
+                        ],
+                        "type": "LineString"
+                    }
+                },
+                {
+                    "type": "Feature",
+                    "properties": {
+                        "name": "Sân golf Tân Sơn Nhất",
+                        "address": "6 Đ. Tân Sơn, phường 12, Gò Vấp, Hồ Chí Minh, Việt Nam",
+                        "type": "Stadium",
+                        "established": "1956",
+                        "area": "Khu vực thể thao, sự kiện"
+                    },
+                    "geometry": {
+                        "type": "Polygon",
+                        "symbol": {
+                            "type": "simple-fill",
+                            "color": [227, 139, 79, 0.4],
+                            "outline": {
+                                "color": [255, 255, 255],
+                                "width": 1
+                            }
+                        },
+                        "coordinates": [
+                            [
+                                [
+                                    106.65104937209657,
+                                    10.830761713421875
+                                ],
+                                [
+                                    106.65100745365042,
+                                    10.830759690781532
+                                ],
+                                [
+                                    106.65096593890351,
+                                    10.830753642339719
+                                ],
+                                [
+                                    106.65092522766716,
+                                    10.830743626346472
+                                ],
+                                [
+                                    106.65088571201433,
+                                    10.83072973926168
+                                ],
+                                [
+                                    106.65084777250367,
+                                    10.830712114826083
+                                ],
+                                [
+                                    106.65081177451447,
+                                    10.830690922773277
+                                ],
+                                [
+                                    106.65077806472785,
+                                    10.830666367195052
+                                ],
+                                [
+                                    106.65074696778798,
+                                    10.830638684575835
+                                ],
+                                [
+                                    106.65071878317553,
+                                    10.830608141515217
+                                ],
+                                [
+                                    106.65069378232361,
+                                    10.830575032160397
+                                ],
+                                [
+                                    106.65067220600353,
+                                    10.830539675373352
+                                ],
+                                [
+                                    106.65065426200631,
+                                    10.830502411660005
+                                ],
+                                [
+                                    106.65064012314137,
+                                    10.830463599890928
+                                ],
+                                [
+                                    106.65062992557236,
+                                    10.830423613845202
+                                ],
+                                [
+                                    106.65062376750599,
+                                    10.830382838610698
+                                ],
+                                [
+                                    106.65062170824618,
+                                    10.830341666875453
+                                ],
+                                [
+                                    106.650623767623,
+                                    10.830300495145872
+                                ],
+                                [
+                                    106.65062992580191,
+                                    10.83025971992813
+                                ],
+                                [
+                                    106.6506401234746,
+                                    10.830219733909624
+                                ],
+                                [
+                                    106.65065426243045,
+                                    10.830180922177181
+                                ],
+                                [
+                                    106.65067220650226,
+                                    10.830143658508469
+                                ],
+                                [
+                                    106.65069378287775,
+                                    10.83010830177235
+                                ],
+                                [
+                                    106.65071878376382,
+                                    10.830075192472787
+                                ],
+                                [
+                                    106.65074696838778,
+                                    10.830044649469636
+                                ],
+                                [
+                                    106.65077806531613,
+                                    10.830016966907888
+                                ],
+                                [
+                                    106.6508117750686,
+                                    10.829992411384918
+                                ],
+                                [
+                                    106.65084777300238,
+                                    10.829971219383037
+                                ],
+                                [
+                                    106.65088571243847,
+                                    10.829953594992078
+                                ],
+                                [
+                                    106.65092522800042,
+                                    10.82993970794392
+                                ],
+                                [
+                                    106.65096593913304,
+                                    10.829929691977895
+                                ],
+                                [
+                                    106.65100745376743,
+                                    10.82992364355284
+                                ],
+                                [
+                                    106.65104937209657,
+                                    10.829921620918158
+                                ],
+                                [
+                                    106.6510912904257,
+                                    10.82992364355284
+                                ],
+                                [
+                                    106.6511328050601,
+                                    10.829929691977895
+                                ],
+                                [
+                                    106.65117351619274,
+                                    10.82993970794392
+                                ],
+                                [
+                                    106.6512130317547,
+                                    10.829953594992078
+                                ],
+                                [
+                                    106.65125097119076,
+                                    10.829971219383037
+                                ],
+                                [
+                                    106.65128696912453,
+                                    10.829992411384918
+                                ],
+                                [
+                                    106.65132067887703,
+                                    10.830016966907888
+                                ],
+                                [
+                                    106.65135177580537,
+                                    10.830044649469636
+                                ],
+                                [
+                                    106.65137996042932,
+                                    10.830075192472787
+                                ],
+                                [
+                                    106.65140496131541,
+                                    10.83010830177235
+                                ],
+                                [
+                                    106.65142653769088,
+                                    10.830143658508469
+                                ],
+                                [
+                                    106.6514444817627,
+                                    10.830180922177181
+                                ],
+                                [
+                                    106.65145862071854,
+                                    10.830219733909624
+                                ],
+                                [
+                                    106.65146881839125,
+                                    10.83025971992813
+                                ],
+                                [
+                                    106.65147497657014,
+                                    10.830300495145872
+                                ],
+                                [
+                                    106.65147703594698,
+                                    10.830341666875453
+                                ],
+                                [
+                                    106.65147497668715,
+                                    10.830382838610698
+                                ],
+                                [
+                                    106.65146881862077,
+                                    10.830423613845202
+                                ],
+                                [
+                                    106.65145862105179,
+                                    10.830463599890928
+                                ],
+                                [
+                                    106.65144448218682,
+                                    10.830502411660005
+                                ],
+                                [
+                                    106.65142653818961,
+                                    10.830539675373352
+                                ],
+                                [
+                                    106.65140496186955,
+                                    10.830575032160397
+                                ],
+                                [
+                                    106.65137996101761,
+                                    10.830608141515217
+                                ],
+                                [
+                                    106.65135177640518,
+                                    10.830638684575835
+                                ],
+                                [
+                                    106.65132067946529,
+                                    10.830666367195052
+                                ],
+                                [
+                                    106.65128696967867,
+                                    10.830690922773277
+                                ],
+                                [
+                                    106.65125097168948,
+                                    10.830712114826083
+                                ],
+                                [
+                                    106.6512130321788,
+                                    10.83072973926168
+                                ],
+                                [
+                                    106.65117351652599,
+                                    10.830743626346472
+                                ],
+                                [
+                                    106.65113280528962,
+                                    10.830753642339719
+                                ],
+                                [
+                                    106.65109129054272,
+                                    10.830759690781532
+                                ],
+                                [
+                                    106.65104937209657,
+                                    10.830761713421875
+                                ]
+                            ]]
+                    }
+                },
+                {
+                    "type": "Feature",
+                    "properties": {
+                        "name": "Sân golf Tân Sơn Nhất",
+                        "type": "Điểm trung tâm",
+                        "description": "Vị trí trung tâm của khu vực Sân golf TSN"
+                    },
+                    "geometry": {
+                        "type": "Point",
+                        "coordinates": [
+                            106.65109704648569,
+                            10.830367214603356
+                        ]
+                    }
+                }
+
+            ]
+        };
+        require([
+            "esri/Map",
+            "esri/views/MapView",
+            "esri/Graphic",
+            "esri/layers/GraphicsLayer"
+        ], function (Map, MapView, Graphic, GraphicsLayer) {
+
+            var map = new Map({
+                basemap: "topo-vector"
+            });
+            map.on("load", function () {
+                map.graphics.enableMouseEvents();
+            });
+
+            var view = new MapView({
+                container: "viewDiv",
+                map: map,
+                center: [
+                    106.65109704648569,
+                    10.830367214603356
+                ],
+                zoom: 17,
+                highlightOptions: {
+                    color: "blue"
+                }
+            });
+            var graphicsLayer = new GraphicsLayer();
+
+            var lineSymbol = {
+                type: "simple-line",
+                color: [255, 87, 34],
+                width: 3,
+                style: "solid"
+            };
+
+            var polygonSymbol = {
+                type: "simple-fill",
+                color: [33, 150, 243, 0.6],
+                outline: {
+                    color: [21, 101, 192],
+                    width: 2
+                }
+            };
+
+            var pointSymbol = {
+                type: "picture-marker",
+                url: "https://cdn-icons-png.flaticon.com/512/2514/2514078.png",
+                width: "56px",
+                height: "56px"
+            };
+
+            jsondata.features.forEach(function (feature) {
+                var geometry;
+                var symbol;
+                var popupTemplate;
+
+                if (feature.geometry.type === "LineString") {
+                    geometry = {
+                        type: "polyline",
+                        paths: [feature.geometry.coordinates]
+                    };
+                    symbol = lineSymbol;
+                    popupTemplate = {
+                        title: feature.properties.name,
+                        content: "<b>Mô tả:</b> {description}<br/><b>Loại:</b> Đường ranh giới"
+                    };
+
+                    var lineGraphic = new Graphic({
+                        geometry: geometry,
+                        symbol: symbol,
+                        attributes: feature.properties,
+                        popupTemplate: popupTemplate
+                    });
+                    graphicsLayer.add(lineGraphic);
+
+                    var polygonGeometry = {
+                        type: "polygon",
+                        rings: [feature.geometry.coordinates]
+                    };
+
+                    var polygonFill = {
+                        type: "simple-fill",
+                        color: [255, 193, 7, 0.4],
+                        outline: {
+                            color: [255, 152, 0],
+                            width: 2
+                        }
+                    };
+
+                    var polygonGraphic = new Graphic({
+                        geometry: polygonGeometry,
+                        symbol: polygonFill,
+                        attributes: { name: feature.properties.name + " (fill)" },
+                        popupTemplate: {
+                            title: feature.properties.name,
+                            content: "Đây là vùng được fill từ đường ranh giới."
+                        }
+                    });
+
+                    graphicsLayer.add(polygonGraphic);
+
+                    return;
+                } else if (feature.geometry.type === "Polygon") {
+                    geometry = {
+                        type: "polygon",
+                        rings: feature.geometry.coordinates
+                    };
+                    symbol = polygonSymbol;
+                    popupTemplate = {
+                        title: feature.properties.name,
+                        content: `
+              <div style="font-family: Arial, sans-serif;">
+                <p><b>📍 Địa chỉ:</b> {address}</p>
+                <p><b>🏛️ Loại:</b> {type}</p>
+                <p><b>📅 Thành lập:</b> {established}</p>
+                <p><b>🗺️ Khu vực:</b> {area}</p>
+                <p><b>ℹ️ Mô tả:</b> Trụ sở chính của chính quyền thành phố</p>
+              </div>
+            `
+                    };
+                } else if (feature.geometry.type === "Point") {
+                    geometry = {
+                        type: "point",
+                        longitude: feature.geometry.coordinates[0],
+                        latitude: feature.geometry.coordinates[1]
+                    };
+                    symbol = pointSymbol;
+                    popupTemplate = {
+                        title: feature.properties.name,
+                        content: `
+              <div style="font-family: Arial, sans-serif; text-align: center;">
+                <p><b>📍 {type}</b></p>
+                <p>{description}</p>
+                <p style="color: #1976D2;"><b>Tọa độ:</b><br/>
+                Kinh độ: ${feature.geometry.coordinates[0].toFixed(6)}<br/>
+                Vĩ độ: ${feature.geometry.coordinates[1].toFixed(6)}</p>
+              </div>
+            `
+                    };
+                }
+
+                var graphic = new Graphic({
+                    geometry: geometry,
+                    symbol: symbol,
+                    attributes: feature.properties,
+                    popupTemplate: popupTemplate
+                });
+                graphicsLayer.add(graphic);
+            });
+
+            map.add(graphicsLayer);
+
+
+        });
+    </script>
+</head>
+
+<body>
+    <div id="viewDiv"></div>
+</body>
+
+</html>
