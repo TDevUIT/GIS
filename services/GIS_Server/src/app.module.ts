@@ -12,10 +12,12 @@ import { AccidentsModule } from './accidents/accidents.module';
 import { PublicTransportsModule } from './public-transports/public-transports.module';
 import { LandUsesModule } from './land-uses/land-uses.module';
 import { UrbanPlansModule } from './urban-plans/urban-plans.module';
+import { CloudinaryModule } from './cloudinary/cloudinary.module';
 
 @Module({
   imports: [
     PrismaModule,
+    CloudinaryModule,
     DistrictsModule,
     WardsModule,
     InfrastructuresModule,
