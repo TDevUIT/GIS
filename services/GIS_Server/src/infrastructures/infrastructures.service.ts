@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
@@ -11,6 +12,8 @@ import { CreateInfrastructureDto } from './dto/create-infrastructure.dto';
 import { UpdateInfrastructureDto } from './dto/update-infrastructure.dto';
 import { InfraCategory, Prisma } from '@prisma/client';
 import cuid from 'cuid';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
+import { ImageDto } from '../common/dto/image.dto';
 
 @Injectable()
 export class InfrastructuresService {
@@ -35,7 +38,10 @@ export class InfrastructuresService {
     LEFT JOIN "public"."utilities" u ON i.id = u."infraId"
   `;
 
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private cloudinary: CloudinaryService,
+  ) {}
 
   async create(createDto: CreateInfrastructureDto) {
     const { districtId, category, school, hospital, park, market, utility } =
@@ -113,14 +119,88 @@ export class InfrastructuresService {
     return this.prisma.$queryRaw(query);
   }
 
+  async uploadImages(files: Express.Multer.File[]): Promise<ImageDto[]> {
+    if (!files || files.length === 0) {
+      throw new BadRequestException('Không có file nào được tải lên.');
+    }
+    const uploadPromises = files.map((file) =>
+      this.cloudinary.uploadFile(file).then((result) => ({
+        url: result.secure_url,
+        publicId: result.public_id,
+      })),
+    );
+    return Promise.all(uploadPromises);
+  }
+
+  async setImages(infraId: string, imagesData: ImageDto[]): Promise<any> {
+    await this.findOne(infraId);
+    return this.prisma.$transaction(async (tx) => {
+      const oldImages = await tx.image.findMany({
+        where: { infrastructureId: infraId },
+      });
+      if (oldImages.length > 0) {
+        await tx.image.deleteMany({
+          where: { infrastructureId: infraId },
+        });
+        Promise.all(
+          oldImages.map((img) => this.cloudinary.deleteFile(img.publicId)),
+        ).catch((err) =>
+          console.error('Lỗi khi xóa ảnh cũ trên Cloudinary:', err),
+        );
+      }
+      if (imagesData && imagesData.length > 0) {
+        await tx.image.createMany({
+          data: imagesData.map((img) => ({
+            url: img.url,
+            publicId: img.publicId,
+            infrastructureId: infraId,
+          })),
+        });
+      }
+      return tx.image.findMany({ where: { infrastructureId: infraId } });
+    });
+  }
+
+  async deleteImage(infraId: string, imageId: string): Promise<void> {
+    const image = await this.prisma.image.findFirst({
+      where: {
+        id: imageId,
+        infrastructureId: infraId,
+      },
+    });
+    if (!image) {
+      throw new NotFoundException(
+        `Ảnh với ID "${imageId}" không tồn tại hoặc không thuộc về hạ tầng này.`,
+      );
+    }
+    await Promise.all([
+      this.prisma.image.delete({ where: { id: imageId } }),
+      this.cloudinary.deleteFile(image.publicId),
+    ]);
+  }
+
   async findOne(id: string, tx?: Prisma.TransactionClient) {
     const prismaClient = tx || this.prisma;
-    const query = Prisma.sql`SELECT ${this.selectFields} ${this.fromTables} WHERE i.id = ${id}`;
-    const result: any[] = await prismaClient.$queryRaw(query);
-    if (result.length === 0) {
+    const infra = await prismaClient.infrastructure.findUnique({
+      where: { id },
+      include: {
+        school: true,
+        hospital: true,
+        park: true,
+        market: true,
+        utility: true,
+        district: { select: { name: true } },
+        images: {
+          select: { id: true, url: true, publicId: true },
+          orderBy: { createdAt: 'asc' },
+        },
+      },
+    });
+
+    if (!infra) {
       throw new NotFoundException(`Hạ tầng với ID "${id}" không tồn tại.`);
     }
-    return result[0];
+    return infra;
   }
 
   async update(id: string, updateDto: UpdateInfrastructureDto) {

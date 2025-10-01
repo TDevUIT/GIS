@@ -6,10 +6,15 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateAccidentDto } from './dto/create-accident.dto';
 import { UpdateAccidentDto } from './dto/update-accident.dto';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
+import { ImageDto } from '../common/dto/image.dto';
 
 @Injectable()
 export class AccidentsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private cloudinary: CloudinaryService,
+  ) {}
 
   private readonly includeOptions = {
     traffic: {
@@ -18,7 +23,11 @@ export class AccidentsService {
         roadName: true,
       },
     },
-  };
+    images: {
+      select: { id: true, url: true, publicId: true },
+      orderBy: { createdAt: 'asc' as const },
+    },
+  } as const;
 
   async create(createDto: CreateAccidentDto) {
     const { trafficId, ...accidentData } = createDto;
@@ -90,5 +99,62 @@ export class AccidentsService {
   async remove(id: string) {
     await this.findOne(id);
     return this.prisma.accident.delete({ where: { id } });
+  }
+  async uploadImages(files: Express.Multer.File[]): Promise<ImageDto[]> {
+    if (!files || files.length === 0) {
+      throw new BadRequestException('Không có file nào được tải lên.');
+    }
+    const uploadPromises = files.map((file) =>
+      this.cloudinary.uploadFile(file).then((result) => ({
+        url: result.secure_url,
+        publicId: result.public_id,
+      })),
+    );
+    return Promise.all(uploadPromises);
+  }
+
+  async setImages(accidentId: string, imagesData: ImageDto[]): Promise<any> {
+    await this.findOne(accidentId); // Kiểm tra accident có tồn tại
+
+    return this.prisma.$transaction(async (tx) => {
+      const oldImages = await tx.image.findMany({ where: { accidentId } });
+
+      if (oldImages.length > 0) {
+        await tx.image.deleteMany({ where: { accidentId } });
+        Promise.all(
+          oldImages.map((img) => this.cloudinary.deleteFile(img.publicId)),
+        ).catch((err) =>
+          console.error('Lỗi khi xóa ảnh cũ trên Cloudinary:', err),
+        );
+      }
+
+      if (imagesData && imagesData.length > 0) {
+        await tx.image.createMany({
+          data: imagesData.map((img) => ({
+            url: img.url,
+            publicId: img.publicId,
+            accidentId: accidentId,
+          })),
+        });
+      }
+
+      return tx.image.findMany({ where: { accidentId } });
+    });
+  }
+
+  async deleteImage(accidentId: string, imageId: string): Promise<void> {
+    const image = await this.prisma.image.findFirst({
+      where: { id: imageId, accidentId: accidentId },
+    });
+    if (!image) {
+      throw new NotFoundException(
+        `Ảnh với ID "${imageId}" không tồn tại hoặc không thuộc về tai nạn này.`,
+      );
+    }
+
+    await Promise.all([
+      this.prisma.image.delete({ where: { id: imageId } }),
+      this.cloudinary.deleteFile(image.publicId),
+    ]);
   }
 }
