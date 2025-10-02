@@ -13,6 +13,7 @@ import { PublicTransportsModule } from './public-transports/public-transports.mo
 import { LandUsesModule } from './land-uses/land-uses.module';
 import { UrbanPlansModule } from './urban-plans/urban-plans.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
+import { AnalyticsModule } from './analytics/analytics.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { CloudinaryModule } from './cloudinary/cloudinary.module';
     PublicTransportsModule,
     LandUsesModule,
     UrbanPlansModule,
+    AnalyticsModule,
   ],
 })
 export class AppModule {}
