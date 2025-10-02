@@ -81,7 +81,7 @@ export class AnalyticsService {
         type, 
         SUM(area_km2) as "totalAreaKm2"
       FROM "public"."land_uses"
-      WHERE "districtId" = ${districtId} AND year = ${targetYear}
+      WHERE "districtId" = ${districtId} AND year = ${targetYear}::integer
       GROUP BY type
       ORDER BY "totalAreaKm2" DESC;
     `;
