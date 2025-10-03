@@ -36,7 +36,7 @@ const Hero = () => {
         handleMotion();
         mql.addEventListener?.("change", handleMotion);
         try {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
             const nav = (navigator as any)
             if (nav?.connection?.saveData) {
                 setPrefersReducedMotion(true);
@@ -277,6 +277,3 @@ const Hero = () => {
 }
 
 export default Hero
-
-
-

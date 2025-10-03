@@ -1,0 +1,26 @@
+import { ReactNode } from 'react';
+
+interface DashboardLayoutProps {
+  children: ReactNode;
+  title: string;
+  subtitle?: string;
+}
+
+export default function DashboardLayout({ children, title, subtitle }: DashboardLayoutProps) {
+  return (
+    <div className="space-y-6">
+      {/* Page Header */}
+      <div className="bg-white rounded-lg shadow p-6">
+        <h1 className="text-2xl font-bold text-gray-900">{title}</h1>
+        {subtitle && (
+          <p className="text-gray-600 mt-1">{subtitle}</p>
+        )}
+      </div>
+      
+      {/* Main Content */}
+      <div className="space-y-6">
+        {children}
+      </div>
+    </div>
+  );
+}
