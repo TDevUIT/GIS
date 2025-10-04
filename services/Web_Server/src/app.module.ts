@@ -17,6 +17,7 @@ import { PublicTransportsModule } from './public-transports/public-transports.mo
 import { LandUsesModule } from './land-uses/land-uses.module';
 import { UrbanPlansModule } from './urban-plans/urban-plans.module';
 import { AnalyticsModule } from './analytics/analytics.module';
+import { CommonModule } from './common/common.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { AnalyticsModule } from './analytics/analytics.module';
       timeout: 8000,
       maxRedirects: 5,
     }),
+    CommonModule,
     PrismaModule,
     AuthModule,
     CloudinaryModule,
