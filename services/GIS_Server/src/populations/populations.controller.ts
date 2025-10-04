@@ -8,7 +8,6 @@ import {
   Delete,
   Query,
   ParseIntPipe,
-  DefaultValuePipe,
 } from '@nestjs/common';
 import { PopulationsService } from './populations.service';
 import { CreatePopulationDto } from './dto/create-population.dto';
@@ -26,7 +25,7 @@ export class PopulationsController {
   @Get()
   findAll(
     @Query('districtId') districtId?: string,
-    @Query('year', new DefaultValuePipe(undefined), ParseIntPipe) year?: number,
+    @Query('year', new ParseIntPipe({ optional: true })) year?: number,
   ) {
     return this.populationsService.findAll(districtId, year);
   }
