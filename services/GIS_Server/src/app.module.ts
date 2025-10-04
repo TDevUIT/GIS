@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { PrismaModule } from './prisma/prisma.module';
+import { CommonModule } from './common/common.module';
 import { DistrictsModule } from './districts/districts.module';
 import { WardsModule } from './wards/wards.module';
 import { InfrastructuresModule } from './infrastructures/infrastructures.module';
@@ -17,6 +18,7 @@ import { AnalyticsModule } from './analytics/analytics.module';
 
 @Module({
   imports: [
+    CommonModule,
     PrismaModule,
     CloudinaryModule,
     DistrictsModule,
