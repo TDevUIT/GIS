@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
@@ -12,6 +14,17 @@ export class DistrictsService {
     id, code, name, area_km2 as "areaKm2", density_per_km2 as "densityPerKm2",
     "createdAt", "updatedAt", ST_AsGeoJSON(geom) as geom
   `;
+
+  private transformDistrict(district: any) {
+    if (district && district.geom && typeof district.geom === 'string') {
+      try {
+        district.geom = JSON.parse(district.geom);
+      } catch (e) {
+        console.error('Failed to parse geom JSON', e);
+      }
+    }
+    return district;
+  }
 
   constructor(private prisma: PrismaService) {}
 
@@ -28,7 +41,8 @@ export class DistrictsService {
 
   async findAll() {
     const query = Prisma.sql`SELECT ${this.selectFields} FROM "public"."districts"`;
-    return this.prisma.$queryRaw(query);
+    const districts: any[] = await this.prisma.$queryRaw(query);
+    return districts.map((d) => this.transformDistrict(d));
   }
 
   async findOne(id: string) {
@@ -39,7 +53,7 @@ export class DistrictsService {
     if (result.length === 0) {
       throw new NotFoundException(`Quận với ID "${id}" không tồn tại.`);
     }
-    return result[0];
+    return this.transformDistrict(result[0]);
   }
 
   async update(id: string, updateDistrictDto: UpdateDistrictDto) {
@@ -75,11 +89,9 @@ export class DistrictsService {
     `;
     const result: any[] = await this.prisma.$queryRaw(query);
     if (result.length === 0) {
-      throw new NotFoundException(
-        `Không tìm thấy quận nào chứa tọa độ (${lng}, ${lat}).`,
-      );
+      return null;
     }
-    return result[0];
+    return this.transformDistrict(result[0]);
   }
 
   async findDistrictsIntersecting(wkt: string) {
@@ -87,6 +99,7 @@ export class DistrictsService {
       SELECT ${this.selectFields} FROM "public"."districts"
       WHERE ST_Intersects(geom, ST_GeomFromText(${wkt}, 4326));
     `;
-    return this.prisma.$queryRaw(query);
+    const districts: any[] = await this.prisma.$queryRaw(query);
+    return districts.map((d) => this.transformDistrict(d));
   }
 }

@@ -10,7 +10,14 @@ import {
   UsePipes,
   Query,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiParam, ApiResponse, ApiQuery, ApiBody } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+  ApiQuery,
+  ApiBody,
+} from '@nestjs/swagger';
 import { DistrictsService } from './districts.service';
 import { WardsService } from '../wards/wards.service';
 import { CreateDistrictDto } from './dto/create-district.dto';
@@ -29,7 +36,10 @@ export class DistrictsController {
   @ApiQuery({ name: 'lng', description: 'Longitude' })
   @ApiQuery({ name: 'lat', description: 'Latitude' })
   @ApiResponse({ status: 200, description: 'District containing the point' })
-  @ApiResponse({ status: 404, description: 'No district found containing the point' })
+  @ApiResponse({
+    status: 404,
+    description: 'No district found containing the point',
+  })
   @Get('contains-point')
   @UsePipes(new ValidationPipe({ transform: true }))
   findContainingPoint(@Query() query: ContainsPointDto) {
@@ -41,7 +51,10 @@ export class DistrictsController {
 
   @ApiOperation({ summary: 'Find districts intersecting with WKT geometry' })
   @ApiBody({ type: IntersectsWktDto, description: 'WKT geometry string' })
-  @ApiResponse({ status: 200, description: 'Districts intersecting with the geometry' })
+  @ApiResponse({
+    status: 200,
+    description: 'Districts intersecting with the geometry',
+  })
   @Post('intersects-with')
   @UsePipes(new ValidationPipe())
   findIntersecting(@Body() body: IntersectsWktDto) {

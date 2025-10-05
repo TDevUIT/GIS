@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-call */
 import {
   Controller,
   Get,
@@ -36,23 +37,46 @@ export class PublicTransportsController {
   ) {}
 
   @Get()
-  @ApiOperation({ summary: 'Get all public transport routes', description: 'Retrieve public transportation routes with optional filters' })
-  @ApiQuery({ name: 'districtId', required: false, description: 'Filter by district ID', example: '1' })
-  @ApiQuery({ name: 'mode', required: false, enum: ['BUS', 'METRO', 'BRT', 'WATERWAY'], description: 'Filter by transport mode' })
-  @ApiResponse({ status: 200, description: 'Public transport routes retrieved successfully' })
+  @ApiOperation({
+    summary: 'Get all public transport routes',
+    description: 'Retrieve public transportation routes with optional filters',
+  })
+  @ApiQuery({
+    name: 'districtId',
+    required: false,
+    description: 'Filter by district ID',
+    example: '1',
+  })
+  @ApiQuery({
+    name: 'mode',
+    required: false,
+    enum: ['BUS', 'METRO', 'BRT', 'WATERWAY'],
+    description: 'Filter by transport mode',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Public transport routes retrieved successfully',
+  })
   findAll(@Query() query: FindPublicTransportsQuery) {
     return this.publicTransportsService.findAll(query);
   }
 
   @Post('intersects-with')
-  @ApiOperation({ summary: 'Find intersecting routes', description: 'Find public transport routes that intersect with a given WKT geometry' })
+  @ApiOperation({
+    summary: 'Find intersecting routes',
+    description:
+      'Find public transport routes that intersect with a given WKT geometry',
+  })
   @ApiResponse({ status: 200, description: 'Intersecting routes found' })
   findIntersecting(@Body() wktBody: any) {
     return this.publicTransportsService.findIntersecting(wktBody);
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Get transport route by ID', description: 'Retrieve a specific public transport route by ID' })
+  @ApiOperation({
+    summary: 'Get transport route by ID',
+    description: 'Retrieve a specific public transport route by ID',
+  })
   @ApiParam({ name: 'id', description: 'Transport route ID', example: '1' })
   @ApiResponse({ status: 200, description: 'Transport route found' })
   @ApiResponse({ status: 404, description: 'Transport route not found' })
@@ -63,8 +87,14 @@ export class PublicTransportsController {
   @Post()
   @UseGuards(JwtAuthGuard, AdminGuard)
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'Create transport route', description: 'Create a new public transport route (Admin only)' })
-  @ApiResponse({ status: 201, description: 'Transport route created successfully' })
+  @ApiOperation({
+    summary: 'Create transport route',
+    description: 'Create a new public transport route (Admin only)',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Transport route created successfully',
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
   create(@Body() createDto: any) {
@@ -74,9 +104,15 @@ export class PublicTransportsController {
   @Patch(':id')
   @UseGuards(JwtAuthGuard, AdminGuard)
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'Update transport route', description: 'Update an existing public transport route (Admin only)' })
+  @ApiOperation({
+    summary: 'Update transport route',
+    description: 'Update an existing public transport route (Admin only)',
+  })
   @ApiParam({ name: 'id', description: 'Transport route ID', example: '1' })
-  @ApiResponse({ status: 200, description: 'Transport route updated successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'Transport route updated successfully',
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
   @ApiResponse({ status: 404, description: 'Transport route not found' })
@@ -87,9 +123,15 @@ export class PublicTransportsController {
   @Delete(':id')
   @UseGuards(JwtAuthGuard, AdminGuard)
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'Delete transport route', description: 'Delete a public transport route (Admin only)' })
+  @ApiOperation({
+    summary: 'Delete transport route',
+    description: 'Delete a public transport route (Admin only)',
+  })
   @ApiParam({ name: 'id', description: 'Transport route ID', example: '1' })
-  @ApiResponse({ status: 200, description: 'Transport route deleted successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'Transport route deleted successfully',
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
   @ApiResponse({ status: 404, description: 'Transport route not found' })

@@ -8,7 +8,14 @@ import {
   Delete,
   Query,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiParam, ApiResponse, ApiQuery, ApiBody } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+  ApiQuery,
+  ApiBody,
+} from '@nestjs/swagger';
 import { WardsService } from './wards.service';
 import { CreateWardDto } from './dto/create-ward.dto';
 import { UpdateWardDto } from './dto/update-ward.dto';
@@ -23,7 +30,10 @@ export class WardsController {
   @ApiQuery({ name: 'lng', description: 'Longitude' })
   @ApiQuery({ name: 'lat', description: 'Latitude' })
   @ApiResponse({ status: 200, description: 'Ward containing the point' })
-  @ApiResponse({ status: 404, description: 'No ward found containing the point' })
+  @ApiResponse({
+    status: 404,
+    description: 'No ward found containing the point',
+  })
   @Get('contains-point')
   findContainingPoint(@Query() query: ContainsPointDto) {
     return this.wardsService.findWardContainingPoint(query.lng, query.lat);
@@ -31,7 +41,10 @@ export class WardsController {
 
   @ApiOperation({ summary: 'Find wards intersecting with WKT geometry' })
   @ApiBody({ type: IntersectsWktDto, description: 'WKT geometry string' })
-  @ApiResponse({ status: 200, description: 'Wards intersecting with the geometry' })
+  @ApiResponse({
+    status: 200,
+    description: 'Wards intersecting with the geometry',
+  })
   @Post('intersects-with')
   findIntersecting(@Body() body: IntersectsWktDto) {
     return this.wardsService.findWardsIntersecting(body.wkt);

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-call */
 import {
   Controller,
   Get,
@@ -27,14 +28,21 @@ export class DistrictsController {
   constructor(private readonly districtsService: DistrictsService) {}
 
   @Get()
-  @ApiOperation({ summary: 'Get all districts', description: 'Retrieve all district records with geometry data' })
+  @ApiOperation({
+    summary: 'Get all districts',
+    description: 'Retrieve all district records with geometry data',
+  })
   @ApiResponse({ status: 200, description: 'Districts retrieved successfully' })
   findAll() {
     return this.districtsService.findAll();
   }
 
   @Get('contains-point')
-  @ApiOperation({ summary: 'Find district containing point', description: 'Find which district contains a specific point (longitude, latitude)' })
+  @ApiOperation({
+    summary: 'Find district containing point',
+    description:
+      'Find which district contains a specific point (longitude, latitude)',
+  })
   @ApiQuery({ name: 'lng', description: 'Longitude', example: '106.6297' })
   @ApiQuery({ name: 'lat', description: 'Latitude', example: '10.8231' })
   @ApiResponse({ status: 200, description: 'District found' })
@@ -44,14 +52,20 @@ export class DistrictsController {
   }
 
   @Post('intersects-with')
-  @ApiOperation({ summary: 'Find intersecting districts', description: 'Find districts that intersect with a given WKT geometry' })
+  @ApiOperation({
+    summary: 'Find intersecting districts',
+    description: 'Find districts that intersect with a given WKT geometry',
+  })
   @ApiResponse({ status: 200, description: 'Intersecting districts found' })
   findIntersecting(@Body() wktBody: any) {
     return this.districtsService.findIntersecting(wktBody);
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Get district by ID', description: 'Retrieve a specific district by ID' })
+  @ApiOperation({
+    summary: 'Get district by ID',
+    description: 'Retrieve a specific district by ID',
+  })
   @ApiParam({ name: 'id', description: 'District ID', example: '1' })
   @ApiResponse({ status: 200, description: 'District found' })
   @ApiResponse({ status: 404, description: 'District not found' })
@@ -60,7 +74,10 @@ export class DistrictsController {
   }
 
   @Get(':districtId/wards')
-  @ApiOperation({ summary: 'Get wards of district', description: 'Retrieve all wards belonging to a specific district' })
+  @ApiOperation({
+    summary: 'Get wards of district',
+    description: 'Retrieve all wards belonging to a specific district',
+  })
   @ApiParam({ name: 'districtId', description: 'District ID', example: '1' })
   @ApiResponse({ status: 200, description: 'Wards retrieved successfully' })
   findWardsOfDistrict(@Param('districtId') districtId: string) {
@@ -70,10 +87,16 @@ export class DistrictsController {
   @Post()
   @UseGuards(JwtAuthGuard, AdminGuard)
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'Create district', description: 'Create a new district (Admin only)' })
+  @ApiOperation({
+    summary: 'Create district',
+    description: 'Create a new district (Admin only)',
+  })
   @ApiResponse({ status: 201, description: 'District created successfully' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - Admin access required',
+  })
   create(@Body() createDto: any) {
     return this.districtsService.create(createDto);
   }
@@ -81,11 +104,17 @@ export class DistrictsController {
   @Patch(':id')
   @UseGuards(JwtAuthGuard, AdminGuard)
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'Update district', description: 'Update an existing district (Admin only)' })
+  @ApiOperation({
+    summary: 'Update district',
+    description: 'Update an existing district (Admin only)',
+  })
   @ApiParam({ name: 'id', description: 'District ID', example: '1' })
   @ApiResponse({ status: 200, description: 'District updated successfully' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - Admin access required',
+  })
   @ApiResponse({ status: 404, description: 'District not found' })
   update(@Param('id') id: string, @Body() updateDto: any) {
     return this.districtsService.update(id, updateDto);
@@ -94,11 +123,17 @@ export class DistrictsController {
   @Delete(':id')
   @UseGuards(JwtAuthGuard, AdminGuard)
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'Delete district', description: 'Delete a district (Admin only)' })
+  @ApiOperation({
+    summary: 'Delete district',
+    description: 'Delete a district (Admin only)',
+  })
   @ApiParam({ name: 'id', description: 'District ID', example: '1' })
   @ApiResponse({ status: 200, description: 'District deleted successfully' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - Admin access required',
+  })
   @ApiResponse({ status: 404, description: 'District not found' })
   remove(@Param('id') id: string) {
     return this.districtsService.remove(id);

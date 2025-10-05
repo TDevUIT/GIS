@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 import {
   Injectable,
@@ -25,6 +27,17 @@ export class AirQualitiesService {
 
   constructor(private prisma: PrismaService) {}
 
+  private transformRecord(record: any) {
+    if (record && record.geom && typeof record.geom === 'string') {
+      try {
+        record.geom = JSON.parse(record.geom);
+      } catch (e) {
+        console.error('Failed to parse geom JSON string:', e);
+      }
+    }
+    return record;
+  }
+
   async create(createDto: CreateAirQualityDto) {
     const { districtId, geom, ...airQualityData } = createDto;
     const districtExists = await this.prisma.district.findUnique({
@@ -46,24 +59,23 @@ export class AirQualitiesService {
 
   async findAll(queryDto: FindAirQualityQueryDto) {
     const { districtId, from, to } = queryDto;
-    const whereClauses: string[] = [];
-    const params: any[] = [];
+    const whereClauses: Prisma.Sql[] = [];
     if (districtId) {
-      whereClauses.push(`aq."districtId" = $${params.length + 1}`);
-      params.push(districtId);
+      whereClauses.push(Prisma.sql`aq."districtId" = ${districtId}`);
     }
     if (from) {
-      whereClauses.push(`aq.recorded_at >= $${params.length + 1}::timestamp`);
-      params.push(from);
+      whereClauses.push(Prisma.sql`aq.recorded_at >= ${from}::timestamp`);
     }
     if (to) {
-      whereClauses.push(`aq.recorded_at <= $${params.length + 1}::timestamp`);
-      params.push(to);
+      whereClauses.push(Prisma.sql`aq.recorded_at <= ${to}::timestamp`);
     }
     const where =
-      whereClauses.length > 0 ? `WHERE ${whereClauses.join(' AND ')}` : '';
-    const query = `
-      SELECT aq.id, aq.pm25, aq.co2, aq.no2, aq.recorded_at as "recordedAt",
+      whereClauses.length > 0
+        ? Prisma.sql`WHERE ${Prisma.join(whereClauses, ' AND ')}`
+        : Prisma.empty;
+    const query = Prisma.sql`
+      SELECT 
+        aq.id, aq.pm25, aq.co2, aq.no2, aq.recorded_at as "recordedAt",
         aq."districtId", d.name as "districtName",
         ST_AsGeoJSON(aq.geom) as geom
       FROM "public"."air_qualities" aq
@@ -71,7 +83,8 @@ export class AirQualitiesService {
       ${where}
       ORDER BY aq.recorded_at DESC
     `;
-    return this.prisma.$queryRawUnsafe(query, ...params);
+    const results: any[] = await this.prisma.$queryRaw(query);
+    return results.map((record) => this.transformRecord(record));
   }
 
   async findOne(id: string) {
@@ -82,7 +95,7 @@ export class AirQualitiesService {
         `Bản ghi chất lượng không khí với ID "${id}" không tồn tại.`,
       );
     }
-    return result[0];
+    return this.transformRecord(result[0]);
   }
 
   async update(id: string, updateDto: UpdateAirQualityDto) {
@@ -133,6 +146,7 @@ export class AirQualitiesService {
       )
       ORDER BY aq.recorded_at DESC
     `;
-    return this.prisma.$queryRaw(query);
+    const results: any[] = await this.prisma.$queryRaw(query);
+    return results.map((record) => this.transformRecord(record));
   }
 }

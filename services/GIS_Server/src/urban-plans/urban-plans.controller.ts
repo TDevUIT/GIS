@@ -8,7 +8,14 @@ import {
   Delete,
   Query,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiParam, ApiResponse, ApiQuery, ApiBody } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+  ApiQuery,
+  ApiBody,
+} from '@nestjs/swagger';
 import { UrbanPlansService } from './urban-plans.service';
 import { CreateUrbanPlanDto } from './dto/create-urban-plan.dto';
 import { UpdateUrbanPlanDto } from './dto/update-urban-plan.dto';
@@ -23,7 +30,10 @@ export class UrbanPlansController {
   @ApiOperation({ summary: 'Find urban plan at a specific point' })
   @ApiQuery({ name: 'lng', description: 'Longitude' })
   @ApiQuery({ name: 'lat', description: 'Latitude' })
-  @ApiResponse({ status: 200, description: 'Urban plan at the specified point' })
+  @ApiResponse({
+    status: 200,
+    description: 'Urban plan at the specified point',
+  })
   @ApiResponse({ status: 404, description: 'No urban plan found at the point' })
   @Get('at-point')
   findAtPoint(@Query() query: GisPointQueryDto) {
@@ -32,14 +42,20 @@ export class UrbanPlansController {
 
   @ApiOperation({ summary: 'Find urban plans intersecting with WKT geometry' })
   @ApiBody({ type: GisWktBodyDto, description: 'WKT geometry string' })
-  @ApiResponse({ status: 200, description: 'Urban plans intersecting with the geometry' })
+  @ApiResponse({
+    status: 200,
+    description: 'Urban plans intersecting with the geometry',
+  })
   @Post('intersects-with')
   findIntersecting(@Body() body: GisWktBodyDto) {
     return this.urbanPlansService.findIntersecting(body.wkt);
   }
 
   @ApiOperation({ summary: 'Create a new urban plan record' })
-  @ApiResponse({ status: 201, description: 'Urban plan record created successfully' })
+  @ApiResponse({
+    status: 201,
+    description: 'Urban plan record created successfully',
+  })
   @ApiResponse({ status: 400, description: 'Bad request' })
   @Post()
   create(@Body() createUrbanPlanDto: CreateUrbanPlanDto) {
@@ -64,7 +80,10 @@ export class UrbanPlansController {
 
   @ApiOperation({ summary: 'Update an urban plan record' })
   @ApiParam({ name: 'id', description: 'Urban plan record ID' })
-  @ApiResponse({ status: 200, description: 'Urban plan record updated successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'Urban plan record updated successfully',
+  })
   @ApiResponse({ status: 404, description: 'Urban plan record not found' })
   @Patch(':id')
   update(
@@ -76,7 +95,10 @@ export class UrbanPlansController {
 
   @ApiOperation({ summary: 'Delete an urban plan record' })
   @ApiParam({ name: 'id', description: 'Urban plan record ID' })
-  @ApiResponse({ status: 200, description: 'Urban plan record deleted successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'Urban plan record deleted successfully',
+  })
   @ApiResponse({ status: 404, description: 'Urban plan record not found' })
   @Delete(':id')
   remove(@Param('id') id: string) {

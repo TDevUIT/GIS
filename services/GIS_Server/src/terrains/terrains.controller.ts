@@ -8,7 +8,14 @@ import {
   Delete,
   Query,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiParam, ApiResponse, ApiQuery, ApiBody } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+  ApiQuery,
+  ApiBody,
+} from '@nestjs/swagger';
 import { TerrainsService } from './terrains.service';
 import { CreateTerrainDto } from './dto/create-terrain.dto';
 import { UpdateTerrainDto } from './dto/update-terrain.dto';
@@ -31,14 +38,20 @@ export class TerrainsController {
 
   @ApiOperation({ summary: 'Find terrains intersecting with WKT geometry' })
   @ApiBody({ type: IntersectsWktDto, description: 'WKT geometry string' })
-  @ApiResponse({ status: 200, description: 'Terrains intersecting with the geometry' })
+  @ApiResponse({
+    status: 200,
+    description: 'Terrains intersecting with the geometry',
+  })
   @Post('intersects-with')
   findIntersecting(@Body() body: IntersectsWktDto) {
     return this.terrainsService.findTerrainsIntersecting(body.wkt);
   }
 
   @ApiOperation({ summary: 'Create a new terrain record' })
-  @ApiResponse({ status: 201, description: 'Terrain record created successfully' })
+  @ApiResponse({
+    status: 201,
+    description: 'Terrain record created successfully',
+  })
   @ApiResponse({ status: 400, description: 'Bad request' })
   @Post()
   create(@Body() createTerrainDto: CreateTerrainDto) {
@@ -64,7 +77,10 @@ export class TerrainsController {
 
   @ApiOperation({ summary: 'Update a terrain record' })
   @ApiParam({ name: 'id', description: 'Terrain record ID' })
-  @ApiResponse({ status: 200, description: 'Terrain record updated successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'Terrain record updated successfully',
+  })
   @ApiResponse({ status: 404, description: 'Terrain record not found' })
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateTerrainDto: UpdateTerrainDto) {
@@ -73,7 +89,10 @@ export class TerrainsController {
 
   @ApiOperation({ summary: 'Delete a terrain record' })
   @ApiParam({ name: 'id', description: 'Terrain record ID' })
-  @ApiResponse({ status: 200, description: 'Terrain record deleted successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'Terrain record deleted successfully',
+  })
   @ApiResponse({ status: 404, description: 'Terrain record not found' })
   @Delete(':id')
   remove(@Param('id') id: string) {

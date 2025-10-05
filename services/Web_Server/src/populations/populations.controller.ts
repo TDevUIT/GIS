@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-call */
 import {
   Controller,
   Get,
@@ -29,10 +30,26 @@ export class PopulationsController {
   constructor(private readonly populationsService: PopulationsService) {}
 
   @Get()
-  @ApiOperation({ summary: 'Get all population records', description: 'Retrieve population data with optional filters' })
-  @ApiQuery({ name: 'districtId', required: false, description: 'Filter by district ID', example: '1' })
-  @ApiQuery({ name: 'year', required: false, description: 'Filter by year', example: 2024 })
-  @ApiResponse({ status: 200, description: 'Population records retrieved successfully' })
+  @ApiOperation({
+    summary: 'Get all population records',
+    description: 'Retrieve population data with optional filters',
+  })
+  @ApiQuery({
+    name: 'districtId',
+    required: false,
+    description: 'Filter by district ID',
+    example: '1',
+  })
+  @ApiQuery({
+    name: 'year',
+    required: false,
+    description: 'Filter by year',
+    example: 2024,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Population records retrieved successfully',
+  })
   findAll(
     @Query('districtId') districtId?: string,
     @Query('year', new DefaultValuePipe(undefined), ParseIntPipe) year?: number,
@@ -41,7 +58,10 @@ export class PopulationsController {
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Get population by ID', description: 'Retrieve a specific population record by ID' })
+  @ApiOperation({
+    summary: 'Get population by ID',
+    description: 'Retrieve a specific population record by ID',
+  })
   @ApiParam({ name: 'id', description: 'Population record ID', example: '1' })
   @ApiResponse({ status: 200, description: 'Population record found' })
   @ApiResponse({ status: 404, description: 'Population record not found' })
@@ -52,8 +72,14 @@ export class PopulationsController {
   @Post()
   @UseGuards(JwtAuthGuard, AdminGuard)
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'Create population record', description: 'Create a new population record (Admin only)' })
-  @ApiResponse({ status: 201, description: 'Population record created successfully' })
+  @ApiOperation({
+    summary: 'Create population record',
+    description: 'Create a new population record (Admin only)',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Population record created successfully',
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
   create(@Body() createDto: any) {
@@ -63,9 +89,15 @@ export class PopulationsController {
   @Patch(':id')
   @UseGuards(JwtAuthGuard, AdminGuard)
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'Update population record', description: 'Update an existing population record (Admin only)' })
+  @ApiOperation({
+    summary: 'Update population record',
+    description: 'Update an existing population record (Admin only)',
+  })
   @ApiParam({ name: 'id', description: 'Population record ID', example: '1' })
-  @ApiResponse({ status: 200, description: 'Population record updated successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'Population record updated successfully',
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
   @ApiResponse({ status: 404, description: 'Population record not found' })
@@ -76,9 +108,15 @@ export class PopulationsController {
   @Delete(':id')
   @UseGuards(JwtAuthGuard, AdminGuard)
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'Delete population record', description: 'Delete a population record (Admin only)' })
+  @ApiOperation({
+    summary: 'Delete population record',
+    description: 'Delete a population record (Admin only)',
+  })
   @ApiParam({ name: 'id', description: 'Population record ID', example: '1' })
-  @ApiResponse({ status: 200, description: 'Population record deleted successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'Population record deleted successfully',
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
   @ApiResponse({ status: 404, description: 'Population record not found' })
