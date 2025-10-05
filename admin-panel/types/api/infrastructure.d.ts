@@ -1,32 +1,28 @@
 import type { GeoJSONPoint, InfraCategory, SchoolLevel, HospitalType, MarketType, UtilityType } from './shared';
+import type { Image } from './accident';
 
-interface SchoolDetails {
-  id: string;
+export interface SchoolDetails {
   studentCapacity: number | null;
   teacherCount: number | null;
   level: SchoolLevel;
 }
 
-interface HospitalDetails {
-  id: string;
+export interface HospitalDetails {
   bedCapacity: number | null;
   doctorCount: number | null;
   type: HospitalType;
 }
 
-interface ParkDetails {
-  id: string;
+export interface ParkDetails {
   area: number | null;
 }
 
-interface MarketDetails {
-  id: string;
+export interface MarketDetails {
   stallCount: number | null;
   type: MarketType;
 }
 
-interface UtilityDetails {
-  id: string;
+export interface UtilityDetails {
   capacity: number | null;
   type: UtilityType;
 }
@@ -38,11 +34,32 @@ export interface Infrastructure {
   category: InfraCategory;
   createdAt: string;
   updatedAt: string;
-  geom: GeoJSONPoint;
+  geom: GeoJSONPoint | null;
   districtId: string;
-  school: SchoolDetails | null;
-  hospital: HospitalDetails | null;
-  park: ParkDetails | null;
-  market: MarketDetails | null;
-  utility: UtilityDetails | null;
+  district?: {
+    name: string;
+  };
+  images?: Image[];
+  school: SchoolDetails & { id?: string; infraId?: string } | null;
+  hospital: HospitalDetails & { id?: string; infraId?: string } | null;
+  park: ParkDetails & { id?: string; infraId?: string } | null;
+  market: MarketDetails & { id?: string; infraId?: string } | null;
+  utility: UtilityDetails & { id?: string; infraId?: string } | null;
+}
+
+export type CreateInfrastructureDTO = 
+  Omit<Infrastructure, 'id' | 'createdAt' | 'updatedAt' | 'geom' | 'district' | 'images'> 
+  & { geom: string };
+
+export type UpdateInfrastructureDTO = Partial<CreateInfrastructureDTO>;
+
+export interface FindInfrastructuresQuery {
+  districtId?: string;
+  category?: InfraCategory;
+}
+
+export interface FindWithinRadiusQuery {
+  lng: number;
+  lat: number;
+  radiusInMeters: number;
 }

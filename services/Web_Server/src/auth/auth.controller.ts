@@ -1,7 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/require-await */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import {
   Controller,
   Post,
@@ -11,6 +11,8 @@ import {
   Get,
   Req,
   Patch,
+  HttpStatus,
+  ForbiddenException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -24,109 +26,108 @@ import { AuthService } from './auth.service';
 import { AuthGuard } from '@nestjs/passport';
 import { Role } from '../../generated/prisma';
 import { AdminGuard } from './admin.gaurd';
+import { CreateSupervisorDto } from './dto/create-supervisor.dto';
+import { SetPasswordDto } from './dto/set-password.dto';
 
 @ApiTags('Authentication')
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 
-  @Post('signup')
-  @ApiOperation({ 
-    summary: 'User registration', 
-    description: 'Register a new user account' 
+  @Post('supervisor')
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Create a new supervisor account (Admin only)' })
+  @ApiResponse({
+    status: 201,
+    description: 'Supervisor account created successfully.',
   })
-  @ApiBody({
-    description: 'User registration data',
-    schema: {
-      type: 'object',
-      required: ['name', 'email', 'password'],
-      properties: {
-        name: { type: 'string', example: 'John Doe' },
-        email: { type: 'string', example: 'user@example.com' },
-        password: { type: 'string', example: 'password123' },
-        phone: { type: 'string', example: '0123456789' },
-      },
-    },
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden. Admin access required.',
   })
-  @ApiResponse({ status: 201, description: 'User registered successfully' })
-  @ApiResponse({ status: 400, description: 'Invalid input or email already exists' })
-  async signup(
-    @Body()
-    body: { name: string; email: string; password: string; phone?: string },
-    @Res() res: Response,
-  ) {
-    const tokens = await this.authService.signup(body);
-    this.setAuthCookies(res, tokens);
-    return res.send({ message: 'Signup successful' });
+  @ApiResponse({ status: 409, description: 'Email already in use.' })
+  async createSupervisor(@Body() createSupervisorDto: CreateSupervisorDto) {
+    return this.authService.createSupervisor(createSupervisorDto);
   }
 
   @Post('login')
-  @ApiOperation({ 
-    summary: 'User login', 
-    description: 'Authenticate user and receive access tokens' 
-  })
+  @ApiOperation({ summary: 'User login' })
   @ApiBody({
-    description: 'User login credentials',
     schema: {
       type: 'object',
       required: ['email', 'password'],
       properties: {
         email: { type: 'string', example: 'user@example.com' },
-        password: { type: 'string', example: 'password123' },
+        password: { type: 'string', example: 'password123 or 6-digit-OTP' },
       },
     },
   })
-  @ApiResponse({ status: 200, description: 'Login successful, tokens set in cookies' })
-  @ApiResponse({ status: 401, description: 'Invalid credentials' })
+  @ApiResponse({
+    status: 200,
+    description: 'Login successful OR must change password.',
+  })
   async login(
     @Body() body: { email: string; password: string },
     @Res() res: Response,
   ) {
-    const tokens = await this.authService.login(body);
-    this.setAuthCookies(res, tokens);
-    return res.send({ message: 'Login successful' });
+    const result = await this.authService.login(body);
+    if (result.mustChangePassword) {
+      return res.status(HttpStatus.OK).json(result);
+    }
+    if ('refreshToken' in result) {
+      this.setAuthCookies(res, result);
+      return res.status(HttpStatus.OK).json({ message: 'Login successful' });
+    }
+    return res.status(HttpStatus.OK).json(result);
+  }
+
+  @Post('set-password')
+  @UseGuards(AuthGuard('jwt'))
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({
+    summary: 'Set a new password on first login',
+    description: 'Requires a temporary token from the first login attempt.',
+  })
+  @ApiResponse({ status: 200, description: 'Password set successfully.' })
+  @ApiResponse({ status: 403, description: 'Password has already been set.' })
+  async setPassword(@Req() req: any, @Body() setPasswordDto: SetPasswordDto) {
+    const userId = req.user.id;
+    return this.authService.setNewPassword(userId, setPasswordDto);
   }
 
   @Get('profile')
   @UseGuards(AuthGuard('jwt'))
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ 
-    summary: 'Get user profile', 
-    description: 'Retrieve authenticated user profile information' 
-  })
-  @ApiResponse({ status: 200, description: 'User profile retrieved successfully' })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async getProfile(@Req() req) {
+  @ApiOperation({ summary: 'Get user profile' })
+  async getProfile(@Req() req: any) {
     return req.user;
   }
 
   @Post('refresh')
-  @ApiOperation({ 
-    summary: 'Refresh access token', 
-    description: 'Refresh the access token using refresh token from cookies' 
-  })
-  @ApiResponse({ status: 200, description: 'Token refreshed successfully' })
-  @ApiResponse({ status: 401, description: 'No refresh token or invalid refresh token' })
+  @ApiOperation({ summary: 'Refresh access token' })
   async refresh(@Req() req: Request, @Res() res: Response) {
     const refreshToken = req.cookies.refreshToken;
-    if (!refreshToken)
-      return res.status(401).send({ message: 'No refresh token' });
-
+    if (!refreshToken) {
+      return res
+        .status(HttpStatus.UNAUTHORIZED)
+        .json({ message: 'No refresh token provided' });
+    }
     const tokens = await this.authService.refreshToken(refreshToken);
     this.setAuthCookies(res, tokens);
-    return res.send({ message: 'Token refreshed' });
+    return res.json({ message: 'Token refreshed' });
   }
 
   @Post('logout')
-  @ApiOperation({ 
-    summary: 'User logout', 
-    description: 'Clear authentication cookies and logout user' 
-  })
-  @ApiResponse({ status: 200, description: 'Logged out successfully' })
-  async logout(@Res({ passthrough: true }) res: Response) {
+  @ApiOperation({ summary: 'User logout' })
+  async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    const refreshToken = req.cookies.refreshToken;
+    if (refreshToken) {
+      await this.authService.logout(refreshToken);
+    }
     const cookieOptions = {
       httpOnly: true,
-      secure: false,
+      secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax' as const,
       path: '/',
     };
@@ -135,45 +136,32 @@ export class AuthController {
     return { message: 'Logged out successfully' };
   }
 
-  @Patch('rule')
+  @Patch('role')
   @UseGuards(AuthGuard('jwt'), AdminGuard)
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ 
-    summary: 'Change user role', 
-    description: 'Update user role/permissions (Admin only)' 
+  @ApiOperation({
+    summary: 'Change user role (Admin only)',
+    description:
+      'Update user role/permissions (Admin only). Cannot change ADMIN role.',
   })
   @ApiBody({
-    description: 'User role update data',
     schema: {
       type: 'object',
       required: ['userId', 'role'],
       properties: {
-        userId: { type: 'string', example: '123' },
-        role: { 
-          type: 'string', 
-          enum: ['USER', 'ADMIN'],
-          example: 'ADMIN' 
-        },
+        userId: { type: 'string', example: 'cuid-of-supervisor' },
+        role: { type: 'string', enum: ['SUPERVISOR'], example: 'SUPERVISOR' },
       },
     },
   })
-  @ApiResponse({ status: 200, description: 'User role updated successfully' })
-  @ApiResponse({ status: 400, description: 'Invalid input or cannot change own role' })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
   async rulePermissions(
     @Body() body: { userId: string; role: Role },
     @Req() req: any,
   ) {
-    const { userId, role } = body;
-    if (!userId || !role) {
-      return { message: 'User ID and role are required' };
+    if (body.userId === req.user.id) {
+      throw new ForbiddenException('You cannot change your own role.');
     }
-    if (userId === req.user.id) {
-      return { message: 'You cannot change your own role' };
-    }
-    const result = await this.authService.rulePermission(userId, role);
-    return { message: result.message };
+    return this.authService.rulePermission(body.userId, body.role);
   }
 
   private setAuthCookies(
@@ -182,11 +170,12 @@ export class AuthController {
   ) {
     const isProduction = process.env.NODE_ENV === 'production';
     const secureFlag = isProduction;
+    const lax = 'lax' as const;
 
     res.cookie('accessToken', tokens.accessToken, {
       httpOnly: true,
       secure: secureFlag,
-      sameSite: 'lax',
+      sameSite: lax,
       path: '/',
       maxAge: 24 * 60 * 60 * 1000,
     });
@@ -194,7 +183,7 @@ export class AuthController {
     res.cookie('refreshToken', tokens.refreshToken, {
       httpOnly: true,
       secure: secureFlag,
-      sameSite: 'lax',
+      sameSite: lax,
       path: '/',
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });

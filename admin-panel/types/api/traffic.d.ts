@@ -5,6 +5,16 @@ export interface Traffic {
   roadName: string;
   trafficVolume: number | null;
   updatedAt: string;
-  geom: GeoJSONLineString;
+  geom: GeoJSONLineString | null;
   districtId: string;
+  districtName?: string;
+}
+
+export type CreateTrafficDTO = Omit<Traffic, 'id' | 'updatedAt' | 'geom' | 'districtName'> & { geom: string };
+
+export type UpdateTrafficDTO = Partial<CreateTrafficDTO>;
+
+export interface FindTrafficsQuery {
+  districtId?: string;
+  roadName?: string;
 }

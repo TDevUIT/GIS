@@ -1,30 +1,31 @@
+import { defineNuxtPlugin, useRuntimeConfig, navigateTo } from 'nuxt/app';
 import { ofetch } from 'ofetch';
-import districtsRepository from '../repositories/districts';
-import wardsRepository from '../repositories/wards';
-import landUses from '../repositories/land-uses';
-import terrains from '../repositories/terrains';
-import urbanPlans from '../repositories/urban-plans';
-import { defineNuxtPlugin, useRuntimeConfig } from 'nuxt/app';
+import { apiFactory } from '../repositories/factory';
+import { useAuthStore } from '../store/auth';
 
 export default defineNuxtPlugin((nuxtApp) => {
     const config = useRuntimeConfig();
-    const apiBaseUrl = config.public.apiBaseUrl as string | undefined;
 
     const apiFetch = ofetch.create({
-        baseURL: apiBaseUrl,
+        baseURL: config.public.apiBaseUrl as string,
         onRequest({ options }) {},
-        onResponseError({ response }) {
-            console.error('API Error:', response._data);
+        onResponseError({ request, response, options }) {
+            console.error(`[API Error] ${response.status} ${response.statusText} on ${request}`);
+            if (response._data) {
+                console.error('Error details:', response._data);
+            }
+            if (response.status === 401) {
+                const authStore = useAuthStore();
+                if (authStore.isAuthenticated) {
+                    console.log('Token expired or invalid. Logging out and redirecting to login page...');
+                    authStore.clear();
+                    navigateTo('/login');
+                }
+            }
         },
     });
 
-    const repositories = {
-        districts: districtsRepository(apiFetch),
-        wards: wardsRepository(apiFetch),
-        landUses: landUses(apiFetch),
-        terrains: terrains(apiFetch),
-        urbanPlans: urbanPlans(apiFetch),
-    };
+    const repositories = apiFactory(apiFetch);
 
     return {
         provide: {
