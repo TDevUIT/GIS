@@ -8,7 +8,14 @@ import {
   Delete,
   Query,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiParam, ApiResponse, ApiQuery, ApiBody } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+  ApiQuery,
+  ApiBody,
+} from '@nestjs/swagger';
 import { LandUsesService } from './land-uses.service';
 import { CreateLandUseDto } from './dto/create-land-use.dto';
 import { UpdateLandUseDto } from './dto/update-land-use.dto';
@@ -32,14 +39,20 @@ export class LandUsesController {
 
   @ApiOperation({ summary: 'Find land uses intersecting with WKT geometry' })
   @ApiBody({ type: GisWktBodyDto, description: 'WKT geometry string' })
-  @ApiResponse({ status: 200, description: 'Land uses intersecting with the geometry' })
+  @ApiResponse({
+    status: 200,
+    description: 'Land uses intersecting with the geometry',
+  })
   @Post('intersects-with')
   findIntersecting(@Body() body: GisWktBodyDto) {
     return this.landUsesService.findIntersecting(body.wkt);
   }
 
   @ApiOperation({ summary: 'Create a new land use record' })
-  @ApiResponse({ status: 201, description: 'Land use record created successfully' })
+  @ApiResponse({
+    status: 201,
+    description: 'Land use record created successfully',
+  })
   @ApiResponse({ status: 400, description: 'Bad request' })
   @Post()
   create(@Body() createLandUseDto: CreateLandUseDto) {
@@ -64,7 +77,10 @@ export class LandUsesController {
 
   @ApiOperation({ summary: 'Update a land use record' })
   @ApiParam({ name: 'id', description: 'Land use record ID' })
-  @ApiResponse({ status: 200, description: 'Land use record updated successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'Land use record updated successfully',
+  })
   @ApiResponse({ status: 404, description: 'Land use record not found' })
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateLandUseDto: UpdateLandUseDto) {
@@ -73,7 +89,10 @@ export class LandUsesController {
 
   @ApiOperation({ summary: 'Delete a land use record' })
   @ApiParam({ name: 'id', description: 'Land use record ID' })
-  @ApiResponse({ status: 200, description: 'Land use record deleted successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'Land use record deleted successfully',
+  })
   @ApiResponse({ status: 404, description: 'Land use record not found' })
   @Delete(':id')
   remove(@Param('id') id: string) {

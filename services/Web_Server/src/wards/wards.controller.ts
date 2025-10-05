@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-call */
 import {
   Controller,
   Get,
@@ -27,15 +28,26 @@ export class WardsController {
   constructor(private readonly wardsService: WardsService) {}
 
   @Get()
-  @ApiOperation({ summary: 'Get all wards', description: 'Retrieve all wards, optionally filtered by district' })
-  @ApiQuery({ name: 'districtId', required: false, description: 'Filter by district ID', example: '1' })
+  @ApiOperation({
+    summary: 'Get all wards',
+    description: 'Retrieve all wards, optionally filtered by district',
+  })
+  @ApiQuery({
+    name: 'districtId',
+    required: false,
+    description: 'Filter by district ID',
+    example: '1',
+  })
   @ApiResponse({ status: 200, description: 'Wards retrieved successfully' })
   findAll(@Query('districtId') districtId?: string) {
     return this.wardsService.findAll(districtId);
   }
 
   @Get('contains-point')
-  @ApiOperation({ summary: 'Find ward containing point', description: 'Find which ward contains a specific point' })
+  @ApiOperation({
+    summary: 'Find ward containing point',
+    description: 'Find which ward contains a specific point',
+  })
   @ApiQuery({ name: 'lng', description: 'Longitude', example: '106.6297' })
   @ApiQuery({ name: 'lat', description: 'Latitude', example: '10.8231' })
   @ApiResponse({ status: 200, description: 'Ward found' })
@@ -45,14 +57,20 @@ export class WardsController {
   }
 
   @Post('intersects-with')
-  @ApiOperation({ summary: 'Find intersecting wards', description: 'Find wards that intersect with a given WKT geometry' })
+  @ApiOperation({
+    summary: 'Find intersecting wards',
+    description: 'Find wards that intersect with a given WKT geometry',
+  })
   @ApiResponse({ status: 200, description: 'Intersecting wards found' })
   findIntersecting(@Body() wktBody: any) {
     return this.wardsService.findIntersecting(wktBody);
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Get ward by ID', description: 'Retrieve a specific ward by ID' })
+  @ApiOperation({
+    summary: 'Get ward by ID',
+    description: 'Retrieve a specific ward by ID',
+  })
   @ApiParam({ name: 'id', description: 'Ward ID', example: '1' })
   @ApiResponse({ status: 200, description: 'Ward found' })
   @ApiResponse({ status: 404, description: 'Ward not found' })
@@ -63,7 +81,10 @@ export class WardsController {
   @Post()
   @UseGuards(JwtAuthGuard, AdminGuard)
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'Create ward', description: 'Create a new ward (Admin only)' })
+  @ApiOperation({
+    summary: 'Create ward',
+    description: 'Create a new ward (Admin only)',
+  })
   @ApiResponse({ status: 201, description: 'Ward created successfully' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
@@ -74,7 +95,10 @@ export class WardsController {
   @Patch(':id')
   @UseGuards(JwtAuthGuard, AdminGuard)
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'Update ward', description: 'Update an existing ward (Admin only)' })
+  @ApiOperation({
+    summary: 'Update ward',
+    description: 'Update an existing ward (Admin only)',
+  })
   @ApiParam({ name: 'id', description: 'Ward ID', example: '1' })
   @ApiResponse({ status: 200, description: 'Ward updated successfully' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
@@ -87,7 +111,10 @@ export class WardsController {
   @Delete(':id')
   @UseGuards(JwtAuthGuard, AdminGuard)
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'Delete ward', description: 'Delete a ward (Admin only)' })
+  @ApiOperation({
+    summary: 'Delete ward',
+    description: 'Delete a ward (Admin only)',
+  })
   @ApiParam({ name: 'id', description: 'Ward ID', example: '1' })
   @ApiResponse({ status: 200, description: 'Ward deleted successfully' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })

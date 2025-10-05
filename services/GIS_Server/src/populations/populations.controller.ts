@@ -9,7 +9,13 @@ import {
   Query,
   ParseIntPipe,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiParam, ApiResponse, ApiQuery } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+  ApiQuery,
+} from '@nestjs/swagger';
 import { PopulationsService } from './populations.service';
 import { CreatePopulationDto } from './dto/create-population.dto';
 import { UpdatePopulationDto } from './dto/update-population.dto';
@@ -20,7 +26,10 @@ export class PopulationsController {
   constructor(private readonly populationsService: PopulationsService) {}
 
   @ApiOperation({ summary: 'Create a new population record' })
-  @ApiResponse({ status: 201, description: 'Population record created successfully' })
+  @ApiResponse({
+    status: 201,
+    description: 'Population record created successfully',
+  })
   @ApiResponse({ status: 400, description: 'Bad request' })
   @Post()
   create(@Body() createPopulationDto: CreatePopulationDto) {
@@ -29,7 +38,12 @@ export class PopulationsController {
 
   @ApiOperation({ summary: 'Get all population records' })
   @ApiQuery({ name: 'districtId', description: 'District ID', required: false })
-  @ApiQuery({ name: 'year', description: 'Year', required: false, type: Number })
+  @ApiQuery({
+    name: 'year',
+    description: 'Year',
+    required: false,
+    type: Number,
+  })
   @ApiResponse({ status: 200, description: 'List of population records' })
   @Get()
   findAll(
@@ -50,7 +64,10 @@ export class PopulationsController {
 
   @ApiOperation({ summary: 'Update a population record' })
   @ApiParam({ name: 'id', description: 'Population record ID' })
-  @ApiResponse({ status: 200, description: 'Population record updated successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'Population record updated successfully',
+  })
   @ApiResponse({ status: 404, description: 'Population record not found' })
   @Patch(':id')
   update(
@@ -62,7 +79,10 @@ export class PopulationsController {
 
   @ApiOperation({ summary: 'Delete a population record' })
   @ApiParam({ name: 'id', description: 'Population record ID' })
-  @ApiResponse({ status: 200, description: 'Population record deleted successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'Population record deleted successfully',
+  })
   @ApiResponse({ status: 404, description: 'Population record not found' })
   @Delete(':id')
   remove(@Param('id') id: string) {

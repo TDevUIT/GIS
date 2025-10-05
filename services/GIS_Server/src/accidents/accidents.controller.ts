@@ -9,7 +9,14 @@ import {
   UploadedFiles,
   UseInterceptors,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiConsumes, ApiBody, ApiParam, ApiResponse, ApiQuery } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiConsumes,
+  ApiBody,
+  ApiParam,
+  ApiResponse,
+} from '@nestjs/swagger';
 import { AccidentsService } from './accidents.service';
 import { CreateAccidentDto } from './dto/create-accident.dto';
 import { UpdateAccidentDto } from './dto/update-accident.dto';
@@ -22,7 +29,10 @@ export class AccidentsController {
   constructor(private readonly accidentsService: AccidentsService) {}
 
   @ApiOperation({ summary: 'Create a new accident record' })
-  @ApiResponse({ status: 201, description: 'Accident record created successfully' })
+  @ApiResponse({
+    status: 201,
+    description: 'Accident record created successfully',
+  })
   @ApiResponse({ status: 400, description: 'Bad request' })
   @Post()
   create(@Body() createAccidentDto: CreateAccidentDto) {
@@ -47,7 +57,10 @@ export class AccidentsController {
 
   @ApiOperation({ summary: 'Update an accident record' })
   @ApiParam({ name: 'id', description: 'Accident ID' })
-  @ApiResponse({ status: 200, description: 'Accident record updated successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'Accident record updated successfully',
+  })
   @ApiResponse({ status: 404, description: 'Accident not found' })
   @Patch(':id')
   update(
@@ -59,7 +72,10 @@ export class AccidentsController {
 
   @ApiOperation({ summary: 'Delete an accident record' })
   @ApiParam({ name: 'id', description: 'Accident ID' })
-  @ApiResponse({ status: 200, description: 'Accident record deleted successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'Accident record deleted successfully',
+  })
   @ApiResponse({ status: 404, description: 'Accident not found' })
   @Delete(':id')
   remove(@Param('id') id: string) {

@@ -8,7 +8,13 @@ import {
   Delete,
   Query,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiParam, ApiResponse, ApiQuery } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+  ApiQuery,
+} from '@nestjs/swagger';
 import { WaterQualitiesService } from './water-qualities.service';
 import { CreateWaterQualityDto } from './dto/create-water-quality.dto';
 import { UpdateWaterQualityDto } from './dto/update-water-quality.dto';
@@ -20,7 +26,10 @@ export class WaterQualitiesController {
   constructor(private readonly waterQualitiesService: WaterQualitiesService) {}
 
   @ApiOperation({ summary: 'Create a new water quality record' })
-  @ApiResponse({ status: 201, description: 'Water quality record created successfully' })
+  @ApiResponse({
+    status: 201,
+    description: 'Water quality record created successfully',
+  })
   @ApiResponse({ status: 400, description: 'Bad request' })
   @Post()
   create(@Body() createWaterQualityDto: CreateWaterQualityDto) {
@@ -38,7 +47,10 @@ export class WaterQualitiesController {
   @ApiQuery({ name: 'lng', description: 'Longitude' })
   @ApiQuery({ name: 'lat', description: 'Latitude' })
   @ApiQuery({ name: 'radiusInMeters', description: 'Radius in meters' })
-  @ApiResponse({ status: 200, description: 'Water quality records within radius' })
+  @ApiResponse({
+    status: 200,
+    description: 'Water quality records within radius',
+  })
   @Get('within-radius')
   findWithinRadius(@Query() query: FindWithinRadiusDto) {
     return this.waterQualitiesService.findWithinRadius(
@@ -59,7 +71,10 @@ export class WaterQualitiesController {
 
   @ApiOperation({ summary: 'Update a water quality record' })
   @ApiParam({ name: 'id', description: 'Water quality record ID' })
-  @ApiResponse({ status: 200, description: 'Water quality record updated successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'Water quality record updated successfully',
+  })
   @ApiResponse({ status: 404, description: 'Water quality record not found' })
   @Patch(':id')
   update(
@@ -71,7 +86,10 @@ export class WaterQualitiesController {
 
   @ApiOperation({ summary: 'Delete a water quality record' })
   @ApiParam({ name: 'id', description: 'Water quality record ID' })
-  @ApiResponse({ status: 200, description: 'Water quality record deleted successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'Water quality record deleted successfully',
+  })
   @ApiResponse({ status: 404, description: 'Water quality record not found' })
   @Delete(':id')
   remove(@Param('id') id: string) {

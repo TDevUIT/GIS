@@ -18,6 +18,10 @@ interface MonitoringStation {
 interface District {
   id: string;
   name: string;
+  geom: {
+    type: string;
+    coordinates: number[][][] | number[][][][];
+  };
 }
 
 interface WeatherData {
@@ -51,25 +55,22 @@ export class EnvironmentJobService {
     this.weatherApiKey = weatherApiKey;
   }
 
-  @Cron(CronExpression.EVERY_MINUTE)
+  @Cron(CronExpression.EVERY_HOUR)
   async simulateEnvironmentalData() {
     this.logger.log(
       '--- Starting Hourly Environmental Data Simulation Job ---',
     );
     try {
       const stations = await this.ensureMonitoringStationsExist();
-
       if (stations.length === 0) {
         this.logger.error(
           'No monitoring stations found and failed to initialize. Skipping job.',
         );
         return;
       }
-
       this.logger.log(
         `Found ${stations.length} unique monitoring locations to process.`,
       );
-
       for (const location of stations) {
         try {
           const weatherData = await this.getWeatherData(
@@ -77,7 +78,6 @@ export class EnvironmentJobService {
             location.lng,
           );
           const now = new Date().toISOString();
-
           const simulatedAirData = this.simulateAirQuality(weatherData);
           await this.postToGis('/air-qualities', {
             geom: `POINT(${location.lng} ${location.lat})`,
@@ -85,7 +85,6 @@ export class EnvironmentJobService {
             recordedAt: now,
             districtId: location.districtId,
           });
-
           const simulatedWaterData = this.simulateWaterQuality(weatherData);
           await this.postToGis('/water-qualities', {
             geom: `POINT(${location.lng} ${location.lat})`,
@@ -93,7 +92,6 @@ export class EnvironmentJobService {
             recordedAt: now,
             districtId: location.districtId,
           });
-
           this.logger.log(
             `Simulated environmental data for location (${location.lng}, ${location.lat}) in district ${location.districtId}`,
           );
@@ -116,101 +114,103 @@ export class EnvironmentJobService {
   private async ensureMonitoringStationsExist(): Promise<
     { lat: number; lng: number; districtId: string }[]
   > {
-    const airStations =
+    const airStationsData =
       await this.fetchFromGis<MonitoringStation[]>('/air-qualities');
-    const waterStations =
+    const waterStationsData =
       await this.fetchFromGis<MonitoringStation[]>('/water-qualities');
-
+    const airStations = Array.isArray(airStationsData) ? airStationsData : [];
+    const waterStations = Array.isArray(waterStationsData)
+      ? waterStationsData
+      : [];
     let allStations = [...airStations, ...waterStations];
-
     if (allStations.length === 0) {
       this.logger.warn(
         'No monitoring stations found. Attempting to initialize default stations...',
       );
       await this.initializeDefaultStations();
-
       this.logger.log('Waiting for 2 seconds for data to propagate...');
       await this.sleep(2000);
-
       this.logger.log('Re-fetching stations after initialization...');
-      const newAirStations =
+      const newAirStationsData =
         await this.fetchFromGis<MonitoringStation[]>('/air-qualities');
-      const newWaterStations =
+      const newWaterStationsData =
         await this.fetchFromGis<MonitoringStation[]>('/water-qualities');
+      const newAirStations = Array.isArray(newAirStationsData)
+        ? newAirStationsData
+        : [];
+      const newWaterStations = Array.isArray(newWaterStationsData)
+        ? newWaterStationsData
+        : [];
       allStations = [...newAirStations, ...newWaterStations];
     }
-
     return this.getUniqueLocations(allStations);
   }
 
   private async initializeDefaultStations() {
-    const defaultStationCoordinates = [
-      {
-        type: 'air',
-        lng: 106.701,
-        lat: 10.776,
-        data: { pm25: 38.5, co2: 410.2, no2: 18.5 },
-      },
-      {
-        type: 'air',
-        lng: 106.695,
-        lat: 10.78,
-        data: { pm25: 42.1, co2: 415.8, no2: 22.1 },
-      },
+    this.logger.log(
+      'Fetching districts from GIS Server to create sample stations...',
+    );
+    const districts = await this.fetchFromGis<District[]>('/districts');
+    if (!districts || districts.length === 0) {
+      this.logger.error(
+        'No districts found on GIS Server. Cannot initialize default stations. Please add district data first.',
+      );
+      return;
+    }
+    this.logger.log(
+      `Found ${districts.length} districts. Will create sample data within them.`,
+    );
+    const sampleDataConfig = [
+      { type: 'air', data: { pm25: 38.5, co2: 410.2, no2: 18.5 } },
+      { type: 'air', data: { pm25: 42.1, co2: 415.8, no2: 22.1 } },
       {
         type: 'water',
-        lng: 106.705,
-        lat: 10.77,
         data: { ph: 7.2, turbidity: 20, contaminationIndex: 2.1 },
       },
     ];
-
     const now = new Date().toISOString();
     let initializedCount = 0;
-
-    for (const station of defaultStationCoordinates) {
+    for (let i = 0; i < sampleDataConfig.length; i++) {
+      const sample = sampleDataConfig[i];
+      const district = districts[i % districts.length];
       try {
-        const district = await this.fetchFromGis<District>(
-          `/districts/contains-point?lng=${station.lng}&lat=${station.lat}`,
-        );
-
-        if (!district) {
+        const firstCoord = district.geom?.coordinates[0][0];
+        if (
+          !firstCoord ||
+          !Array.isArray(firstCoord) ||
+          firstCoord.length < 2 ||
+          typeof firstCoord[0] !== 'number' ||
+          typeof firstCoord[1] !== 'number'
+        ) {
           this.logger.warn(
-            `Skipping station at (${station.lng}, ${station.lat}) as it does not belong to any district.`,
+            `Skipping sample for district "${district.name}" due to invalid geometry data.`,
           );
           continue;
         }
-
-        if (station.type === 'air') {
-          await this.postToGis('/air-qualities', {
-            geom: `POINT(${station.lng} ${station.lat})`,
-            ...station.data,
-            recordedAt: now,
-            districtId: district.id,
-          });
-        } else if (station.type === 'water') {
-          await this.postToGis('/water-qualities', {
-            geom: `POINT(${station.lng} ${station.lat})`,
-            ...station.data,
-            recordedAt: now,
-            districtId: district.id,
-          });
+        const lng: number = firstCoord[0];
+        const lat: number = firstCoord[1];
+        const payload = {
+          geom: `POINT(${lng} ${lat})`,
+          ...sample.data,
+          recordedAt: now,
+          districtId: district.id,
+        };
+        if (sample.type === 'air') {
+          await this.postToGis('/air-qualities', payload);
+        } else if (sample.type === 'water') {
+          await this.postToGis('/water-qualities', payload);
         }
         this.logger.log(
-          `Initialized sample ${station.type} station in "${district.name}"`,
+          `Initialized sample ${sample.type} station in "${
+            district.name
+          }" at (${lng.toFixed(4)}, ${lat.toFixed(4)})`,
         );
         initializedCount++;
       } catch (error) {
-        if (error.status === 404) {
-          this.logger.warn(
-            `Skipping station at (${station.lng}, ${station.lat}) as it does not belong to any district.`,
-          );
-        } else {
-          this.logger.error(
-            `Failed to initialize station at (${station.lng}, ${station.lat})`,
-            error.response?.data || error.message,
-          );
-        }
+        this.logger.error(
+          `Failed to initialize station for district "${district.name}"`,
+          error.response?.data || error.message,
+        );
       }
     }
     this.logger.log(
@@ -226,7 +226,6 @@ export class EnvironmentJobService {
       basePm25 * windEffect * humidityEffect + (Math.random() * 10 - 5);
     const co2 = 410 + (Math.random() * 20 - 10);
     const no2 = 20 + (Math.random() * 15 - 7.5);
-
     return {
       pm25: parseFloat(pm25.toFixed(2)),
       co2: parseFloat(co2.toFixed(2)),
@@ -240,7 +239,6 @@ export class EnvironmentJobService {
     const ph =
       7.0 - weather.current.precip_mm * 0.1 + (Math.random() * 0.4 - 0.2);
     const contaminationIndex = 1 + Math.random() * 3;
-
     return {
       ph: parseFloat(ph.toFixed(2)),
       turbidity: parseFloat(turbidity.toFixed(2)),
@@ -300,8 +298,11 @@ export class EnvironmentJobService {
   private async fetchFromGis<T>(endpoint: string): Promise<T> {
     const url = `${this.gisServerUrl}${endpoint}`;
     try {
-      const response = await firstValueFrom(this.httpService.get<T>(url));
-      return response.data;
+      const response = await firstValueFrom(
+        // Assuming the actual data is nested in a 'data' property
+        this.httpService.get<{ data: T }>(url),
+      );
+      return response.data.data;
     } catch (error) {
       this.handleError(error, `fetchFromGis: ${endpoint}`);
       throw error;

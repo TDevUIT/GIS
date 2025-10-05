@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-call */
 import {
   Controller,
   Get,
@@ -50,10 +51,34 @@ export class InfrastructuresController {
   ) {}
 
   @Get()
-  @ApiOperation({ summary: 'Get all infrastructures', description: 'Retrieve all infrastructure records with optional filters' })
-  @ApiQuery({ name: 'districtId', required: false, description: 'Filter by district ID', example: '1' })
-  @ApiQuery({ name: 'category', required: false, enum: ['SCHOOL', 'HOSPITAL', 'PARK', 'MARKET', 'UTILITY', 'ADMINISTRATIVE', 'OTHER'], description: 'Filter by category' })
-  @ApiResponse({ status: 200, description: 'Infrastructures retrieved successfully' })
+  @ApiOperation({
+    summary: 'Get all infrastructures',
+    description: 'Retrieve all infrastructure records with optional filters',
+  })
+  @ApiQuery({
+    name: 'districtId',
+    required: false,
+    description: 'Filter by district ID',
+    example: '1',
+  })
+  @ApiQuery({
+    name: 'category',
+    required: false,
+    enum: [
+      'SCHOOL',
+      'HOSPITAL',
+      'PARK',
+      'MARKET',
+      'UTILITY',
+      'ADMINISTRATIVE',
+      'OTHER',
+    ],
+    description: 'Filter by category',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Infrastructures retrieved successfully',
+  })
   findAll(
     @Query('districtId') districtId?: string,
     @Query('category') category?: InfraCategory,
@@ -62,10 +87,17 @@ export class InfrastructuresController {
   }
 
   @Get('within-radius')
-  @ApiOperation({ summary: 'Find infrastructures within radius', description: 'Find infrastructures within a specified radius from a point' })
+  @ApiOperation({
+    summary: 'Find infrastructures within radius',
+    description: 'Find infrastructures within a specified radius from a point',
+  })
   @ApiQuery({ name: 'lng', description: 'Longitude', example: '106.6297' })
   @ApiQuery({ name: 'lat', description: 'Latitude', example: '10.8231' })
-  @ApiQuery({ name: 'radiusInMeters', description: 'Radius in meters', example: '1000' })
+  @ApiQuery({
+    name: 'radiusInMeters',
+    description: 'Radius in meters',
+    example: '1000',
+  })
   @ApiResponse({ status: 200, description: 'Infrastructures found' })
   findWithinRadius(
     @Query('lng') lng: string,
@@ -80,7 +112,10 @@ export class InfrastructuresController {
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Get infrastructure by ID', description: 'Retrieve a specific infrastructure by ID' })
+  @ApiOperation({
+    summary: 'Get infrastructure by ID',
+    description: 'Retrieve a specific infrastructure by ID',
+  })
   @ApiParam({ name: 'id', description: 'Infrastructure ID', example: '1' })
   @ApiResponse({ status: 200, description: 'Infrastructure found' })
   @ApiResponse({ status: 404, description: 'Infrastructure not found' })
@@ -91,8 +126,14 @@ export class InfrastructuresController {
   @Post()
   @UseGuards(JwtAuthGuard, AdminGuard)
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'Create infrastructure', description: 'Create a new infrastructure (Admin only)' })
-  @ApiResponse({ status: 201, description: 'Infrastructure created successfully' })
+  @ApiOperation({
+    summary: 'Create infrastructure',
+    description: 'Create a new infrastructure (Admin only)',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Infrastructure created successfully',
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
   create(@Body() createDto: any) {
@@ -102,9 +143,15 @@ export class InfrastructuresController {
   @Patch(':id')
   @UseGuards(JwtAuthGuard, AdminGuard)
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'Update infrastructure', description: 'Update an existing infrastructure (Admin only)' })
+  @ApiOperation({
+    summary: 'Update infrastructure',
+    description: 'Update an existing infrastructure (Admin only)',
+  })
   @ApiParam({ name: 'id', description: 'Infrastructure ID', example: '1' })
-  @ApiResponse({ status: 200, description: 'Infrastructure updated successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'Infrastructure updated successfully',
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
   @ApiResponse({ status: 404, description: 'Infrastructure not found' })
@@ -115,9 +162,15 @@ export class InfrastructuresController {
   @Delete(':id')
   @UseGuards(JwtAuthGuard, AdminGuard)
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'Delete infrastructure', description: 'Delete an infrastructure (Admin only)' })
+  @ApiOperation({
+    summary: 'Delete infrastructure',
+    description: 'Delete an infrastructure (Admin only)',
+  })
   @ApiParam({ name: 'id', description: 'Infrastructure ID', example: '1' })
-  @ApiResponse({ status: 200, description: 'Infrastructure deleted successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'Infrastructure deleted successfully',
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
   @ApiResponse({ status: 404, description: 'Infrastructure not found' })
@@ -130,7 +183,10 @@ export class InfrastructuresController {
   @UseInterceptors(FilesInterceptor('images', 10))
   @ApiBearerAuth('JWT-auth')
   @ApiConsumes('multipart/form-data')
-  @ApiOperation({ summary: 'Upload infrastructure images', description: 'Upload multiple images (Admin only)' })
+  @ApiOperation({
+    summary: 'Upload infrastructure images',
+    description: 'Upload multiple images (Admin only)',
+  })
   @ApiBody({
     schema: {
       type: 'object',

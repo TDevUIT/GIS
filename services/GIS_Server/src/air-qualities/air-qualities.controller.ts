@@ -8,7 +8,13 @@ import {
   Delete,
   Query,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiParam, ApiResponse, ApiQuery } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+  ApiQuery,
+} from '@nestjs/swagger';
 import { AirQualitiesService } from './air-qualities.service';
 import { CreateAirQualityDto } from './dto/create-air-quality.dto';
 import { UpdateAirQualityDto } from './dto/update-air-quality.dto';
@@ -20,7 +26,10 @@ export class AirQualitiesController {
   constructor(private readonly airQualitiesService: AirQualitiesService) {}
 
   @ApiOperation({ summary: 'Create a new air quality record' })
-  @ApiResponse({ status: 201, description: 'Air quality record created successfully' })
+  @ApiResponse({
+    status: 201,
+    description: 'Air quality record created successfully',
+  })
   @ApiResponse({ status: 400, description: 'Bad request' })
   @Post()
   create(@Body() createAirQualityDto: CreateAirQualityDto) {
@@ -38,7 +47,10 @@ export class AirQualitiesController {
   @ApiQuery({ name: 'lng', description: 'Longitude' })
   @ApiQuery({ name: 'lat', description: 'Latitude' })
   @ApiQuery({ name: 'radiusInMeters', description: 'Radius in meters' })
-  @ApiResponse({ status: 200, description: 'Air quality records within radius' })
+  @ApiResponse({
+    status: 200,
+    description: 'Air quality records within radius',
+  })
   @Get('within-radius')
   findWithinRadius(@Query() query: FindWithinRadiusDto) {
     return this.airQualitiesService.findWithinRadius(
@@ -59,7 +71,10 @@ export class AirQualitiesController {
 
   @ApiOperation({ summary: 'Update an air quality record' })
   @ApiParam({ name: 'id', description: 'Air quality record ID' })
-  @ApiResponse({ status: 200, description: 'Air quality record updated successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'Air quality record updated successfully',
+  })
   @ApiResponse({ status: 404, description: 'Air quality record not found' })
   @Patch(':id')
   update(
@@ -71,7 +86,10 @@ export class AirQualitiesController {
 
   @ApiOperation({ summary: 'Delete an air quality record' })
   @ApiParam({ name: 'id', description: 'Air quality record ID' })
-  @ApiResponse({ status: 200, description: 'Air quality record deleted successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'Air quality record deleted successfully',
+  })
   @ApiResponse({ status: 404, description: 'Air quality record not found' })
   @Delete(':id')
   remove(@Param('id') id: string) {

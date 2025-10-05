@@ -1,5 +1,11 @@
 import { Controller, Get, Param, Query } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiParam, ApiResponse, ApiQuery } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+  ApiQuery,
+} from '@nestjs/swagger';
 import { AnalyticsService } from './analytics.service';
 import { LandUseSummaryQueryDto } from './dto/analytics-query.dto';
 
@@ -16,7 +22,10 @@ export class AnalyticsController {
   }
 
   @ApiOperation({ summary: 'Get infrastructure statistics by category' })
-  @ApiResponse({ status: 200, description: 'Infrastructure data grouped by category' })
+  @ApiResponse({
+    status: 200,
+    description: 'Infrastructure data grouped by category',
+  })
   @Get('infrastructure-by-category')
   getInfrastructureByCategory() {
     return this.analyticsService.getInfrastructureByCategory();
@@ -53,7 +62,10 @@ export class AnalyticsController {
   }
 
   @ApiOperation({ summary: 'Get accident summary by severity' })
-  @ApiResponse({ status: 200, description: 'Accident data grouped by severity' })
+  @ApiResponse({
+    status: 200,
+    description: 'Accident data grouped by severity',
+  })
   @Get('accident-summary-by-severity')
   getAccidentSummaryBySeverity() {
     return this.analyticsService.getAccidentSummaryBySeverity();

@@ -10,7 +10,15 @@ import {
   UseInterceptors,
   UploadedFiles,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiParam, ApiResponse, ApiQuery, ApiConsumes, ApiBody } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+  ApiQuery,
+  ApiConsumes,
+  ApiBody,
+} from '@nestjs/swagger';
 import { InfrastructuresService } from './infrastructures.service';
 import { CreateInfrastructureDto } from './dto/create-infrastructure.dto';
 import { UpdateInfrastructureDto } from './dto/update-infrastructure.dto';
@@ -41,7 +49,10 @@ export class InfrastructuresController {
   }
 
   @ApiOperation({ summary: 'Create a new infrastructure record' })
-  @ApiResponse({ status: 201, description: 'Infrastructure created successfully' })
+  @ApiResponse({
+    status: 201,
+    description: 'Infrastructure created successfully',
+  })
   @ApiResponse({ status: 400, description: 'Bad request' })
   @Post()
   create(@Body() createInfrastructureDto: CreateInfrastructureDto) {
@@ -85,7 +96,10 @@ export class InfrastructuresController {
   @ApiParam({ name: 'id', description: 'Infrastructure ID' })
   @ApiParam({ name: 'imageId', description: 'Image ID' })
   @ApiResponse({ status: 200, description: 'Image deleted successfully' })
-  @ApiResponse({ status: 404, description: 'Infrastructure or image not found' })
+  @ApiResponse({
+    status: 404,
+    description: 'Infrastructure or image not found',
+  })
   @Delete(':id/images/:imageId')
   deleteImage(@Param('id') id: string, @Param('imageId') imageId: string) {
     return this.infrastructuresService.deleteImage(id, imageId);
@@ -93,7 +107,12 @@ export class InfrastructuresController {
 
   @ApiOperation({ summary: 'Get all infrastructures' })
   @ApiQuery({ name: 'districtId', description: 'District ID', required: false })
-  @ApiQuery({ name: 'category', description: 'Infrastructure category', required: false, enum: InfraCategory })
+  @ApiQuery({
+    name: 'category',
+    description: 'Infrastructure category',
+    required: false,
+    enum: InfraCategory,
+  })
   @ApiResponse({ status: 200, description: 'List of infrastructures' })
   @Get()
   findAll(
@@ -114,7 +133,10 @@ export class InfrastructuresController {
 
   @ApiOperation({ summary: 'Update an infrastructure' })
   @ApiParam({ name: 'id', description: 'Infrastructure ID' })
-  @ApiResponse({ status: 200, description: 'Infrastructure updated successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'Infrastructure updated successfully',
+  })
   @ApiResponse({ status: 404, description: 'Infrastructure not found' })
   @Patch(':id')
   update(
@@ -126,7 +148,10 @@ export class InfrastructuresController {
 
   @ApiOperation({ summary: 'Delete an infrastructure' })
   @ApiParam({ name: 'id', description: 'Infrastructure ID' })
-  @ApiResponse({ status: 200, description: 'Infrastructure deleted successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'Infrastructure deleted successfully',
+  })
   @ApiResponse({ status: 404, description: 'Infrastructure not found' })
   @Delete(':id')
   remove(@Param('id') id: string) {
