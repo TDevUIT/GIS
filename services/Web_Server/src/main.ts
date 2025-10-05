@@ -33,7 +33,9 @@ async function bootstrap() {
 
   const config = new DocumentBuilder()
     .setTitle('IE402 Web Server API')
-    .setDescription('API documentation for IE402 GIS Web Server - Urban Planning and Analytics System')
+    .setDescription(
+      'API documentation for IE402 GIS Web Server - Urban Planning and Analytics System',
+    )
     .setVersion('1.0')
     .addTag('Authentication', 'User authentication and authorization endpoints')
     .addTag('Districts', 'District management endpoints')
