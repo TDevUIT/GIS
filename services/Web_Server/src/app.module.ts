@@ -18,6 +18,8 @@ import { LandUsesModule } from './land-uses/land-uses.module';
 import { UrbanPlansModule } from './urban-plans/urban-plans.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { CommonModule } from './common/common.module';
+import { EmailModule } from './email/email.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -46,6 +48,8 @@ import { CommonModule } from './common/common.module';
     LandUsesModule,
     UrbanPlansModule,
     AnalyticsModule,
+    EmailModule,
+    UsersModule,
   ],
 })
 export class AppModule {}
