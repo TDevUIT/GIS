@@ -110,7 +110,14 @@ async function handleLogin() {
         const redirectPath = route.query.redirect as string | undefined;
         await router.push(redirectPath || '/');
     } catch (e: any) {
-        error.value = e.data?.message || 'An unexpected error occurred.';
+        console.error("Login request failed:", e);
+        let errorMessage = 'An unexpected error occurred.';
+        if (e.data && e.data.message) {
+            errorMessage = Array.isArray(e.data.message) ? e.data.message.join(', ') : e.data.message;
+        } else if (e.message) {
+            errorMessage = e.message;
+        }
+        error.value = errorMessage;
     } finally {
         isLoading.value = false;
     }

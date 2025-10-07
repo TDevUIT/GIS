@@ -8,6 +8,7 @@ export default defineNuxtPlugin((nuxtApp) => {
 
     const apiFetch = ofetch.create({
         baseURL: config.public.apiBaseUrl as string,
+        credentials: 'include',
         onRequest({ options }) {},
         onResponseError({ request, response, options }) {
             console.error(`[API Error] ${response.status} ${response.statusText} on ${request}`);
@@ -17,7 +18,6 @@ export default defineNuxtPlugin((nuxtApp) => {
             if (response.status === 401) {
                 const authStore = useAuthStore();
                 if (authStore.isAuthenticated) {
-                    console.log('Token expired or invalid. Logging out and redirecting to login page...');
                     authStore.clear();
                     navigateTo('/login');
                 }
