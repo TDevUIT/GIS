@@ -1,0 +1,43 @@
+import {
+    HomeIcon,
+    UsersIcon,
+    MapIcon,
+    MapPinIcon,
+    BuildingOffice2Icon,
+    UserGroupIcon,
+    GlobeAltIcon,
+    CloudIcon,
+    BeakerIcon,
+    RadioIcon,
+    ExclamationTriangleIcon,
+    TruckIcon,
+    DocumentTextIcon,
+    LightBulbIcon,
+    ChartBarIcon,
+} from '@heroicons/vue/24/outline';
+import { shallowRef } from 'vue';
+import type { FunctionalComponent } from 'vue';
+
+export interface NavigationItem {
+    name: string;
+    href: string;
+    icon: FunctionalComponent;
+    adminOnly?: boolean;
+}
+
+export const navigation: NavigationItem[] = [
+    { name: 'Dashboard', href: '/', icon: HomeIcon },
+    { name: 'Districts', href: '/districts', icon: MapIcon },
+    { name: 'Wards', href: '/wards', icon: MapPinIcon },
+    { name: 'Infrastructures', href: '/infrastructures', icon: BuildingOffice2Icon },
+    { name: 'Land Uses', href: '/land-uses', icon: DocumentTextIcon },
+    { name: 'Urban Plans', href: '/urban-plans', icon: LightBulbIcon },
+    { name: 'Populations', href: '/populations', icon: UserGroupIcon },
+    { name: 'Traffics', href: '/traffics', icon: RadioIcon },
+    { name: 'Public Transports', href: '/public-transports', icon: TruckIcon },
+    { name: 'Accidents', href: '/accidents', icon: ExclamationTriangleIcon },
+    { name: 'Air Qualities', href: '/air-qualities', icon: CloudIcon },
+    { name: 'Water Qualities', href: '/water-qualities', icon: BeakerIcon },
+    { name: 'Terrains', href: '/terrains', icon: GlobeAltIcon },
+    { name: 'Users', href: '/users', icon: UsersIcon, adminOnly: true },
+];
