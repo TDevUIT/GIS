@@ -70,4 +70,17 @@ export class AnalyticsController {
   getAccidentSummaryBySeverity() {
     return this.analyticsService.getAccidentSummaryBySeverity();
   }
+
+  @ApiOperation({ summary: 'Get water quality history for a district' })
+  @ApiParam({ name: 'districtId', description: 'District ID' })
+  @Get('water-quality-history/:districtId')
+  getWaterQualityHistory(@Param('districtId') districtId: string) {
+    return this.analyticsService.getWaterQualityHistory(districtId);
+  }
+
+  @ApiOperation({ summary: 'Get recent system activities' })
+  @Get('recent-activities')
+  getRecentActivities() {
+    return this.analyticsService.getRecentActivities();
+  }
 }

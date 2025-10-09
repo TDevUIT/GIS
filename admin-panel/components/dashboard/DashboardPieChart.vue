@@ -1,11 +1,13 @@
 <template>
-  <div class="rounded-lg border border-gray-700 bg-gray-800/50 p-5 shadow-lg">
+  <div class="rounded-lg border border-gray-700 bg-gray-800/50 p-10 pb-20 shadow-lg">
     <h3 class="text-lg font-semibold text-white mb-4">{{ title }}</h3>
-    <div v-if="chartData.labels && chartData.labels.length > 0">
-      <Pie :data="chartData" :options="chartOptions" />
-    </div>
-    <div v-else class="text-center text-gray-400 py-8">
-      No data available
+    <div class="relative h-64">
+      <div v-if="chartData.labels && chartData.labels.length > 0">
+        <Pie :data="chartData" :options="chartOptions" />
+      </div>
+      <div v-else class="flex h-full items-center justify-center text-center text-gray-400">
+        No data available
+      </div>
     </div>
   </div>
 </template>
@@ -24,6 +26,7 @@ defineProps<{
 
 const chartOptions: ChartOptions<'pie'> = {
   responsive: true,
+  maintainAspectRatio: false,
   plugins: {
     legend: {
       position: 'right',

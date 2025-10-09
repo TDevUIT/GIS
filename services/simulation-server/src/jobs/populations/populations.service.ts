@@ -4,6 +4,7 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { firstValueFrom } from 'rxjs';
+import { AxiosError } from 'axios';
 
 interface District {
   id: string;
@@ -33,7 +34,7 @@ export class PopulationsJobService {
     this.gisServerUrl = url;
   }
 
-  @Cron(CronExpression.EVERY_HOUR)
+  @Cron(CronExpression.EVERY_10_HOURS)
   async simulateYearlyPopulationGrowth() {
     this.logger.log('--- Starting Yearly Population Simulation Job ---');
     try {
@@ -86,15 +87,45 @@ export class PopulationsJobService {
     }
   }
 
+  private handleError(error: AxiosError, context: string) {
+    if (error.response) {
+      this.logger.error(
+        `[${context}] GIS Server responded with status ${error.response.status}`,
+        JSON.stringify(error.response.data, null, 2),
+      );
+    } else if (error.request) {
+      this.logger.error(
+        `[${context}] No response received from GIS Server. Is it running at ${this.gisServerUrl}?`,
+      );
+    } else {
+      this.logger.error(
+        `[${context}] Error setting up request:`,
+        error.message,
+      );
+    }
+  }
+
   private async fetchFromGis<T>(endpoint: string): Promise<T> {
     const url = `${this.gisServerUrl}${endpoint}`;
-    const response = await firstValueFrom(this.httpService.get<T>(url));
-    return response.data;
+    try {
+      const response = await firstValueFrom(
+        this.httpService.get<{ data: T }>(url),
+      );
+      return response.data.data;
+    } catch (error) {
+      this.handleError(error, `fetchFromGis: ${endpoint}`);
+      throw error;
+    }
   }
 
   private async postToGis(endpoint: string, data: any): Promise<any> {
     const url = `${this.gisServerUrl}${endpoint}`;
-    const response = await firstValueFrom(this.httpService.post(url, data));
-    return response.data;
+    try {
+      const response = await firstValueFrom(this.httpService.post(url, data));
+      return response.data;
+    } catch (error) {
+      this.handleError(error, `postToGis: ${endpoint}`);
+      throw error;
+    }
   }
 }

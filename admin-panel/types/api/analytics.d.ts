@@ -31,7 +31,7 @@ export interface LandUseSummary {
 }
 
 export interface AirQualityHistoryPoint {
-    month: string;
+    day: string;
     avgPm25: number;
     avgCo2: number;
 }
@@ -44,4 +44,17 @@ export interface AccidentSummaryBySeverity {
 export interface GetLandUseSummaryQuery {
     districtId: string;
     year?: number;
+}
+export interface WaterQualityHistoryPoint {
+  month: string;
+  avgPh: number;
+  avgTurbidity: number;
+}
+export interface RecentActivity {
+  type: 'INFRASTRUCTURE' | 'ACCIDENT';
+  id: string;
+  name?: string;
+  category?: string;
+  severity?: string;
+  createdAt: string;
 }

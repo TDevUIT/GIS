@@ -7,6 +7,8 @@ import type {
     AirQualityHistoryPoint,
     AccidentSummaryBySeverity,
     GetLandUseSummaryQuery,
+    RecentActivity,
+    WaterQualityHistoryPoint,
 } from '../types/api/analytics';
 
 type OFetch = typeof ofetch;
@@ -49,4 +51,16 @@ export default (apiFetch: OFetch) => ({
             method: 'GET',
         });
     },
+
+    getWaterQualityHistory(districtId: string) {
+    return apiFetch<ApiResponse<WaterQualityHistoryPoint[]>>(`/analytics/water-quality-history/${districtId}`, {
+      method: 'GET',
+    });
+    },
+
+    getRecentActivities() {
+    return apiFetch<ApiResponse<RecentActivity[]>>('/analytics/recent-activities', {
+      method: 'GET',
+    });
+  },
 });

@@ -97,15 +97,15 @@ export class AnalyticsService {
       throw new NotFoundException(`Quận với ID "${districtId}" không tồn tại.`);
     }
     const query = Prisma.sql`
-      SELECT 
-        DATE_TRUNC('month', recorded_at)::date as "month",
-        ROUND(AVG(pm25)::numeric, 2) as "avgPm25",
-        ROUND(AVG(co2)::numeric, 2) as "avgCo2"
-      FROM "public"."air_qualities"
-      WHERE "districtId" = ${districtId} AND pm25 IS NOT NULL
-      GROUP BY "month"
-      ORDER BY "month" ASC;
-    `;
+    SELECT 
+      DATE_TRUNC('day', recorded_at)::date as "day",
+      ROUND(AVG(pm25)::numeric, 2) as "avgPm25",
+      ROUND(AVG(co2)::numeric, 2) as "avgCo2"
+    FROM "public"."air_qualities"
+    WHERE "districtId" = ${districtId} AND pm25 IS NOT NULL
+    GROUP BY "day"
+    ORDER BY "day" ASC;
+  `;
     return this.prisma.$queryRaw(query);
   }
 
@@ -119,5 +119,54 @@ export class AnalyticsService {
       ORDER BY "count" DESC;
     `;
     return this.prisma.$queryRaw(query);
+  }
+
+  async getWaterQualityHistory(districtId: string) {
+    const district = await this.prisma.district.findUnique({
+      where: { id: districtId },
+    });
+    if (!district)
+      throw new NotFoundException(`Quận với ID "${districtId}" không tồn tại.`);
+
+    const query = Prisma.sql`
+      SELECT 
+        DATE_TRUNC('month', recorded_at)::date as "month",
+        ROUND(AVG(ph)::numeric, 2) as "avgPh",
+        ROUND(AVG(turbidity)::numeric, 2) as "avgTurbidity"
+      FROM "public"."water_qualities"
+      WHERE "districtId" = ${districtId} AND ph IS NOT NULL
+      GROUP BY "month"
+      ORDER BY "month" ASC;
+    `;
+    return this.prisma.$queryRaw(query);
+  }
+
+  async getRecentActivities() {
+    const recentInfrastructures = this.prisma.infrastructure.findMany({
+      take: 3,
+      orderBy: { createdAt: 'desc' },
+      select: { id: true, name: true, category: true, createdAt: true },
+    });
+    const recentAccidents = this.prisma.accident.findMany({
+      take: 2,
+      orderBy: { accidentDate: 'desc' },
+      select: { id: true, severity: true, accidentDate: true },
+    });
+    const [infras, accidents] = await Promise.all([
+      recentInfrastructures,
+      recentAccidents,
+    ]);
+    const activities = [
+      ...infras.map((item) => ({ type: 'INFRASTRUCTURE', ...item })),
+      ...accidents.map((item) => ({
+        type: 'ACCIDENT',
+        ...item,
+        createdAt: item.accidentDate,
+      })),
+    ].sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    );
+    return activities.slice(0, 5);
   }
 }

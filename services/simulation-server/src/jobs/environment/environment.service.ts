@@ -55,7 +55,7 @@ export class EnvironmentJobService {
     this.weatherApiKey = weatherApiKey;
   }
 
-  @Cron(CronExpression.EVERY_HOUR)
+  @Cron(CronExpression.EVERY_30_MINUTES)
   async simulateEnvironmentalData() {
     this.logger.log(
       '--- Starting Hourly Environmental Data Simulation Job ---',
@@ -299,7 +299,6 @@ export class EnvironmentJobService {
     const url = `${this.gisServerUrl}${endpoint}`;
     try {
       const response = await firstValueFrom(
-        // Assuming the actual data is nested in a 'data' property
         this.httpService.get<{ data: T }>(url),
       );
       return response.data.data;

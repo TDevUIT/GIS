@@ -4,6 +4,7 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { firstValueFrom } from 'rxjs';
+import { AxiosError } from 'axios';
 
 interface TrafficRoute {
   id: string;
@@ -31,9 +32,11 @@ export class AccidentsJobService {
   async simulateTrafficVolume() {
     this.logger.log('--- Starting Traffic Volume Simulation Job ---');
     try {
-      const allRoutes = await this.fetchTrafficRoutes();
+      const allRoutes = await this.fetchFromGis<TrafficRoute[]>('/traffics');
       if (!allRoutes || allRoutes.length === 0) {
-        this.logger.log('No traffic routes found to simulate.');
+        this.logger.warn(
+          'No traffic routes found to simulate volume. Skipping job.',
+        );
         return;
       }
 
@@ -56,7 +59,9 @@ export class AccidentsJobService {
         const randomFactor = 0.8 + Math.random() * 0.4;
         const newTrafficVolume = Math.round(baseVolume * randomFactor);
 
-        await this.updateTrafficVolume(route.id, newTrafficVolume);
+        await this.patchToGis(`/traffics/${route.id}`, {
+          trafficVolume: newTrafficVolume,
+        });
         this.logger.debug(
           `Updated traffic volume for "${route.roadName}" to ${newTrafficVolume} at hour ${currentHour}.`,
         );
@@ -68,7 +73,7 @@ export class AccidentsJobService {
     } catch (error) {
       this.logger.error(
         'Failed to run traffic volume simulation job',
-        error.response?.data || error.message,
+        error.stack,
       );
     }
   }
@@ -77,9 +82,11 @@ export class AccidentsJobService {
   async simulateDailyAccidents() {
     this.logger.log('--- Starting Accident Simulation Job ---');
     try {
-      const allRoutes = await this.fetchTrafficRoutes();
+      const allRoutes = await this.fetchFromGis<TrafficRoute[]>('/traffics');
       if (!allRoutes || allRoutes.length === 0) {
-        this.logger.log('No traffic routes found to simulate accidents on.');
+        this.logger.warn(
+          'No traffic routes found to simulate accidents on. Skipping job.',
+        );
         return;
       }
 
@@ -89,10 +96,10 @@ export class AccidentsJobService {
         if (trafficVolume > 1000) {
           const accidentProbability = trafficVolume / 50000;
           this.logger.debug(
-            `Route: "${route.roadName}", Volume: ${trafficVolume}, Accident Probability: ${accidentProbability.toFixed(3)}`,
+            `Route: "${route.roadName}", Volume: ${trafficVolume}, Accident Probability: ${accidentProbability.toFixed(4)}`,
           );
           if (Math.random() < accidentProbability) {
-            const accidentDto = {
+            const newAccident = {
               trafficId: route.id,
               accidentDate: new Date().toISOString(),
               severity:
@@ -100,7 +107,7 @@ export class AccidentsJobService {
               casualties:
                 Math.random() < 0.4 ? Math.floor(Math.random() * 2) + 1 : 0,
             };
-            await this.createAccident(accidentDto);
+            await this.postToGis('/accidents', newAccident);
             this.logger.warn(
               `>>> Simulated an accident on route: "${route.roadName}" (ID: ${route.id})`,
             );
@@ -109,34 +116,63 @@ export class AccidentsJobService {
         }
       }
       this.logger.log(
-        `--- Finished Accident Simulation Job. Simulated ${simulatedCount} accidents. ---`,
+        `--- Finished Accident Simulation Job. Simulated ${simulatedCount} new accidents. ---`,
       );
     } catch (error) {
+      this.logger.error('Failed to run accident simulation job', error.stack);
+    }
+  }
+
+  private handleError(error: AxiosError, context: string) {
+    if (error.response) {
       this.logger.error(
-        'Failed to run accident simulation job',
-        error.response?.data || error.message,
+        `[${context}] Server responded with status ${error.response.status}`,
+        JSON.stringify(error.response.data, null, 2),
+      );
+    } else if (error.request) {
+      this.logger.error(
+        `[${context}] No response received. Is the server running at ${this.gisServerUrl}?`,
+      );
+    } else {
+      this.logger.error(
+        `[${context}] Error setting up request:`,
+        error.message,
       );
     }
   }
 
-  private async fetchTrafficRoutes(): Promise<TrafficRoute[]> {
-    const url = `${this.gisServerUrl}/traffics`;
-    const response = await firstValueFrom(
-      this.httpService.get<TrafficRoute[]>(url),
-    );
-    return response.data;
+  private async fetchFromGis<T>(endpoint: string): Promise<T> {
+    const url = `${this.gisServerUrl}${endpoint}`;
+    try {
+      const response = await firstValueFrom(
+        this.httpService.get<{ data: T }>(url),
+      );
+      return response.data.data;
+    } catch (error) {
+      this.handleError(error, `fetchFromGis: ${endpoint}`);
+      throw error;
+    }
   }
 
-  private async createAccident(data: any): Promise<void> {
-    const url = `${this.gisServerUrl}/accidents`;
-    await firstValueFrom(this.httpService.post(url, data));
+  private async postToGis(endpoint: string, data: any): Promise<any> {
+    const url = `${this.gisServerUrl}${endpoint}`;
+    try {
+      const response = await firstValueFrom(this.httpService.post(url, data));
+      return response.data;
+    } catch (error) {
+      this.handleError(error, `postToGis: ${endpoint}`);
+      throw error;
+    }
   }
 
-  private async updateTrafficVolume(
-    id: string,
-    trafficVolume: number,
-  ): Promise<void> {
-    const url = `${this.gisServerUrl}/traffics/${id}`;
-    await firstValueFrom(this.httpService.patch(url, { trafficVolume }));
+  private async patchToGis(endpoint: string, data: any): Promise<any> {
+    const url = `${this.gisServerUrl}${endpoint}`;
+    try {
+      const response = await firstValueFrom(this.httpService.patch(url, data));
+      return response.data;
+    } catch (error) {
+      this.handleError(error, `patchToGis: ${endpoint}`);
+      throw error;
+    }
   }
 }
