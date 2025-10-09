@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 import {
   Injectable,
@@ -22,6 +24,17 @@ export class WardsService {
   `;
 
   constructor(private prisma: PrismaService) {}
+
+  private transformWard(ward: any) {
+    if (ward && ward.geom && typeof ward.geom === 'string') {
+      try {
+        ward.geom = JSON.parse(ward.geom);
+      } catch (e) {
+        console.error('Failed to parse ward geom JSON string:', e);
+      }
+    }
+    return ward;
+  }
 
   async create(createWardDto: CreateWardDto) {
     const { code, name, geom, districtId } = createWardDto;
@@ -49,7 +62,8 @@ export class WardsService {
     const query = Prisma.sql`
       SELECT ${this.selectFields} ${this.fromTable} ${whereClause}
     `;
-    return this.prisma.$queryRaw(query);
+    const wards: any[] = await this.prisma.$queryRaw(query);
+    return wards.map((ward) => this.transformWard(ward));
   }
 
   async findOne(id: string) {
@@ -60,7 +74,7 @@ export class WardsService {
     if (result.length === 0) {
       throw new NotFoundException(`Phường với ID "${id}" không tồn tại.`);
     }
-    return result[0];
+    return this.transformWard(result[0]);
   }
 
   async update(id: string, updateWardDto: UpdateWardDto) {
@@ -101,11 +115,9 @@ export class WardsService {
     `;
     const result: any[] = await this.prisma.$queryRaw(query);
     if (result.length === 0) {
-      throw new NotFoundException(
-        `Không tìm thấy phường nào chứa tọa độ (${lng}, ${lat}).`,
-      );
+      return null;
     }
-    return result[0];
+    return this.transformWard(result[0]);
   }
 
   async findWardsIntersecting(wkt: string) {
@@ -113,6 +125,7 @@ export class WardsService {
       SELECT ${this.selectFields} ${this.fromTable}
       WHERE ST_Intersects(w.geom, ST_GeomFromText(${wkt}, 4326));
     `;
-    return this.prisma.$queryRaw(query);
+    const wards: any[] = await this.prisma.$queryRaw(query);
+    return wards.map((ward) => this.transformWard(ward));
   }
 }
