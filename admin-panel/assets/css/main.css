@@ -1,0 +1,56 @@
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+@import 'sweetalert2/src/sweetalert2.scss';
+
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #1f2937;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #4b5563;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #6b7280;
+}
+
+.swal2-popup {
+    background-color: #1f2937 !important;
+    color: #f9fafb !important;
+    border: 1px solid #374151;
+}
+
+.swal2-title {
+    color: #f9fafb !important;
+}
+
+.swal2-html-container {
+    color: #d1d5db !important;
+}
+
+.swal2-actions {
+    gap: 0.5rem;
+}
+
+.btn {
+    @apply inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-semibold shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800;
+}
+
+.btn-primary {
+    @apply bg-blue-600 text-white hover:bg-blue-500 focus:ring-blue-500;
+}
+
+.btn-secondary {
+    @apply bg-gray-600 text-white hover:bg-gray-500 focus:ring-gray-500;
+}
+
+.btn-danger {
+    @apply bg-red-600 text-white hover:bg-red-500 focus:ring-red-500;
+}
