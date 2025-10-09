@@ -33,6 +33,9 @@
                 </template>
                 <template #actions="{ item }">
                     <div class="flex items-center justify-end gap-3">
+                        <button @click="viewOnMap(item)" class="text-gray-400 hover:text-white transition-colors" title="View on Map">
+                            <MapPinIcon class="h-5 w-5" />
+                        </button>
                         <button @click="handleEdit(item.id)" class="text-blue-400 hover:text-blue-300 transition-colors" title="Edit">
                             <PencilSquareIcon class="h-5 w-5" />
                         </button>
@@ -67,6 +70,7 @@ import type { DataTableColumn } from '~/components/ui/DataTable.vue';
 import type { District } from '~/types/api/district';
 import type { FeatureCollection } from 'geojson';
 import type { LatLngExpression } from 'leaflet';
+import L from 'leaflet';
 
 const LGeoJson = (await import('@vue-leaflet/vue-leaflet')).LGeoJson;
 
@@ -146,19 +150,19 @@ const allDistrictsGeoJson = computed<FeatureCollection | null>(() => {
 });
 
 function viewOnMap(district: District) {
-    if (
-        !district.geom ||
-        !mapRef.value?.mapObject ||
-        !district.geom.coordinates ||
-        !Array.isArray(district.geom.coordinates) ||
-        !district.geom.coordinates[0] ||
-        !Array.isArray(district.geom.coordinates[0]) ||
-        !district.geom.coordinates[0][0] ||
-        !Array.isArray(district.geom.coordinates[0][0])
-    ) return;
-    const firstRing = district.geom.coordinates[0][0] as [number, number][];
-    const centerLat = firstRing.reduce((sum, coord) => sum + coord[1], 0) / firstRing.length;
-    const centerLng = firstRing.reduce((sum, coord) => sum + coord[0], 0) / firstRing.length;
-    mapRef.value.mapObject.flyTo([centerLat, centerLng], 14);
+  const mapInstance = mapRef.value?.mapObject;
+  if (!district.geom || !mapInstance) {
+    console.warn('Map instance or district geometry is not available.');
+    return;
+  }
+
+  try {
+    const geoJsonLayer = L.geoJSON(district.geom as any);
+    const bounds = geoJsonLayer.getBounds();
+    mapInstance.flyToBounds(bounds, { padding: [50, 50] });
+
+  } catch (e) {
+    console.error("Error processing district geometry for map view:", e);
+  }
 }
 </script>
