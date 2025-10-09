@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call */
 import { Controller, Get, Param, Query } from '@nestjs/common';
 import {
   ApiTags,
@@ -111,5 +110,18 @@ export class AnalyticsController {
   })
   getAccidentSummaryBySeverity() {
     return this.analyticsService.getAccidentSummaryBySeverity();
+  }
+  @Get('recent-activities')
+  @ApiOperation({
+    summary: 'Get recent system activities',
+    description:
+      'Retrieve a list of the latest activities, such as new infrastructures or accidents',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Recent activities retrieved successfully',
+  })
+  getRecentActivities() {
+    return this.analyticsService.getRecentActivities();
   }
 }

@@ -85,4 +85,12 @@ export class AnalyticsService {
     );
     return response.data;
   }
+
+  async getRecentActivities() {
+    const url = `${this.gisServerUrl}/analytics/recent-activities`;
+    const response = await firstValueFrom(
+      this.httpService.get(url).pipe(catchError(this.handleError)),
+    );
+    return response.data;
+  }
 }
