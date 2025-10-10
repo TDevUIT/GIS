@@ -17,6 +17,10 @@
             <div class="xl:col-span-1 flex flex-col gap-4">
                 <div class="flex flex-col sm:flex-row gap-4">
                     <div class="flex-grow">
+                        <label for="search" class="block text-xs font-medium text-gray-400 mb-1">Search</label>
+                        <UiSearchInput v-model="searchQuery" placeholder="Search by ward name..." />
+                    </div>
+                    <div class="flex-grow">
                         <label for="district-filter" class="block text-xs font-medium text-gray-400 mb-1">Filter by District</label>
                         <UiAppDropdown
                             v-if="districtOptions.length > 0"
@@ -25,10 +29,6 @@
                             placeholder="All Districts"
                             class="w-full"
                         />
-                    </div>
-                    <div class="flex-grow">
-                        <label for="search" class="block text-xs font-medium text-gray-400 mb-1">Search</label>
-                        <UiSearchInput v-model="searchQuery" placeholder="Search by ward name..." />
                     </div>
                 </div>
                 <div class="flex-grow overflow-y-auto">
@@ -43,13 +43,6 @@
                         </template>
                         <template #actions="{ item }">
                             <div class="flex items-center justify-end gap-3">
-                                <button
-                                    @click.stop="viewOnMap(item)"
-                                    class="text-gray-400 hover:text-white transition-colors"
-                                    title="View on Map"
-                                >
-                                    <MapPinIcon class="h-5 w-5" />
-                                </button>
                                 <button
                                     @click.stop="handleEdit(item.id)"
                                     class="text-blue-400 hover:text-blue-300 transition-colors"
