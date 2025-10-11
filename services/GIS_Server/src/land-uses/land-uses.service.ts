@@ -28,6 +28,7 @@ export class LandUsesService {
 
   async create(createDto: CreateLandUseDto) {
     const { districtId, year, type, geom, ...landUseData } = createDto;
+
     const districtExists = await this.prisma.district.findUnique({
       where: { id: districtId },
     });
@@ -36,6 +37,7 @@ export class LandUsesService {
         `District with ID "${districtId}" does not exist.`,
       );
     }
+
     const recordExists = await this.prisma.landUse.findUnique({
       where: { districtId_type_year: { districtId, type, year } },
     });
@@ -44,11 +46,13 @@ export class LandUsesService {
         `Land use data for type "${type}" in district "${districtId}" for year "${year}" already exists.`,
       );
     }
+
     const id = cuid();
     const query = Prisma.sql`
       INSERT INTO "public"."land_uses" (id, type, area_km2, year, geom, "districtId", "updatedAt")
-      VALUES (${id}, ${type}, ${landUseData.areaKm2}, ${year}, ST_GeomFromText(${geom}, 4326), ${districtId}, NOW())
+      VALUES (${id}, ${type}, ${landUseData.areaKm2}, ${year}, ST_GeomFromGeoJSON(${geom}), ${districtId}, NOW())
     `;
+
     await this.prisma.$executeRaw(query);
     return this.findOne(id);
   }
@@ -56,16 +60,19 @@ export class LandUsesService {
   async findAll(queryDto: FindLandUsesQueryDto) {
     const { districtId, type } = queryDto;
     const whereClauses: Prisma.Sql[] = [];
+
     if (districtId) {
       whereClauses.push(Prisma.sql`lu."districtId" = ${districtId}`);
     }
     if (type) {
       whereClauses.push(Prisma.sql`lu.type ILIKE ${'%' + type + '%'}`);
     }
+
     const where =
       whereClauses.length > 0
         ? Prisma.sql`WHERE ${Prisma.join(whereClauses, ' AND ')}`
         : Prisma.empty;
+
     const query = Prisma.sql`SELECT ${this.selectFields} ${this.fromTable} ${where} ORDER BY lu.year DESC, lu.type ASC`;
     return this.prisma.$queryRaw(query);
   }
@@ -73,6 +80,7 @@ export class LandUsesService {
   async findOne(id: string) {
     const query = Prisma.sql`SELECT ${this.selectFields} ${this.fromTable} WHERE lu.id = ${id}`;
     const result: any[] = await this.prisma.$queryRaw(query);
+
     if (result.length === 0) {
       throw new NotFoundException(`Land use record with ID "${id}" not found.`);
     }
@@ -82,6 +90,7 @@ export class LandUsesService {
   async update(id: string, updateDto: UpdateLandUseDto) {
     await this.findOne(id);
     const { geom, ...otherData } = updateDto;
+
     if (otherData.districtId) {
       const districtExists = await this.prisma.district.findUnique({
         where: { id: otherData.districtId },
@@ -91,17 +100,20 @@ export class LandUsesService {
           `District with ID "${otherData.districtId}" does not exist.`,
         );
     }
+
     if (Object.keys(otherData).length > 0) {
       await this.prisma.landUse.update({
         where: { id },
         data: { ...otherData, updatedAt: new Date() },
       });
     }
+
     if (geom) {
       await this.prisma.$executeRaw`
-        UPDATE "public"."land_uses" SET geom = ST_GeomFromText(${geom}, 4326), "updatedAt" = NOW() WHERE id = ${id};
+        UPDATE "public"."land_uses" SET geom = ST_GeomFromGeoJSON(${geom}), "updatedAt" = NOW() WHERE id = ${id};
       `;
     }
+
     return this.findOne(id);
   }
 
