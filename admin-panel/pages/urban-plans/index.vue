@@ -2,26 +2,27 @@
     <div class="h-full flex flex-col">
         <header class="flex-shrink-0 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
             <div>
-                <h1 class="text-2xl font-bold text-white">Wards Management</h1>
-                <p class="mt-1 text-sm text-gray-400">Manage wards within each district.</p>
+                <h1 class="text-2xl font-bold text-white">Urban Plan Management</h1>
+                <p class="mt-1 text-sm text-gray-400">Manage urban planning data across districts.</p>
             </div>
             <button
                 @click="handleAdd"
                 class="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 transition-colors"
             >
                 <PlusIcon class="h-5 w-5" />
-                <span>Add Ward</span>
+                <span>Add Urban Plan</span>
             </button>
         </header>
+
         <div class="flex-grow grid grid-cols-1 xl:grid-cols-3 gap-8 min-h-0">
             <div class="xl:col-span-1 flex flex-col gap-4">
                 <div class="flex flex-col sm:flex-row gap-4">
                     <div class="flex-grow">
-                        <label for="search" class="block text-xs font-medium text-gray-400 mb-1">Search</label>
-                        <UiSearchInput v-model="searchQuery" placeholder="Search by ward name..." />
+                        <label class="block text-xs font-medium text-gray-400 mb-1">Search by Plan Name</label>
+                        <UiSearchInput v-model="searchQuery" placeholder="Search by plan name..." />
                     </div>
                     <div class="flex-grow">
-                        <label for="district-filter" class="block text-xs font-medium text-gray-400 mb-1">Filter by District</label>
+                        <label class="block text-xs font-medium text-gray-400 mb-1">Filter by District</label>
                         <UiAppDropdown
                             v-if="districtOptions.length > 0"
                             v-model="selectedDistrictId"
@@ -34,27 +35,22 @@
                 <div class="flex-grow overflow-y-auto">
                     <UiDataTable
                         :columns="columns"
-                        :data="filteredWards"
-                        :selected-id="selectedWard?.id"
+                        :data="filteredUrbanPlans"
+                        :selected-id="selectedUrbanPlan?.id"
                         @row-click="handleRowClick"
                     >
-                        <template #cell-updatedAt="{ value }">
+                        <template #cell-zoningType="{ item }">
+                            <FeaturesUrbanPlansZoningTypeBadge :type="item.zoningType" />
+                        </template>
+                        <template #cell-issuedDate="{ value }">
                             {{ new Date(value).toLocaleDateString('en-GB') }}
                         </template>
                         <template #actions="{ item }">
                             <div class="flex items-center justify-end gap-3">
-                                <button
-                                    @click.stop="handleEdit(item.id)"
-                                    class="text-blue-400 hover:text-blue-300 transition-colors"
-                                    title="Edit"
-                                >
+                                <button @click.stop="handleEdit(item.id)" class="text-blue-400 hover:text-blue-300" title="Edit">
                                     <PencilSquareIcon class="h-5 w-5" />
                                 </button>
-                                <button
-                                    @click.stop="handleDelete(item.id, item.name)"
-                                    class="text-red-400 hover:text-red-300 transition-colors"
-                                    title="Delete"
-                                >
+                                <button @click.stop="handleDelete(item.id, item.planName)" class="text-red-400 hover:text-red-300" title="Delete">
                                     <TrashIcon class="h-5 w-5" />
                                 </button>
                             </div>
@@ -62,18 +58,24 @@
                     </UiDataTable>
                 </div>
             </div>
+
             <div class="xl:col-span-2 flex flex-col gap-8">
-                <div class="h-[40vh] xl:h-auto xl:flex-grow">
+                <div class="relative h-[40vh] xl:h-auto xl:flex-grow">
                     <ClientOnly>
                         <UiLeafletMap ref="mapRef" :center="mapCenter" :zoom="11" class="h-full">
                             <LGeoJson
-                                v-if="wardsGeoJson"
+                                v-if="urbanPlanGeoJson"
                                 :key="geoJsonKey"
-                                :geojson="wardsGeoJson"
+                                :geojson="urbanPlanGeoJson"
                                 :options-style="geoJsonStyleFunction"
                                 @click="onPolygonClick"
                             />
                         </UiLeafletMap>
+                        <FeaturesUrbanPlansMapLegend
+                            :types="uniqueZoningTypes"
+                            :highlighted-type="highlightedType"
+                            @highlight="highlightedType = $event"
+                        />
                         <template #fallback>
                             <div class="h-full w-full bg-gray-800 flex items-center justify-center text-gray-500 rounded-lg">
                                 Loading Map...
@@ -82,24 +84,28 @@
                     </ClientOnly>
                 </div>
                 <div class="h-[40vh] xl:h-auto xl:flex-grow">
-                    <UiDataDetailView title="Ward Details" :item="selectedWard" @close="selectedWard = null">
+                    <UiDataDetailView title="Urban Plan Details" :item="selectedUrbanPlan" @close="selectedUrbanPlan = null">
                         <template #default="{ item }">
                             <ul class="space-y-3 text-sm">
                                 <li class="flex justify-between border-b border-gray-700 pb-3">
-                                    <span class="font-semibold text-gray-400">Name</span>
-                                    <span class="text-white font-medium text-right">{{ item.name }}</span>
+                                    <span class="font-semibold text-gray-400">Plan Name</span>
+                                    <span class="text-white font-medium text-right">{{ item.planName }}</span>
                                 </li>
                                 <li class="flex justify-between border-b border-gray-700 pb-3">
-                                    <span class="font-semibold text-gray-400">Code</span>
-                                    <span class="text-white text-right">{{ item.code }}</span>
+                                    <span class="font-semibold text-gray-400">Zoning Type</span>
+                                    <FeaturesUrbanPlansZoningTypeBadge :type="item.zoningType" />
                                 </li>
                                 <li class="flex justify-between border-b border-gray-700 pb-3">
                                     <span class="font-semibold text-gray-400">District</span>
-                                    <span class="text-white text-right">{{ item.districtName }}</span>
+                                    <span class="text-white font-medium text-right">{{ item.districtName }}</span>
                                 </li>
-                                <li class="flex justify-between pb-3">
-                                    <span class="font-semibold text-gray-400">Last Updated</span>
-                                    <span class="text-white text-right">{{ new Date(item.updatedAt).toLocaleString('en-GB') }}</span>
+                                <li class="flex justify-between border-b border-gray-700 pb-3">
+                                    <span class="font-semibold text-gray-400">Issued Date</span>
+                                    <span class="text-white font-medium text-right">{{ new Date(item.issuedDate).toLocaleDateString('en-GB') }}</span>
+                                </li>
+                                <li class="pt-2">
+                                    <span class="font-semibold text-gray-400">Description</span>
+                                    <p class="text-white mt-1">{{ item.description || 'N/A' }}</p>
                                 </li>
                             </ul>
                         </template>
@@ -114,14 +120,15 @@
 import { ref, computed, watch } from 'vue'
 import { PlusIcon, PencilSquareIcon, TrashIcon } from '@heroicons/vue/24/outline'
 import L from 'leaflet'
+import { getLeafletStyle } from '~/utils/urbanPlanStyles'
 import type { DataTableColumn } from '~/components/ui/DataTable.vue'
-import type { Ward } from '~/types/api/ward'
 import type { District } from '~/types/api/district'
+import type { UrbanPlan } from '~/types/api/urban-plan'
 import type { FeatureCollection } from 'geojson'
 
 const { LGeoJson } = await import('@vue-leaflet/vue-leaflet')
 
-useHead({ title: 'Wards Management' })
+useHead({ title: 'Urban Plan Management' })
 
 const { $api } = useNuxtApp()
 const router = useRouter()
@@ -130,8 +137,9 @@ const { confirmDelete, toastSuccess, toastError } = useSwal()
 const searchQuery = ref('')
 const selectedDistrictId = ref('')
 const districtOptions = ref<{ label: string; value: string }[]>([])
-const allWards = ref<Ward[]>([])
-const selectedWard = ref<Ward | null>(null)
+const allUrbanPlans = ref<UrbanPlan[]>([])
+const selectedUrbanPlan = ref<UrbanPlan | null>(null)
+const highlightedType = ref<string | null>(null)
 const mapRef = ref()
 const mapCenter = ref<[number, number]>([10.7769, 106.7009])
 
@@ -147,80 +155,76 @@ useAsyncData('districts-for-filter', async () => {
     return districtData
 })
 
-const { refresh: refreshWards } = useAsyncData(
-    'wards-list',
+const { refresh: refreshUrbanPlans } = useAsyncData(
+    'urban-plans-list',
     async () => {
         const params = { districtId: selectedDistrictId.value || undefined }
-        const response = await $api.wards.getAll(params)
-        const wardsData = response.data.data || []
-        allWards.value = wardsData.map((ward: any) => ({
-            ...ward,
-            geom: typeof ward.geom === 'string' ? JSON.parse(ward.geom) : ward.geom
+        const response = await $api.urbanPlans.getAll(params)
+        const plans = response.data.data || []
+        allUrbanPlans.value = plans.map((plan: any) => ({
+            ...plan,
+            geom: typeof plan.geom === 'string' ? JSON.parse(plan.geom) : plan.geom
         }))
-        return allWards.value
+        return allUrbanPlans.value
     },
     { watch: [selectedDistrictId] }
 )
 
 const columns: DataTableColumn[] = [
-    { key: 'name', label: 'Ward' },
+    { key: 'planName', label: 'Plan Name' },
+    { key: 'zoningType', label: 'Zoning Type' },
     { key: 'districtName', label: 'District' },
-    { key: 'code', label: 'Code' },
-    { key: 'updatedAt', label: 'Last Updated' }
+    { key: 'issuedDate', label: 'Issued' },
 ]
 
-const filteredWards = computed(() => {
-    if (!searchQuery.value) return allWards.value
+const filteredUrbanPlans = computed(() => {
+    if (!searchQuery.value) return allUrbanPlans.value
     const lowerCaseQuery = searchQuery.value.toLowerCase()
-    return allWards.value.filter((w: Ward) => w.name.toLowerCase().includes(lowerCaseQuery))
+    return allUrbanPlans.value.filter(up =>
+        up.planName.toLowerCase().includes(lowerCaseQuery)
+    )
 })
 
-const wardsGeoJson = computed<FeatureCollection | null>(() => {
-    if (!filteredWards.value || filteredWards.value.length === 0) return null
+const urbanPlanGeoJson = computed<FeatureCollection | null>(() => {
+    if (!filteredUrbanPlans.value || filteredUrbanPlans.value.length === 0) return null
     return {
         type: 'FeatureCollection',
-        features: filteredWards.value.filter(w => w.geom).map(w => ({
+        features: filteredUrbanPlans.value.filter(up => up.geom).map(up => ({
             type: 'Feature',
-            properties: { ...w },
-            geometry: w.geom as any
+            properties: { ...up },
+            geometry: up.geom as any
         }))
     }
 })
 
-const geoJsonKey = computed(() => `${selectedDistrictId.value}-${searchQuery.value}-${selectedWard.value?.id}`)
+const uniqueZoningTypes = computed(() => [...new Set(filteredUrbanPlans.value.map(up => up.zoningType))])
+const geoJsonKey = computed(() => `${selectedDistrictId.value}-${searchQuery.value}-${highlightedType.value}`)
 
 function geoJsonStyleFunction(feature: any) {
-    const isSelected = selectedWard.value?.id === feature?.properties.id
-    return {
-        color: isSelected ? '#FBBF24' : '#8B5CF6',
-        weight: isSelected ? 3 : 2,
-        opacity: 1,
-        fillColor: isSelected ? '#FBBF24' : '#8B5CF6',
-        fillOpacity: isSelected ? 0.5 : 0.2,
-    }
+    return getLeafletStyle(feature?.properties.zoningType, highlightedType.value)
 }
 
-function handleRowClick(ward: Ward) {
-    if (selectedWard.value?.id === ward.id) {
-        selectedWard.value = null
+function handleRowClick(plan: UrbanPlan) {
+    if (selectedUrbanPlan.value?.id === plan.id) {
+        selectedUrbanPlan.value = null
+        highlightedType.value = null
     } else {
-        selectedWard.value = ward
-        viewOnMap(ward)
+        selectedUrbanPlan.value = plan
+        highlightedType.value = plan.zoningType
+        viewOnMap(plan)
     }
 }
 
 function onPolygonClick(event: any) {
     const properties = event.layer.feature.properties
-    const ward = filteredWards.value.find(w => w.id === properties.id)
-    if (ward) {
-        handleRowClick(ward)
-    }
+    const plan = filteredUrbanPlans.value.find(up => up.id === properties.id)
+    if (plan) handleRowClick(plan)
 }
 
-function viewOnMap(ward: Ward) {
+function viewOnMap(plan: UrbanPlan) {
     const mapInstance = mapRef.value?.mapObject
-    if (!ward.geom || !mapInstance) return
-    const geoJsonLayer = L.geoJSON(ward.geom as any)
+    if (!plan.geom || !mapInstance) return
+    const geoJsonLayer = L.geoJSON(plan.geom as any)
     const bounds = geoJsonLayer.getBounds()
     if (bounds.isValid()) {
         mapInstance.flyToBounds(bounds, { padding: [50, 50], maxZoom: 15 })
@@ -228,35 +232,36 @@ function viewOnMap(ward: Ward) {
 }
 
 function handleAdd() {
-    router.push('/wards/create')
+    router.push('/urban-plans/create')
 }
 
 function handleEdit(id: string) {
-    router.push(`/wards/${id}`)
+    router.push(`/urban-plans/${id}`)
 }
 
 async function handleDelete(id: string, name: string) {
-    const result = await confirmDelete(name)
+    const result = await confirmDelete(`urban plan "${name}"`)
     if (result.isConfirmed) {
         try {
-            await $api.wards.remove(id)
-            toastSuccess(`Ward "${name}" has been deleted.`)
-            selectedWard.value = null
-            await refreshWards()
+            await $api.urbanPlans.remove(id)
+            toastSuccess(`Urban Plan has been deleted.`)
+            selectedUrbanPlan.value = null
+            await refreshUrbanPlans()
         } catch (err: any) {
             toastError('Deletion failed', err.data?.message || 'An error occurred.')
         }
     }
 }
 
-watch(filteredWards, (newWards) => {
-    if (selectedWard.value && !newWards.some(w => w.id === selectedWard.value?.id)) {
-        selectedWard.value = null
+watch(filteredUrbanPlans, (newData) => {
+    if (selectedUrbanPlan.value && !newData.some(p => p.id === selectedUrbanPlan.value?.id)) {
+        selectedUrbanPlan.value = null
+        highlightedType.value = null
     }
     const mapInstance = mapRef.value?.mapObject
     if (!mapInstance) return
-    if (newWards.length > 0 && wardsGeoJson.value) {
-        const geoJsonLayer = L.geoJSON(wardsGeoJson.value as any)
+    if (newData.length > 0 && urbanPlanGeoJson.value) {
+        const geoJsonLayer = L.geoJSON(urbanPlanGeoJson.value as any)
         const bounds = geoJsonLayer.getBounds()
         if (bounds.isValid()) {
             mapInstance.flyToBounds(bounds, { padding: [20, 20] })

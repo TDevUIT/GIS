@@ -39,7 +39,7 @@ export class UrbanPlansService {
     const id = cuid();
     const query = Prisma.sql`
       INSERT INTO "public"."urban_plans" (id, plan_name, zoning_type, description, issued_date, geom, "districtId", "updatedAt")
-      VALUES (${id}, ${planData.planName}, ${planData.zoningType}, ${planData.description}, ${planData.issuedDate}::timestamp, ST_GeomFromText(${geom}, 4326), ${districtId}, NOW())
+      VALUES (${id}, ${planData.planName}, ${planData.zoningType}, ${planData.description}, ${planData.issuedDate}::timestamp, ST_GeomFromGeoJSON(${geom}), ${districtId}, NOW())
     `;
     await this.prisma.$executeRaw(query);
     return this.findOne(id);
@@ -101,7 +101,7 @@ export class UrbanPlansService {
     }
     if (geom) {
       await this.prisma.$executeRaw`
-        UPDATE "public"."urban_plans" SET geom = ST_GeomFromText(${geom}, 4326), "updatedAt" = NOW() WHERE id = ${id};
+        UPDATE "public"."urban_plans" SET geom = ST_GeomFromGeoJSON(${geom}), "updatedAt" = NOW() WHERE id = ${id};
       `;
     }
     return this.findOne(id);
