@@ -86,12 +86,12 @@ export async function seedInfrastructures(prisma: PrismaClient) {
       await tx.$executeRaw(Prisma.sql`
                 INSERT INTO "public"."infrastructures" (id, name, address, category, geom, "districtId", "updatedAt")
                 VALUES (
-                    ${infraId}, 
-                    ${infra.name}, 
-                    ${infra.address}, 
-                    ${infra.category}::"InfraCategory", 
-                    ST_GeomFromText(${infra.geom}, 4326), 
-                    ${infra.districtId}, 
+                    ${infraId},
+                    ${infra.name},
+                    ${infra.address},
+                    ${infra.category}::"InfraCategory",
+                    ST_GeomFromText(${infra.geom}, 4326),
+                    ${infra.districtId},
                     NOW()
                 )
             `);
