@@ -77,9 +77,7 @@ export class PopulationsService {
           select: { name: true },
         },
       },
-      orderBy: {
-        year: 'desc',
-      },
+      orderBy: [{ year: 'desc' }, { district: { name: 'asc' } }],
     });
   }
 
@@ -108,9 +106,41 @@ export class PopulationsService {
     const { households, demographics, ...populationData } = updateDto;
     await this.findOne(id);
 
-    return this.prisma.population.update({
-      where: { id },
-      data: populationData,
+    return this.prisma.$transaction(async (tx) => {
+      const updatedPopulation = await tx.population.update({
+        where: { id },
+        data: populationData,
+      });
+
+      if (demographics) {
+        await tx.demographic.deleteMany({
+          where: { populationId: id },
+        });
+        if (demographics.length > 0) {
+          await tx.demographic.createMany({
+            data: demographics.map((d) => ({
+              ...d,
+              populationId: id,
+            })),
+          });
+        }
+      }
+
+      if (households) {
+        await tx.household.deleteMany({
+          where: { populationId: id },
+        });
+        if (households.length > 0) {
+          await tx.household.createMany({
+            data: households.map((h) => ({
+              ...h,
+              populationId: id,
+            })),
+          });
+        }
+      }
+
+      return this.findOne(id, tx);
     });
   }
 

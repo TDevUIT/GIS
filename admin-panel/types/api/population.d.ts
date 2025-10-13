@@ -40,9 +40,7 @@ export type CreatePopulationDTO = Omit<
   demographics?: CreateDemographicDTO[];
 };
 
-export type UpdatePopulationDTO = Partial<
-  Omit<CreatePopulationDTO, 'households' | 'demographics'>
->;
+export type UpdatePopulationDTO = Partial<CreatePopulationDTO>;
 
 export interface FindPopulationsQuery {
   districtId?: string;

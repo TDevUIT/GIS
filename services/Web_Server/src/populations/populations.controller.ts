@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call */
 import {
   Controller,
   Get,
@@ -9,8 +8,6 @@ import {
   Delete,
   Query,
   UseGuards,
-  ParseIntPipe,
-  DefaultValuePipe,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -38,7 +35,7 @@ export class PopulationsController {
     name: 'districtId',
     required: false,
     description: 'Filter by district ID',
-    example: '1',
+    example: 'cuid-goes-here',
   })
   @ApiQuery({
     name: 'year',
@@ -52,8 +49,15 @@ export class PopulationsController {
   })
   findAll(
     @Query('districtId') districtId?: string,
-    @Query('year', new DefaultValuePipe(undefined), ParseIntPipe) year?: number,
+    @Query('year') yearQuery?: string,
   ) {
+    let year: number | undefined;
+    if (yearQuery !== undefined) {
+      const parsedYear = parseInt(yearQuery, 10);
+      if (!isNaN(parsedYear)) {
+        year = parsedYear;
+      }
+    }
     return this.populationsService.findAll(districtId, year);
   }
 

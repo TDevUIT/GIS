@@ -124,4 +124,26 @@ export class AnalyticsController {
   getRecentActivities() {
     return this.analyticsService.getRecentActivities();
   }
+
+  @Get('demographics-summary/:populationId')
+  @ApiOperation({
+    summary: 'Get demographics summary',
+    description:
+      'Retrieve demographics (age, gender) for a specific population record',
+  })
+  @ApiParam({ name: 'populationId', description: 'Population record ID' })
+  getDemographicsSummary(@Param('populationId') populationId: string) {
+    return this.analyticsService.getDemographicsSummary(populationId);
+  }
+
+  @Get('households-summary/:populationId')
+  @ApiOperation({
+    summary: 'Get households summary',
+    description:
+      'Retrieve households (housing type, income) for a specific population record',
+  })
+  @ApiParam({ name: 'populationId', description: 'Population record ID' })
+  getHouseholdsSummary(@Param('populationId') populationId: string) {
+    return this.analyticsService.getHouseholdsSummary(populationId);
+  }
 }

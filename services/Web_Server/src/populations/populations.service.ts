@@ -1,8 +1,6 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/unbound-method */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+
 import { Injectable, HttpException } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom, catchError, throwError } from 'rxjs';
@@ -46,10 +44,16 @@ export class PopulationsService {
 
   async findAll(districtId?: string, year?: number) {
     const url = `${this.gisServerUrl}/populations`;
+    const params: { districtId?: string; year?: number } = {};
+    if (districtId) {
+      params.districtId = districtId;
+    }
+    if (year !== undefined && !isNaN(year)) {
+      params.year = year;
+    }
+
     const response = await firstValueFrom(
-      this.httpService
-        .get(url, { params: { districtId, year } })
-        .pipe(catchError(this.handleError)),
+      this.httpService.get(url, { params }).pipe(catchError(this.handleError)),
     );
     return response.data;
   }

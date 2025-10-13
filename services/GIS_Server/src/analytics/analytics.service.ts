@@ -169,4 +169,63 @@ export class AnalyticsService {
     );
     return activities.slice(0, 5);
   }
+  async getDemographicsSummary(populationId: string) {
+    const populationExists = await this.prisma.population.findUnique({
+      where: { id: populationId },
+    });
+    if (!populationExists) {
+      throw new NotFoundException(
+        `Dữ liệu dân số với ID "${populationId}" không tồn tại.`,
+      );
+    }
+
+    const query = Prisma.sql`
+      SELECT 
+        age_group as "ageGroup", 
+        male,
+        female
+      FROM "public"."demographics"
+      WHERE "populationId" = ${populationId}
+      ORDER BY 
+        CASE 
+          WHEN age_group ~ '^[0-9]+-[0-9]+$' THEN LPAD(SPLIT_PART(age_group, '-', 1), 3, '0')
+          ELSE age_group
+        END; -- Sắp xếp theo độ tuổi một cách thông minh
+    `;
+    return this.prisma.$queryRaw(query);
+  }
+
+  async getHouseholdsSummary(populationId: string) {
+    const populationExists = await this.prisma.population.findUnique({
+      where: { id: populationId },
+    });
+    if (!populationExists) {
+      throw new NotFoundException(
+        `Dữ liệu dân số với ID "${populationId}" không tồn tại.`,
+      );
+    }
+
+    const [byHousingType, byIncomeLevel] = await this.prisma.$transaction([
+      this.prisma.$queryRaw(Prisma.sql`
+        SELECT 
+          housing_type as "housingType",
+          COUNT(id)::int as count
+        FROM "public"."households"
+        WHERE "populationId" = ${populationId} AND housing_type IS NOT NULL
+        GROUP BY "housingType"
+        ORDER BY count DESC;
+      `),
+      this.prisma.$queryRaw(Prisma.sql`
+        SELECT 
+          income_level as "incomeLevel",
+          COUNT(id)::int as count
+        FROM "public"."households"
+        WHERE "populationId" = ${populationId} AND income_level IS NOT NULL
+        GROUP BY "incomeLevel"
+        ORDER BY count DESC;
+      `),
+    ]);
+
+    return { byHousingType, byIncomeLevel };
+  }
 }

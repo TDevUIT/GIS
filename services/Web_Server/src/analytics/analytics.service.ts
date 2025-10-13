@@ -93,4 +93,20 @@ export class AnalyticsService {
     );
     return response.data;
   }
+
+  async getDemographicsSummary(populationId: string) {
+    const url = `${this.gisServerUrl}/analytics/demographics-summary/${populationId}`;
+    const response = await firstValueFrom(
+      this.httpService.get(url).pipe(catchError(this.handleError)),
+    );
+    return response.data;
+  }
+
+  async getHouseholdsSummary(populationId: string) {
+    const url = `${this.gisServerUrl}/analytics/households-summary/${populationId}`;
+    const response = await firstValueFrom(
+      this.httpService.get(url).pipe(catchError(this.handleError)),
+    );
+    return response.data;
+  }
 }
