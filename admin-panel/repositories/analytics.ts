@@ -9,6 +9,8 @@ import type {
     GetLandUseSummaryQuery,
     RecentActivity,
     WaterQualityHistoryPoint,
+    DemographicsSummaryPoint,
+    HouseholdsSummary,
 } from '../types/api/analytics';
 
 type OFetch = typeof ofetch;
@@ -53,14 +55,26 @@ export default (apiFetch: OFetch) => ({
     },
 
     getWaterQualityHistory(districtId: string) {
-    return apiFetch<ApiResponse<WaterQualityHistoryPoint[]>>(`/analytics/water-quality-history/${districtId}`, {
-      method: 'GET',
-    });
+        return apiFetch<ApiResponse<WaterQualityHistoryPoint[]>>(`/analytics/water-quality-history/${districtId}`, {
+            method: 'GET',
+        });
     },
 
     getRecentActivities() {
-    return apiFetch<ApiResponse<RecentActivity[]>>('/analytics/recent-activities', {
-      method: 'GET',
-    });
-  },
+        return apiFetch<ApiResponse<RecentActivity[]>>('/analytics/recent-activities', {
+            method: 'GET',
+        });
+    },
+
+    getDemographicsSummary(populationId: string) {
+        return apiFetch<ApiResponse<DemographicsSummaryPoint[]>>(`/analytics/demographics-summary/${populationId}`, {
+            method: 'GET',
+        });
+    },
+
+    getHouseholdsSummary(populationId: string) {
+        return apiFetch<ApiResponse<HouseholdsSummary>>(`/analytics/households-summary/${populationId}`, {
+            method: 'GET',
+        });
+    },
 });

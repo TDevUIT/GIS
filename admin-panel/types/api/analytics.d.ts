@@ -45,16 +45,35 @@ export interface GetLandUseSummaryQuery {
     districtId: string;
     year?: number;
 }
+
 export interface WaterQualityHistoryPoint {
-  month: string;
-  avgPh: number;
-  avgTurbidity: number;
+    month: string;
+    avgPh: number;
+    avgTurbidity: number;
 }
+
 export interface RecentActivity {
-  type: 'INFRASTRUCTURE' | 'ACCIDENT';
-  id: string;
-  name?: string;
-  category?: string;
-  severity?: string;
-  createdAt: string;
+    type: 'INFRASTRUCTURE' | 'ACCIDENT';
+    id: string;
+    name?: string;
+    category?: string;
+    severity?: string;
+    createdAt: string;
+}
+
+export interface DemographicsSummaryPoint {
+    ageGroup: string;
+    male: number;
+    female: number;
+}
+
+export interface HouseholdsSummary {
+    byHousingType: {
+        housingType: string;
+        count: number;
+    }[];
+    byIncomeLevel: {
+        incomeLevel: string;
+        count: number;
+    }[];
 }

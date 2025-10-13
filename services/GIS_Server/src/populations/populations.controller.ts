@@ -7,7 +7,6 @@ import {
   Param,
   Delete,
   Query,
-  ParseIntPipe,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -48,8 +47,17 @@ export class PopulationsController {
   @Get()
   findAll(
     @Query('districtId') districtId?: string,
-    @Query('year', new ParseIntPipe({ optional: true })) year?: number,
+    @Query('year') yearQuery?: string,
   ) {
+    let year: number | undefined;
+    if (yearQuery !== undefined) {
+      const parsedYear = parseInt(yearQuery, 10);
+      if (isNaN(parsedYear)) {
+        return this.populationsService.findAll(districtId, undefined);
+      }
+      year = parsedYear;
+    }
+
     return this.populationsService.findAll(districtId, year);
   }
 
