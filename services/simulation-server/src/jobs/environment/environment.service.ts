@@ -55,7 +55,7 @@ export class EnvironmentJobService {
     this.weatherApiKey = weatherApiKey;
   }
 
-  @Cron(CronExpression.EVERY_30_MINUTES)
+  @Cron(CronExpression.EVERY_MINUTE)
   async simulateEnvironmentalData() {
     this.logger.log(
       '--- Starting Hourly Environmental Data Simulation Job ---',

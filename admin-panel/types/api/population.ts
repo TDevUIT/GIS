@@ -1,6 +1,20 @@
+export enum IncomeLevel {
+  Thap = 'Thap',
+  TrungBinh = 'TrungBinh',
+  Cao = 'Cao',
+}
+
+export enum HousingType {
+  NhaRieng = 'NhaRieng',
+  ChungCuCaoCap = 'ChungCuCaoCap',
+  NhaTrongHem = 'NhaTrongHem',
+  NhaTro = 'NhaTro',
+}
+
 export interface Demographic {
   id: string;
-  ageGroup: string;
+  ageMin: number;
+  ageMax: number | null;
   male: number;
   female: number;
   populationId: string;
@@ -9,8 +23,8 @@ export interface Demographic {
 export interface Household {
   id: string;
   householdSize: number;
-  incomeLevel: string | null;
-  housingType: string | null;
+  incomeLevel: IncomeLevel | null;
+  housingType: HousingType | null;
   populationId: string;
 }
 

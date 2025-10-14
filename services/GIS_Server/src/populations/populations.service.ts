@@ -36,34 +36,40 @@ export class PopulationsService {
       );
     }
 
-    return this.prisma.$transaction(async (tx) => {
-      const population = await tx.population.create({
-        data: {
-          ...populationData,
-          year,
-          district: {
-            connect: { id: districtId },
+    return this.prisma.$transaction(
+      async (tx) => {
+        const population = await tx.population.create({
+          data: {
+            ...populationData,
+            year,
+            district: {
+              connect: { id: districtId },
+            },
           },
-        },
-      });
-
-      if (households && households.length > 0) {
-        await tx.household.createMany({
-          data: households.map((h) => ({ ...h, populationId: population.id })),
         });
-      }
 
-      if (demographics && demographics.length > 0) {
-        await tx.demographic.createMany({
-          data: demographics.map((d) => ({
-            ...d,
-            populationId: population.id,
-          })),
-        });
-      }
+        if (households && households.length > 0) {
+          await tx.household.createMany({
+            data: households.map((h) => ({
+              ...h,
+              populationId: population.id,
+            })),
+          });
+        }
 
-      return this.findOne(population.id, tx);
-    });
+        if (demographics && demographics.length > 0) {
+          await tx.demographic.createMany({
+            data: demographics.map((d) => ({
+              ...d,
+              populationId: population.id,
+            })),
+          });
+        }
+
+        return this.findOne(population.id, tx);
+      },
+      { timeout: 30000 },
+    );
   }
 
   async findAll(districtId?: string, year?: number) {
@@ -106,42 +112,45 @@ export class PopulationsService {
     const { households, demographics, ...populationData } = updateDto;
     await this.findOne(id);
 
-    return this.prisma.$transaction(async (tx) => {
-      const updatedPopulation = await tx.population.update({
-        where: { id },
-        data: populationData,
-      });
-
-      if (demographics) {
-        await tx.demographic.deleteMany({
-          where: { populationId: id },
+    return this.prisma.$transaction(
+      async (tx) => {
+        const updatedPopulation = await tx.population.update({
+          where: { id },
+          data: populationData,
         });
-        if (demographics.length > 0) {
-          await tx.demographic.createMany({
-            data: demographics.map((d) => ({
-              ...d,
-              populationId: id,
-            })),
-          });
-        }
-      }
 
-      if (households) {
-        await tx.household.deleteMany({
-          where: { populationId: id },
-        });
-        if (households.length > 0) {
-          await tx.household.createMany({
-            data: households.map((h) => ({
-              ...h,
-              populationId: id,
-            })),
+        if (demographics) {
+          await tx.demographic.deleteMany({
+            where: { populationId: id },
           });
+          if (demographics.length > 0) {
+            await tx.demographic.createMany({
+              data: demographics.map((d) => ({
+                ...d,
+                populationId: id,
+              })),
+            });
+          }
         }
-      }
 
-      return this.findOne(id, tx);
-    });
+        if (households) {
+          await tx.household.deleteMany({
+            where: { populationId: id },
+          });
+          if (households.length > 0) {
+            await tx.household.createMany({
+              data: households.map((h) => ({
+                ...h,
+                populationId: id,
+              })),
+            });
+          }
+        }
+
+        return this.findOne(id, tx);
+      },
+      { timeout: 30000 },
+    );
   }
 
   async remove(id: string) {

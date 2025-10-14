@@ -1,15 +1,17 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
 import { NestFactory } from '@nestjs/core';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
 import passport from 'passport';
+import { json, urlencoded } from 'express';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.setGlobalPrefix('api/v1');
+
+  app.use(json({ limit: '50mb' }));
+  app.use(urlencoded({ extended: true, limit: '50mb' }));
 
   app.enableCors({
     origin: '*',
@@ -33,7 +35,9 @@ async function bootstrap() {
 
   const config = new DocumentBuilder()
     .setTitle('GIS Server API')
-    .setDescription('API documentation for GIS Server - Geographic Information System for IE402 project')
+    .setDescription(
+      'API documentation for GIS Server - Geographic Information System for IE402 project',
+    )
     .setVersion('1.0')
     .addTag('accidents', 'Accident data management')
     .addTag('air-qualities', 'Air quality monitoring')
