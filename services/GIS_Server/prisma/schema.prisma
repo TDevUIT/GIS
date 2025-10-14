@@ -44,8 +44,8 @@ model Ward {
 
 model Image {
   id        String    @id @default(cuid())
-  url       String    
-  publicId  String    @map("public_id") 
+  url       String
+  publicId  String    @map("public_id")
   createdAt DateTime  @default(now())
   infrastructureId String?
   infrastructure   Infrastructure? @relation(fields: [infrastructureId], references: [id], onDelete: Cascade)
@@ -137,8 +137,8 @@ model Population {
 model Household {
   id             String        @id @default(cuid())
   householdSize  Int           @map("household_size")
-  incomeLevel    String?       @map("income_level")
-  housingType    String?       @map("housing_type")
+  incomeLevel    IncomeLevel?  @map("income_level")
+  housingType    HousingType?  @map("housing_type")
   populationId   String
   population     Population    @relation(fields: [populationId], references: [id], onDelete: Cascade)
   @@map("households")
@@ -146,7 +146,8 @@ model Household {
 
 model Demographic {
   id           String     @id @default(cuid())
-  ageGroup     String     @map("age_group")
+  ageMin       Int        @map("age_min")
+  ageMax       Int?       @map("age_max")
   male         Int
   female       Int
   populationId String
@@ -297,4 +298,17 @@ enum TransportMode {
   METRO
   BRT
   WATERWAY
+}
+
+enum IncomeLevel {
+  Thap
+  TrungBinh
+  Cao
+}
+
+enum HousingType {
+  NhaRieng
+  ChungCuCaoCap
+  NhaTrongHem
+  NhaTro
 }

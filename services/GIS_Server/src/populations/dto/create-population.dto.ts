@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call */
 import {
   IsNotEmpty,
   IsString,
@@ -6,27 +5,33 @@ import {
   IsArray,
   ValidateNested,
   IsOptional,
+  IsEnum,
 } from 'class-validator';
 import { Type } from 'class-transformer';
+import { HousingType, IncomeLevel } from '@prisma/client';
 
 class CreateHouseholdDto {
   @IsInt()
   @IsNotEmpty()
   householdSize: number;
 
-  @IsString()
+  @IsEnum(IncomeLevel)
   @IsOptional()
-  incomeLevel?: string;
+  incomeLevel?: IncomeLevel;
 
-  @IsString()
+  @IsEnum(HousingType)
   @IsOptional()
-  housingType?: string;
+  housingType?: HousingType;
 }
 
 class CreateDemographicDto {
-  @IsString()
+  @IsInt()
   @IsNotEmpty()
-  ageGroup: string;
+  ageMin: number;
+
+  @IsInt()
+  @IsOptional()
+  ageMax?: number;
 
   @IsInt()
   @IsNotEmpty()

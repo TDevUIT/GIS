@@ -178,19 +178,17 @@ export class AnalyticsService {
         `Dữ liệu dân số với ID "${populationId}" không tồn tại.`,
       );
     }
-
     const query = Prisma.sql`
       SELECT 
-        age_group as "ageGroup", 
+        CASE 
+          WHEN age_max IS NOT NULL THEN age_min || '-' || age_max
+          ELSE age_min || '+'
+        END as "ageGroup", 
         male,
         female
       FROM "public"."demographics"
       WHERE "populationId" = ${populationId}
-      ORDER BY 
-        CASE 
-          WHEN age_group ~ '^[0-9]+-[0-9]+$' THEN LPAD(SPLIT_PART(age_group, '-', 1), 3, '0')
-          ELSE age_group
-        END; -- Sắp xếp theo độ tuổi một cách thông minh
+      ORDER BY age_min ASC;
     `;
     return this.prisma.$queryRaw(query);
   }
@@ -208,20 +206,31 @@ export class AnalyticsService {
     const [byHousingType, byIncomeLevel] = await this.prisma.$transaction([
       this.prisma.$queryRaw(Prisma.sql`
         SELECT 
-          housing_type as "housingType",
+          CASE
+            WHEN housing_type = 'NhaRieng' THEN 'Nhà riêng'
+            WHEN housing_type = 'ChungCuCaoCap' THEN 'Chung cư cao cấp'
+            WHEN housing_type = 'NhaTrongHem' THEN 'Nhà trong hẻm'
+            WHEN housing_type = 'NhaTro' THEN 'Nhà trọ'
+            ELSE housing_type::text
+          END as "housingType",
           COUNT(id)::int as count
         FROM "public"."households"
         WHERE "populationId" = ${populationId} AND housing_type IS NOT NULL
-        GROUP BY "housingType"
+        GROUP BY housing_type
         ORDER BY count DESC;
       `),
       this.prisma.$queryRaw(Prisma.sql`
         SELECT 
-          income_level as "incomeLevel",
+          CASE
+            WHEN income_level = 'Thap' THEN 'Thấp'
+            WHEN income_level = 'TrungBinh' THEN 'Trung bình'
+            WHEN income_level = 'Cao' THEN 'Cao'
+            ELSE income_level::text
+          END as "incomeLevel",
           COUNT(id)::int as count
         FROM "public"."households"
         WHERE "populationId" = ${populationId} AND income_level IS NOT NULL
-        GROUP BY "incomeLevel"
+        GROUP BY income_level
         ORDER BY count DESC;
       `),
     ]);
