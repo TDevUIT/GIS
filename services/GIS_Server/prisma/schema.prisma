@@ -196,6 +196,8 @@ model Traffic {
   id             String      @id @default(cuid())
   roadName       String      @map("road_name")
   trafficVolume  Int?        @map("traffic_volume")
+  lengthKm       Float?      @map("length_km")
+  createdAt      DateTime    @default(now()) 
   updatedAt      DateTime    @updatedAt
   geom           String?
   districtId     String
@@ -207,12 +209,19 @@ model Traffic {
 model Accident {
   id            String   @id @default(cuid())
   accidentDate  DateTime @map("accident_date")
-  severity      String
+  severity      AccidentSeverity
   casualties    Int?
   trafficId     String
   traffic       Traffic  @relation(fields: [trafficId], references: [id], onDelete: Cascade)
   images        Image[]
   @@map("accidents")
+}
+
+enum AccidentSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
 }
 
 model PublicTransport {

@@ -146,4 +146,58 @@ export class AnalyticsController {
   getHouseholdsSummary(@Param('populationId') populationId: string) {
     return this.analyticsService.getHouseholdsSummary(populationId);
   }
+
+  @Get('accident-hotspots')
+  @ApiOperation({
+    summary: 'Get accident hotspots (most dangerous roads)',
+    description: 'Retrieve a list of traffic routes with the most accidents',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Hotspots data retrieved successfully',
+  })
+  getAccidentHotspots() {
+    return this.analyticsService.getAccidentHotspots();
+  }
+
+  @Get('accidents-by-time-of-day')
+  @ApiOperation({
+    summary: 'Get accident statistics by time of day',
+    description:
+      'Retrieve accident counts grouped by time of day (Morning, Afternoon, etc.)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Time of day stats retrieved successfully',
+  })
+  getAccidentsByTimeOfDay() {
+    return this.analyticsService.getAccidentsByTimeOfDay();
+  }
+
+  @Get('accidents-by-day-of-week')
+  @ApiOperation({
+    summary: 'Get accident statistics by day of the week',
+    description: 'Retrieve accident counts for each day of the week',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Day of week stats retrieved successfully',
+  })
+  getAccidentsByDayOfWeek() {
+    return this.analyticsService.getAccidentsByDayOfWeek();
+  }
+
+  @Get('traffic-risk-assessment')
+  @ApiOperation({
+    summary: 'Get traffic risk assessment (RFM model)',
+    description:
+      'Retrieve a ranked list of traffic routes by their calculated risk score',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Risk assessment data retrieved successfully',
+  })
+  getTrafficRiskAssessment() {
+    return this.analyticsService.getTrafficRiskAssessment();
+  }
 }

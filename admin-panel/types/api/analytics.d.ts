@@ -1,4 +1,4 @@
-import { InfraCategory } from './shared';
+import { InfraCategory, AccidentSeverity } from './shared';
 
 export interface GlobalSummary {
     totalDistricts: number;
@@ -37,7 +37,7 @@ export interface AirQualityHistoryPoint {
 }
 
 export interface AccidentSummaryBySeverity {
-    severity: string;
+    severity: AccidentSeverity;
     count: number;
 }
 
@@ -57,7 +57,7 @@ export interface RecentActivity {
     id: string;
     name?: string;
     category?: string;
-    severity?: string;
+    severity?: AccidentSeverity;
     createdAt: string;
 }
 
@@ -76,4 +76,31 @@ export interface HouseholdsSummary {
         incomeLevel: string;
         count: number;
     }[];
+}
+
+export interface AccidentHotspot {
+    id: string;
+    roadName: string;
+    districtName: string;
+    accidentCount: number;
+}
+
+export interface AccidentsByTimeOfDay {
+    timeOfDay: 'Morning (6-12h)' | 'Afternoon (12-17h)' | 'Evening (17-21h)' | 'Night (21-6h)';
+    accidentCount: number;
+}
+
+export interface AccidentsByDayOfWeek {
+    dayOfWeek: string;
+    accidentCount: number;
+}
+
+export interface TrafficRisk {
+    id: string;
+    roadName: string;
+    districtName: string;
+    recency: number;
+    frequency: number;
+    magnitude: number;
+    riskScore: number;
 }

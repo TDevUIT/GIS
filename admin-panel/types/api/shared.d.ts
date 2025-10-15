@@ -1,17 +1,17 @@
-export interface GeoJSONPoint {
+export type GeoJSONPoint = {
     type: 'Point';
     coordinates: [number, number];
-}
+};
 
-export interface GeoJSONPolygon {
+export type GeoJSONPolygon = {
     type: 'Polygon' | 'MultiPolygon';
     coordinates: number[][][] | number[][][][];
-}
+};
 
-export interface GeoJSONLineString {
+export type GeoJSONLineString = {
     type: 'LineString';
     coordinates: [number, number][];
-}
+};
 
 export enum InfraCategory {
     SCHOOL = 'SCHOOL',
@@ -57,4 +57,11 @@ export enum TransportMode {
     METRO = 'METRO',
     BRT = 'BRT',
     WATERWAY = 'WATERWAY',
+}
+
+export enum AccidentSeverity {
+    LOW = 'LOW',
+    MEDIUM = 'MEDIUM',
+    HIGH = 'HIGH',
+    CRITICAL = 'CRITICAL',
 }

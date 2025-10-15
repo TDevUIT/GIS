@@ -12,6 +12,13 @@ interface TrafficRoute {
   trafficVolume: number | null;
 }
 
+enum AccidentSeverity {
+  LOW = 'LOW',
+  MEDIUM = 'MEDIUM',
+  HIGH = 'HIGH',
+  CRITICAL = 'CRITICAL',
+}
+
 @Injectable()
 export class AccidentsJobService {
   private readonly logger = new Logger(AccidentsJobService.name);
@@ -28,7 +35,7 @@ export class AccidentsJobService {
     this.gisServerUrl = url;
   }
 
-  @Cron(CronExpression.EVERY_HOUR)
+  @Cron(CronExpression.EVERY_5_MINUTES)
   async simulateTrafficVolume() {
     this.logger.log('--- Starting Traffic Volume Simulation Job ---');
     try {
@@ -44,20 +51,36 @@ export class AccidentsJobService {
       let updatedCount = 0;
 
       for (const route of allRoutes) {
+        let roadTypeMultiplier = 1.0;
+        const roadNameLower = route.roadName.toLowerCase();
+        if (
+          roadNameLower.includes('đại lộ') ||
+          roadNameLower.includes('xa lộ') ||
+          roadNameLower.includes('cao tốc')
+        ) {
+          roadTypeMultiplier = 2.5;
+        } else if (
+          roadNameLower.includes('hẻm') ||
+          roadNameLower.includes('ngõ')
+        ) {
+          roadTypeMultiplier = 0.2;
+        }
+
         let baseVolume: number;
         if (
           (currentHour >= 7 && currentHour < 10) ||
           (currentHour >= 17 && currentHour < 20)
         ) {
-          baseVolume = 10000;
+          baseVolume = 8000;
         } else if (currentHour >= 0 && currentHour < 6) {
-          baseVolume = 500;
+          baseVolume = 400;
         } else {
-          baseVolume = 4000;
+          baseVolume = 3000;
         }
 
+        const adjustedBaseVolume = baseVolume * roadTypeMultiplier;
         const randomFactor = 0.8 + Math.random() * 0.4;
-        const newTrafficVolume = Math.round(baseVolume * randomFactor);
+        const newTrafficVolume = Math.round(adjustedBaseVolume * randomFactor);
 
         await this.patchToGis(`/traffics/${route.id}`, {
           trafficVolume: newTrafficVolume,
@@ -78,7 +101,7 @@ export class AccidentsJobService {
     }
   }
 
-  @Cron(CronExpression.EVERY_30_MINUTES)
+  @Cron(CronExpression.EVERY_MINUTE)
   async simulateDailyAccidents() {
     this.logger.log('--- Starting Accident Simulation Job ---');
     try {
@@ -94,22 +117,25 @@ export class AccidentsJobService {
       for (const route of allRoutes) {
         const trafficVolume = route.trafficVolume || 0;
         if (trafficVolume > 1000) {
-          const accidentProbability = trafficVolume / 50000;
+          const accidentProbability = trafficVolume / 80000;
           this.logger.debug(
-            `Route: "${route.roadName}", Volume: ${trafficVolume}, Accident Probability: ${accidentProbability.toFixed(4)}`,
+            `Route: "${route.roadName}", Volume: ${trafficVolume}, Accident Probability: ${accidentProbability.toFixed(5)}`,
           );
+
           if (Math.random() < accidentProbability) {
+            const severity = this.getRandomSeverity();
+            const casualties = this.getCasualtiesBasedOnSeverity(severity);
+
             const newAccident = {
               trafficId: route.id,
               accidentDate: new Date().toISOString(),
-              severity:
-                Math.random() < 0.7 ? 'Ít nghiêm trọng' : 'Nghiêm trọng',
-              casualties:
-                Math.random() < 0.4 ? Math.floor(Math.random() * 2) + 1 : 0,
+              severity: severity,
+              casualties: casualties,
             };
+
             await this.postToGis('/accidents', newAccident);
             this.logger.warn(
-              `>>> Simulated an accident on route: "${route.roadName}" (ID: ${route.id})`,
+              `>>> Simulated a ${severity} accident on route: "${route.roadName}" (ID: ${route.id})`,
             );
             simulatedCount++;
           }
@@ -120,6 +146,30 @@ export class AccidentsJobService {
       );
     } catch (error) {
       this.logger.error('Failed to run accident simulation job', error.stack);
+    }
+  }
+
+  private getRandomSeverity(): AccidentSeverity {
+    const rand = Math.random();
+    if (rand < 0.02) return AccidentSeverity.CRITICAL;
+    if (rand < 0.1) return AccidentSeverity.HIGH;
+    if (rand < 0.4) return AccidentSeverity.MEDIUM;
+    return AccidentSeverity.LOW;
+  }
+
+  private getCasualtiesBasedOnSeverity(severity: AccidentSeverity): number {
+    const rand = Math.random();
+    switch (severity) {
+      case AccidentSeverity.CRITICAL:
+        return Math.floor(rand * 3) + 2;
+      case AccidentSeverity.HIGH:
+        return rand < 0.8 ? Math.floor(rand * 2) + 1 : 0;
+      case AccidentSeverity.MEDIUM:
+        return rand < 0.3 ? 1 : 0;
+      case AccidentSeverity.LOW:
+        return rand < 0.05 ? 1 : 0;
+      default:
+        return 0;
     }
   }
 

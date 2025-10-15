@@ -1,5 +1,10 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-import { IsNotEmpty, IsString, IsOptional, IsNumber } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsString,
+  IsOptional,
+  IsNumber,
+  Min,
+} from 'class-validator';
 
 export class CreateTrafficDto {
   @IsString()
@@ -9,6 +14,11 @@ export class CreateTrafficDto {
   @IsString()
   @IsNotEmpty({ message: 'Dữ liệu tuyến đường (geom) không được để trống' })
   geom: string;
+
+  @IsNumber()
+  @Min(0)
+  @IsOptional()
+  lengthKm?: number;
 
   @IsNumber()
   @IsOptional()

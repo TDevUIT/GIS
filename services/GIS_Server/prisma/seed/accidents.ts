@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, AccidentSeverity } from '@prisma/client';
 
 export async function seedAccidents(prisma: PrismaClient) {
   const leLoiStreet = await prisma.traffic.findFirst({
@@ -16,28 +16,36 @@ export async function seedAccidents(prisma: PrismaClient) {
   }
 
   const date1 = new Date();
-  date1.setDate(date1.getDate() - 10);
+  date1.setDate(date1.getDate() - 15);
   const date2 = new Date();
-  date2.setDate(date2.getDate() - 5);
+  date2.setDate(date2.getDate() - 7);
+  const date3 = new Date();
+  date3.setDate(date3.getDate() - 2);
 
   const accidentsData = [
     {
       trafficId: leLoiStreet.id,
       accidentDate: date1,
-      severity: 'Ít nghiêm trọng',
+      severity: AccidentSeverity.LOW,
       casualties: 0,
     },
     {
       trafficId: leLoiStreet.id,
-      accidentDate: date2,
-      severity: 'Nghiêm trọng',
+      accidentDate: date3,
+      severity: AccidentSeverity.HIGH,
       casualties: 2,
     },
     {
       trafficId: nkkNStreet.id,
       accidentDate: date2,
-      severity: 'Ít nghiêm trọng',
+      severity: AccidentSeverity.MEDIUM,
       casualties: 1,
+    },
+    {
+      trafficId: nkkNStreet.id,
+      accidentDate: date1,
+      severity: AccidentSeverity.CRITICAL,
+      casualties: 3,
     },
   ];
 
