@@ -61,6 +61,7 @@ import { ref, watch, computed } from 'vue';
 import { BuildingOffice2Icon, MapIcon, MapPinIcon, UserGroupIcon } from '@heroicons/vue/24/outline';
 import { useAuth } from '~/composables/useAuth';
 import type { District } from '~/types/api/district';
+import { getSeverityStyle } from '~/utils/trafficStyles';
 import type { InfrastructureByCategory, AccidentSummaryBySeverity, AirQualityHistoryPoint, RecentActivity } from '~/types/api/analytics';
 
 useHead({ title: 'Dashboard' });
@@ -142,16 +143,20 @@ const infraChartData = computed(() => {
 const accidentChartData = computed(() => {
   const accidentData = dashboardData.value?.accidents;
   const items = Array.isArray(accidentData) ? accidentData : [];
+  const labels = items.map((item: AccidentSummaryBySeverity) => item.severity);
+  const backgroundColors = labels.map(label => getSeverityStyle(label).color);
+
   return {
-    labels: items.map((item: AccidentSummaryBySeverity) => item.severity),
+    labels: labels,
     datasets: [{
-      backgroundColor: ['#DC2626', '#F59E0B', '#3B82F6'].slice(0, items.length),
+      backgroundColor: backgroundColors,
       borderColor: '#1F2937',
-      borderWidth: 1,
+      borderWidth: 2,
       data: items.map((item: AccidentSummaryBySeverity) => item.count),
     }],
   };
 });
+
 
 const airQualityChartData = computed(() => {
   const airData = airQualityHistory.value?.data.data;
