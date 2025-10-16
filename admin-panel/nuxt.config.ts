@@ -6,6 +6,9 @@ export default defineNuxtConfig({
     '@pinia/nuxt',
     '@pinia-plugin-persistedstate/nuxt',
   ],
+  build: {
+    transpile: ['@vue-leaflet/vue-leaflet'],
+  },
   css: [
     '~/assets/css/main.css',
   ],

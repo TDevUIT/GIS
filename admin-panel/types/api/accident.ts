@@ -5,10 +5,17 @@ export interface Image {
   createdAt?: string;
 }
 
+export enum AccidentSeverity {
+  LOW = 'LOW',
+  MEDIUM = 'MEDIUM',
+  HIGH = 'HIGH',
+  CRITICAL = 'CRITICAL',
+}
+
 export interface Accident {
   id: string;
   accidentDate: string;
-  severity: string;
+  severity: AccidentSeverity;
   casualties: number | null;
   trafficId: string;
   traffic?: {

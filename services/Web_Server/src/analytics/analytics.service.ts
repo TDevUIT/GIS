@@ -109,4 +109,36 @@ export class AnalyticsService {
     );
     return response.data;
   }
+
+  async getAccidentHotspots() {
+    const url = `${this.gisServerUrl}/analytics/accident-hotspots`;
+    const response = await firstValueFrom(
+      this.httpService.get(url).pipe(catchError(this.handleError)),
+    );
+    return response.data;
+  }
+
+  async getAccidentsByTimeOfDay() {
+    const url = `${this.gisServerUrl}/analytics/accidents-by-time-of-day`;
+    const response = await firstValueFrom(
+      this.httpService.get(url).pipe(catchError(this.handleError)),
+    );
+    return response.data;
+  }
+
+  async getAccidentsByDayOfWeek() {
+    const url = `${this.gisServerUrl}/analytics/accidents-by-day-of-week`;
+    const response = await firstValueFrom(
+      this.httpService.get(url).pipe(catchError(this.handleError)),
+    );
+    return response.data;
+  }
+
+  async getTrafficRiskAssessment() {
+    const url = `${this.gisServerUrl}/analytics/traffic-risk-assessment`;
+    const response = await firstValueFrom(
+      this.httpService.get(url).pipe(catchError(this.handleError)),
+    );
+    return response.data;
+  }
 }

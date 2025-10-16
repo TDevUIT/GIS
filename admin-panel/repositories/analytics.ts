@@ -11,6 +11,10 @@ import type {
     WaterQualityHistoryPoint,
     DemographicsSummaryPoint,
     HouseholdsSummary,
+    AccidentsByTimeOfDay,
+    AccidentHotspot,
+    TrafficRisk,
+    AccidentsByDayOfWeek,
 } from '../types/api/analytics';
 
 type OFetch = typeof ofetch;
@@ -74,6 +78,30 @@ export default (apiFetch: OFetch) => ({
 
     getHouseholdsSummary(populationId: string) {
         return apiFetch<ApiResponse<HouseholdsSummary>>(`/analytics/households-summary/${populationId}`, {
+            method: 'GET',
+        });
+    },
+
+    getAccidentHotspots() {
+        return apiFetch<ApiResponse<AccidentHotspot[]>>('/analytics/accident-hotspots', {
+            method: 'GET',
+        });
+    },
+
+    getAccidentsByTimeOfDay() {
+        return apiFetch<ApiResponse<AccidentsByTimeOfDay[]>>('/analytics/accidents-by-time-of-day', {
+            method: 'GET',
+        });
+    },
+
+    getAccidentsByDayOfWeek() {
+        return apiFetch<ApiResponse<AccidentsByDayOfWeek[]>>('/analytics/accidents-by-day-of-week', {
+            method: 'GET',
+        });
+    },
+
+    getTrafficRiskAssessment() {
+        return apiFetch<ApiResponse<TrafficRisk[]>>('/analytics/traffic-risk-assessment', {
             method: 'GET',
         });
     },

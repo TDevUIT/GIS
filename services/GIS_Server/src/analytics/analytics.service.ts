@@ -237,4 +237,95 @@ export class AnalyticsService {
 
     return { byHousingType, byIncomeLevel };
   }
+  async getAccidentHotspots(limit = 5) {
+    const query = Prisma.sql`
+      SELECT
+        t.id,
+        t.road_name as "roadName",
+        d.name as "districtName",
+        COUNT(a.id)::int as "accidentCount"
+      FROM "public"."traffics" t
+      JOIN "public"."accidents" a ON t.id = a."trafficId"
+      LEFT JOIN "public"."districts" d ON t."districtId" = d.id
+      GROUP BY t.id, d.name
+      ORDER BY "accidentCount" DESC
+      LIMIT ${limit};
+    `;
+    return this.prisma.$queryRaw(query);
+  }
+  async getAccidentsByTimeOfDay() {
+    const query = Prisma.sql`
+      WITH AccidentsWithTimeSlot AS (
+        SELECT
+          id,
+          CASE
+            WHEN EXTRACT(HOUR FROM accident_date) BETWEEN 6 AND 11 THEN 1
+            WHEN EXTRACT(HOUR FROM accident_date) BETWEEN 12 AND 16 THEN 2
+            WHEN EXTRACT(HOUR FROM accident_date) BETWEEN 17 AND 20 THEN 3
+            ELSE 4
+          END as "timeSlot"
+        FROM "public"."accidents"
+      )
+      SELECT
+        CASE "timeSlot"
+          WHEN 1 THEN 'Morning (6-12h)'
+          WHEN 2 THEN 'Afternoon (12-17h)'
+          WHEN 3 THEN 'Evening (17-21h)'
+          ELSE 'Night (21-6h)'
+        END as "timeOfDay",
+        COUNT(id)::int as "accidentCount"
+      FROM AccidentsWithTimeSlot
+      GROUP BY "timeSlot"
+      ORDER BY "timeSlot";
+    `;
+    return this.prisma.$queryRaw(query);
+  }
+  async getAccidentsByDayOfWeek() {
+    const query = Prisma.sql`
+      SELECT
+        TO_CHAR(a.accident_date, 'Day') as "dayOfWeek",
+        COUNT(a.id)::int as "accidentCount"
+      FROM "public"."accidents" a
+      GROUP BY "dayOfWeek", EXTRACT(DOW FROM a.accident_date)
+      ORDER BY EXTRACT(DOW FROM a.accident_date);
+    `;
+    return this.prisma.$queryRaw(query);
+  }
+  async getTrafficRiskAssessment() {
+    const query = Prisma.sql`
+      WITH TrafficStats AS (
+        SELECT
+          t.id,
+          t.road_name as "roadName",
+          d.name as "districtName",
+          COUNT(a.id)::int as "frequency",
+          MIN(DATE_PART('day', NOW() - a.accident_date))::int as "recency",
+          SUM(
+            CASE a.severity
+              WHEN 'CRITICAL' THEN 5
+              WHEN 'HIGH' THEN 3
+              WHEN 'MEDIUM' THEN 2
+              WHEN 'LOW' THEN 1
+              ELSE 0
+            END
+          )::int as "magnitude"
+        FROM "public"."traffics" t
+        LEFT JOIN "public"."accidents" a ON t.id = a."trafficId"
+        LEFT JOIN "public"."districts" d ON t."districtId" = d.id
+        WHERE a.id IS NOT NULL
+        GROUP BY t.id, d.name
+      )
+      SELECT
+        id,
+        "roadName",
+        "districtName",
+        recency,
+        frequency,
+        magnitude,
+        ( (1.0 / (recency + 1)) * 50 + frequency * 30 + magnitude * 20 ) as "riskScore"
+      FROM TrafficStats
+      ORDER BY "riskScore" DESC;
+    `;
+    return this.prisma.$queryRaw(query);
+  }
 }

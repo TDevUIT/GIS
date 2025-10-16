@@ -1,5 +1,5 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call */
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { AccidentSeverity } from '@prisma/client';
 import {
   IsNotEmpty,
   IsString,
@@ -7,6 +7,7 @@ import {
   IsInt,
   IsDateString,
   Min,
+  IsEnum,
 } from 'class-validator';
 
 export class CreateAccidentDto {
@@ -21,10 +22,11 @@ export class CreateAccidentDto {
   @ApiProperty({
     description: 'Severity level of the accident',
     example: 'HIGH',
+    enum: AccidentSeverity,
   })
-  @IsString()
+  @IsEnum(AccidentSeverity)
   @IsNotEmpty({ message: 'Severity level cannot be empty' })
-  severity: string;
+  severity: AccidentSeverity;
 
   @ApiPropertyOptional({
     description: 'Number of casualties in the accident',
