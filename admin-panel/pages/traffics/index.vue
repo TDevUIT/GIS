@@ -33,12 +33,6 @@
             <div class="xl:col-span-1 flex flex-col gap-4">
                 <div class="flex flex-col sm:flex-row gap-4">
                     <UiSearchInput v-model="searchQuery" placeholder="Search by road name..." class="flex-grow" />
-                    <UiAppDropdown
-                        v-if="districtOptions.length > 0"
-                        v-model="selectedDistrictId"
-                        :options="districtOptions"
-                        placeholder="All Districts"
-                    />
                 </div>
                 <div class="flex-grow overflow-y-auto">
                     <UiDataTable
