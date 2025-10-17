@@ -328,4 +328,42 @@ export class AnalyticsService {
     `;
     return this.prisma.$queryRaw(query);
   }
+  async getPublicTransportSummaryByMode() {
+    const query = Prisma.sql`
+      SELECT
+        mode,
+        COUNT(id)::int as "routeCount"
+      FROM "public"."public_transports"
+      GROUP BY mode
+      ORDER BY "routeCount" DESC;
+    `;
+    return this.prisma.$queryRaw(query);
+  }
+  async getPublicTransportCapacityByMode() {
+    const query = Prisma.sql`
+      SELECT
+        mode,
+        SUM(capacity)::int as "totalCapacity"
+      FROM "public"."public_transports"
+      WHERE capacity IS NOT NULL
+      GROUP BY mode
+      ORDER BY "totalCapacity" DESC;
+    `;
+    return this.prisma.$queryRaw(query);
+  }
+  async getMostFrequentRoutes(limit = 5) {
+    const query = Prisma.sql`
+      SELECT
+        pt.route_name as "routeName",
+        pt.mode,
+        pt.frequency_min as "frequencyMin",
+        d.name as "districtName"
+      FROM "public"."public_transports" pt
+      LEFT JOIN "public"."districts" d ON pt."districtId" = d.id
+      WHERE pt.frequency_min IS NOT NULL
+      ORDER BY pt.frequency_min ASC
+      LIMIT ${limit};
+    `;
+    return this.prisma.$queryRaw(query);
+  }
 }

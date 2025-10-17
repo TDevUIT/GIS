@@ -225,13 +225,18 @@ enum AccidentSeverity {
 }
 
 model PublicTransport {
-  id          String       @id @default(cuid())
-  routeName   String       @map("route_name")
-  mode        TransportMode
-  capacity    Int?
-  geom        String?
-  districtId  String
-  district    District     @relation(fields: [districtId], references: [id], onDelete: Cascade)
+  id              String       @id @default(cuid())
+  routeName       String       @map("route_name")
+  mode            TransportMode
+  capacity        Int?
+  stopsCount      Int?         @map("stops_count")      
+  frequencyMin    Int?         @map("frequency_min")    
+  operatingHours  String?      @map("operating_hours")  
+  createdAt       DateTime     @default(now())          
+  updatedAt       DateTime     @updatedAt               
+  geom            String?
+  districtId      String
+  district        District     @relation(fields: [districtId], references: [id], onDelete: Cascade)
   @@map("public_transports")
 }
 

@@ -1,4 +1,4 @@
-import { InfraCategory, AccidentSeverity } from './shared';
+import { InfraCategory, AccidentSeverity, TransportMode } from './shared';
 
 export interface GlobalSummary {
     totalDistricts: number;
@@ -103,4 +103,20 @@ export interface TrafficRisk {
     frequency: number;
     magnitude: number;
     riskScore: number;
+}
+export interface PublicTransportSummaryByMode {
+    mode: TransportMode;
+    routeCount: number;
+}
+
+export interface PublicTransportCapacityByMode {
+    mode: TransportMode;
+    totalCapacity: number;
+}
+
+export interface MostFrequentRoute {
+    routeName: string;
+    mode: TransportMode;
+    frequencyMin: number;
+    districtName: string;
 }

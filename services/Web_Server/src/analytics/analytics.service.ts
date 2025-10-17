@@ -141,4 +141,28 @@ export class AnalyticsService {
     );
     return response.data;
   }
+
+  async getPublicTransportSummaryByMode() {
+    const url = `${this.gisServerUrl}/analytics/public-transport-summary-by-mode`;
+    const response = await firstValueFrom(
+      this.httpService.get(url).pipe(catchError(this.handleError)),
+    );
+    return response.data;
+  }
+
+  async getPublicTransportCapacityByMode() {
+    const url = `${this.gisServerUrl}/analytics/public-transport-capacity-by-mode`;
+    const response = await firstValueFrom(
+      this.httpService.get(url).pipe(catchError(this.handleError)),
+    );
+    return response.data;
+  }
+
+  async getMostFrequentRoutes() {
+    const url = `${this.gisServerUrl}/analytics/most-frequent-routes`;
+    const response = await firstValueFrom(
+      this.httpService.get(url).pipe(catchError(this.handleError)),
+    );
+    return response.data;
+  }
 }
