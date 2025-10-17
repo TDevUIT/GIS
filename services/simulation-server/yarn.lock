@@ -5165,6 +5165,11 @@ which@^2.0.1:
   dependencies:
     isexe "^2.0.0"
 
+wkt@^0.1.1:
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/wkt/-/wkt-0.1.1.tgz#8d3280cb0d7664343d8987a30c85806554618bf8"
+  integrity sha512-2vtzYZOqN0VZdtDTMDUgbpXpE+MXRdsFTiCpS08FZ4yktT9pPylVMZaLxcIqT9pRkBp5FIAGVQyJ/kJa9b8uGg==
+
 word-wrap@^1.2.5:
   version "1.2.5"
   resolved "https://registry.yarnpkg.com/word-wrap/-/word-wrap-1.2.5.tgz#d2c45c6dd4fbce621a66f136cbe328afd0410b34"

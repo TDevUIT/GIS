@@ -5,6 +5,7 @@ import { HttpModule } from '@nestjs/axios';
 import { ScheduleModule } from '@nestjs/schedule';
 import { PopulationsModule } from './jobs/populations/populations.module';
 import { EnvironmentModule } from './jobs/environment/environment.module';
+import { PublicTransportsModule } from './jobs/public-transports.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { EnvironmentModule } from './jobs/environment/environment.module';
     AccidentsModule,
     PopulationsModule,
     EnvironmentModule,
+    PublicTransportsModule,
   ],
 })
 export class AppModule {}

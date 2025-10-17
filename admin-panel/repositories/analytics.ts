@@ -15,6 +15,9 @@ import type {
     AccidentHotspot,
     TrafficRisk,
     AccidentsByDayOfWeek,
+    PublicTransportSummaryByMode,
+    PublicTransportCapacityByMode,
+    MostFrequentRoute,
 } from '../types/api/analytics';
 
 type OFetch = typeof ofetch;
@@ -102,6 +105,24 @@ export default (apiFetch: OFetch) => ({
 
     getTrafficRiskAssessment() {
         return apiFetch<ApiResponse<TrafficRisk[]>>('/analytics/traffic-risk-assessment', {
+            method: 'GET',
+        });
+    },
+
+    getPublicTransportSummaryByMode() {
+        return apiFetch<ApiResponse<PublicTransportSummaryByMode[]>>('/analytics/public-transport-summary-by-mode', {
+            method: 'GET',
+        });
+    },
+
+    getPublicTransportCapacityByMode() {
+        return apiFetch<ApiResponse<PublicTransportCapacityByMode[]>>('/analytics/public-transport-capacity-by-mode', {
+            method: 'GET',
+        });
+    },
+
+    getMostFrequentRoutes() {
+        return apiFetch<ApiResponse<MostFrequentRoute[]>>('/analytics/most-frequent-routes', {
             method: 'GET',
         });
     },

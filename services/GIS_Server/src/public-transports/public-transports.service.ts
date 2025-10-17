@@ -15,9 +15,12 @@ import cuid from 'cuid';
 export class PublicTransportsService {
   private readonly selectFields = Prisma.sql`
     pt.id, pt.route_name as "routeName", pt.mode, pt.capacity,
+    pt.stops_count as "stopsCount", pt.frequency_min as "frequencyMin", pt.operating_hours as "operatingHours",
+    pt."createdAt", pt."updatedAt",
     pt."districtId", d.name as "districtName",
     ST_AsGeoJSON(pt.geom) as geom
   `;
+
   private readonly fromTable = Prisma.sql`
     FROM "public"."public_transports" pt
     LEFT JOIN "public"."districts" d ON pt."districtId" = d.id
@@ -27,19 +30,37 @@ export class PublicTransportsService {
 
   async create(createDto: CreatePublicTransportDto) {
     const { districtId, geom, ...transportData } = createDto;
+
     const districtExists = await this.prisma.district.findUnique({
       where: { id: districtId },
     });
+
     if (!districtExists) {
       throw new BadRequestException(
         `Quận với ID "${districtId}" không tồn tại.`,
       );
     }
+
     const id = cuid();
+
     const query = Prisma.sql`
-      INSERT INTO "public"."public_transports" (id, route_name, mode, capacity, geom, "districtId")
-      VALUES (${id}, ${transportData.routeName}, ${transportData.mode}::"TransportMode", ${transportData.capacity}, ST_GeomFromText(${geom}, 4326), ${districtId})
+      INSERT INTO "public"."public_transports" 
+        (id, route_name, mode, capacity, stops_count, frequency_min, operating_hours, geom, "districtId", "createdAt", "updatedAt")
+      VALUES (
+        ${id}, 
+        ${transportData.routeName}, 
+        ${transportData.mode}::"TransportMode", 
+        ${transportData.capacity}, 
+        ${transportData.stopsCount},
+        ${transportData.frequencyMin},
+        ${transportData.operatingHours},
+        ST_GeomFromText(${geom}, 4326), 
+        ${districtId},
+        NOW(),
+        NOW()
+      )
     `;
+
     await this.prisma.$executeRaw(query);
     return this.findOne(id);
   }
@@ -47,52 +68,76 @@ export class PublicTransportsService {
   async findAll(queryDto: FindPublicTransportsQueryDto) {
     const { districtId, mode } = queryDto;
     const whereClauses: Prisma.Sql[] = [];
+
     if (districtId) {
       whereClauses.push(Prisma.sql`pt."districtId" = ${districtId}`);
     }
+
     if (mode) {
       whereClauses.push(Prisma.sql`pt.mode = ${mode}::"TransportMode"`);
     }
+
     const where =
       whereClauses.length > 0
         ? Prisma.sql`WHERE ${Prisma.join(whereClauses, ' AND ')}`
         : Prisma.empty;
-    const query = Prisma.sql`SELECT ${this.selectFields} ${this.fromTable} ${where} ORDER BY pt.route_name ASC`;
+
+    const query = Prisma.sql`
+      SELECT ${this.selectFields} ${this.fromTable} ${where} ORDER BY pt.route_name ASC
+    `;
+
     return this.prisma.$queryRaw(query);
   }
 
   async findOne(id: string) {
-    const query = Prisma.sql`SELECT ${this.selectFields} ${this.fromTable} WHERE pt.id = ${id}`;
+    const query = Prisma.sql`
+      SELECT ${this.selectFields} ${this.fromTable} WHERE pt.id = ${id}
+    `;
     const result: any[] = await this.prisma.$queryRaw(query);
+
     if (result.length === 0) {
       throw new NotFoundException(`Tuyến GTCC với ID "${id}" không tồn tại.`);
     }
+
     return result[0];
   }
 
   async update(id: string, updateDto: UpdatePublicTransportDto) {
     await this.findOne(id);
-    const { geom, ...otherData } = updateDto;
-    if (otherData.districtId) {
+
+    const { geom, districtId, ...otherData } = updateDto;
+
+    if (districtId) {
       const districtExists = await this.prisma.district.findUnique({
-        where: { id: otherData.districtId },
+        where: { id: districtId },
       });
-      if (!districtExists)
+      if (!districtExists) {
         throw new BadRequestException(
-          `Quận với ID "${otherData.districtId}" không tồn tại.`,
+          `Quận với ID "${districtId}" không tồn tại.`,
         );
+      }
     }
-    if (Object.keys(otherData).length > 0) {
+
+    const dataToUpdate = {
+      ...otherData,
+      ...(districtId && { district: { connect: { id: districtId } } }),
+    };
+
+    if (Object.keys(dataToUpdate).length > 0) {
       await this.prisma.publicTransport.update({
         where: { id },
-        data: otherData,
+        data: dataToUpdate,
       });
     }
+
     if (geom) {
       await this.prisma.$executeRaw`
-        UPDATE "public"."public_transports" SET geom = ST_GeomFromText(${geom}, 4326) WHERE id = ${id};
+        UPDATE "public"."public_transports" 
+        SET geom = ST_GeomFromText(${geom}, 4326), "updatedAt" = NOW() 
+        WHERE id = ${id};
       `;
     }
+
     return this.findOne(id);
   }
 

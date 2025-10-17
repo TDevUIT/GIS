@@ -136,4 +136,34 @@ export class AnalyticsController {
   getTrafficRiskAssessment() {
     return this.analyticsService.getTrafficRiskAssessment();
   }
+
+  @ApiOperation({ summary: 'Get public transport summary by mode' })
+  @ApiResponse({
+    status: 200,
+    description: 'Count of routes for each transport mode',
+  })
+  @Get('public-transport-summary-by-mode')
+  getPublicTransportSummaryByMode() {
+    return this.analyticsService.getPublicTransportSummaryByMode();
+  }
+
+  @ApiOperation({ summary: 'Get total passenger capacity by transport mode' })
+  @ApiResponse({
+    status: 200,
+    description: 'Total capacity for each transport mode',
+  })
+  @Get('public-transport-capacity-by-mode')
+  getPublicTransportCapacityByMode() {
+    return this.analyticsService.getPublicTransportCapacityByMode();
+  }
+
+  @ApiOperation({ summary: 'Get the most frequent public transport routes' })
+  @ApiResponse({
+    status: 200,
+    description: 'List of top 5 most frequent routes',
+  })
+  @Get('most-frequent-routes')
+  getMostFrequentRoutes() {
+    return this.analyticsService.getMostFrequentRoutes();
+  }
 }

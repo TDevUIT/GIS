@@ -200,4 +200,46 @@ export class AnalyticsController {
   getTrafficRiskAssessment() {
     return this.analyticsService.getTrafficRiskAssessment();
   }
+
+  @Get('public-transport-summary-by-mode')
+  @ApiOperation({
+    summary: 'Get public transport summary by mode',
+    description:
+      'Retrieve statistics on the number of routes for each transport mode (BUS, METRO, etc.)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Summary retrieved successfully',
+  })
+  getPublicTransportSummaryByMode() {
+    return this.analyticsService.getPublicTransportSummaryByMode();
+  }
+
+  @Get('public-transport-capacity-by-mode')
+  @ApiOperation({
+    summary: 'Get public transport capacity by mode',
+    description:
+      'Retrieve statistics on the total passenger capacity for each transport mode',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Capacity data retrieved successfully',
+  })
+  getPublicTransportCapacityByMode() {
+    return this.analyticsService.getPublicTransportCapacityByMode();
+  }
+
+  @Get('most-frequent-routes')
+  @ApiOperation({
+    summary: 'Get most frequent transport routes',
+    description:
+      'Retrieve a list of the top public transport routes with the highest frequency (lowest minutes per trip)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Most frequent routes retrieved successfully',
+  })
+  getMostFrequentRoutes() {
+    return this.analyticsService.getMostFrequentRoutes();
+  }
 }
