@@ -78,6 +78,14 @@ export class AnalyticsService {
     return response.data;
   }
 
+  async getWaterQualityHistory(districtId: string) {
+    const url = `${this.gisServerUrl}/analytics/water-quality-history/${districtId}`;
+    const response = await firstValueFrom(
+      this.httpService.get(url).pipe(catchError(this.handleError)),
+    );
+    return response.data;
+  }
+
   async getAccidentSummaryBySeverity() {
     const url = `${this.gisServerUrl}/analytics/accident-summary-by-severity`;
     const response = await firstValueFrom(
@@ -160,6 +168,22 @@ export class AnalyticsService {
 
   async getMostFrequentRoutes() {
     const url = `${this.gisServerUrl}/analytics/most-frequent-routes`;
+    const response = await firstValueFrom(
+      this.httpService.get(url).pipe(catchError(this.handleError)),
+    );
+    return response.data;
+  }
+
+  async getAirQualityRankingByDistrict() {
+    const url = `${this.gisServerUrl}/analytics/air-quality-ranking-by-district`;
+    const response = await firstValueFrom(
+      this.httpService.get(url).pipe(catchError(this.handleError)),
+    );
+    return response.data;
+  }
+
+  async getWaterQualityRankingByDistrict() {
+    const url = `${this.gisServerUrl}/analytics/water-quality-ranking-by-district`;
     const response = await firstValueFrom(
       this.httpService.get(url).pipe(catchError(this.handleError)),
     );

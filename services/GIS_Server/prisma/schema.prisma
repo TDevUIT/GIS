@@ -173,6 +173,7 @@ model AirQuality {
   pm25        Float?
   co2         Float?
   no2         Float?
+  level       QualityLevel?
   recordedAt  DateTime @map("recorded_at")
   geom        String?
   districtId  String
@@ -185,11 +186,19 @@ model WaterQuality {
   ph                  Float?
   turbidity           Float?
   contaminationIndex  Float?   @map("contamination_index")
+  level               QualityLevel?
   recordedAt          DateTime @map("recorded_at")
   geom                String?
   districtId          String
   district            District @relation(fields: [districtId], references: [id], onDelete: Cascade)
   @@map("water_qualities")
+}
+
+enum QualityLevel {
+  GOOD
+  MODERATE
+  UNHEALTHY
+  HAZARDOUS
 }
 
 model Traffic {

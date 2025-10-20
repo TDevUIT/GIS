@@ -9,14 +9,14 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateAirQualityDto } from './dto/create-air-quality.dto';
 import { UpdateAirQualityDto } from './dto/update-air-quality.dto';
-import { Prisma } from '@prisma/client';
+import { Prisma, QualityLevel } from '@prisma/client';
 import cuid from 'cuid';
 import { FindAirQualityQueryDto } from './dto/query.dto';
 
 @Injectable()
 export class AirQualitiesService {
   private readonly selectFields = Prisma.sql`
-    aq.id, aq.pm25, aq.co2, aq.no2, aq.recorded_at as "recordedAt",
+    aq.id, aq.pm25, aq.co2, aq.no2, aq.level, aq.recorded_at as "recordedAt",
     aq."districtId", d.name as "districtName",
     ST_AsGeoJSON(aq.geom) as geom
   `;
@@ -26,6 +26,14 @@ export class AirQualitiesService {
   `;
 
   constructor(private prisma: PrismaService) {}
+
+  private determineAirQualityLevel(pm25?: number | null): QualityLevel | null {
+    if (pm25 == null) return null;
+    if (pm25 <= 12.0) return QualityLevel.GOOD;
+    if (pm25 <= 35.4) return QualityLevel.MODERATE;
+    if (pm25 <= 55.4) return QualityLevel.UNHEALTHY;
+    return QualityLevel.HAZARDOUS;
+  }
 
   private transformRecord(record: any) {
     if (record && record.geom && typeof record.geom === 'string') {
@@ -48,10 +56,13 @@ export class AirQualitiesService {
         `Quận với ID "${districtId}" không tồn tại.`,
       );
     }
+
+    const level = this.determineAirQualityLevel(airQualityData.pm25);
     const id = cuid();
+
     const query = Prisma.sql`
-      INSERT INTO "public"."air_qualities" (id, pm25, co2, no2, recorded_at, geom, "districtId")
-      VALUES (${id}, ${airQualityData.pm25}, ${airQualityData.co2}, ${airQualityData.no2}, ${airQualityData.recordedAt}::timestamp, ST_GeomFromText(${geom}, 4326), ${districtId})
+      INSERT INTO "public"."air_qualities" (id, pm25, co2, no2, level, recorded_at, geom, "districtId")
+      VALUES (${id}, ${airQualityData.pm25}, ${airQualityData.co2}, ${airQualityData.no2}, ${level}::"QualityLevel", ${airQualityData.recordedAt}::timestamp, ST_GeomFromText(${geom}, 4326), ${districtId})
     `;
     await this.prisma.$executeRaw(query);
     return this.findOne(id);
@@ -73,13 +84,9 @@ export class AirQualitiesService {
       whereClauses.length > 0
         ? Prisma.sql`WHERE ${Prisma.join(whereClauses, ' AND ')}`
         : Prisma.empty;
+
     const query = Prisma.sql`
-      SELECT 
-        aq.id, aq.pm25, aq.co2, aq.no2, aq.recorded_at as "recordedAt",
-        aq."districtId", d.name as "districtName",
-        ST_AsGeoJSON(aq.geom) as geom
-      FROM "public"."air_qualities" aq
-      LEFT JOIN "public"."districts" d ON aq."districtId" = d.id
+      SELECT ${this.selectFields} ${this.fromTable}
       ${where}
       ORDER BY aq.recorded_at DESC
     `;
@@ -110,18 +117,20 @@ export class AirQualitiesService {
           `Quận với ID "${otherData.districtId}" không tồn tại.`,
         );
     }
+
     if (Object.keys(otherData).length > 0) {
-      const dataToUpdate = { ...otherData };
-      if (dataToUpdate.recordedAt) {
-        dataToUpdate.recordedAt = new Date(
-          dataToUpdate.recordedAt,
-        ).toISOString();
+      const dataToUpdate: Prisma.AirQualityUpdateInput = { ...otherData };
+      if (dataToUpdate.pm25 !== undefined) {
+        dataToUpdate.level = this.determineAirQualityLevel(
+          dataToUpdate.pm25 as number,
+        );
       }
       await this.prisma.airQuality.update({
         where: { id },
         data: dataToUpdate,
       });
     }
+
     if (geom) {
       await this.prisma.$executeRaw`
         UPDATE "public"."air_qualities" SET geom = ST_GeomFromText(${geom}, 4326) WHERE id = ${id};

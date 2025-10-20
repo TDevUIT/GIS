@@ -35,7 +35,7 @@ export class AccidentsJobService {
     this.gisServerUrl = url;
   }
 
-  @Cron(CronExpression.EVERY_5_MINUTES)
+  @Cron(CronExpression.EVERY_HOUR)
   async simulateTrafficVolume() {
     this.logger.log('--- Starting Traffic Volume Simulation Job ---');
     try {
@@ -101,7 +101,7 @@ export class AccidentsJobService {
     }
   }
 
-  @Cron(CronExpression.EVERY_MINUTE)
+  @Cron(CronExpression.EVERY_30_MINUTES)
   async simulateDailyAccidents() {
     this.logger.log('--- Starting Accident Simulation Job ---');
     try {

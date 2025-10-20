@@ -1,10 +1,12 @@
 import type { GeoJSONPoint } from './shared';
+import { QualityLevel } from './shared';
 
 export interface AirQuality {
   id: string;
   pm25: number | null;
   co2: number | null;
   no2: number | null;
+  level: QualityLevel | null;
   recordedAt: string;
   geom: GeoJSONPoint | null;
   districtId: string;

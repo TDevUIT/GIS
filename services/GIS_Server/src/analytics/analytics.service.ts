@@ -127,16 +127,15 @@ export class AnalyticsService {
     });
     if (!district)
       throw new NotFoundException(`Quận với ID "${districtId}" không tồn tại.`);
-
     const query = Prisma.sql`
       SELECT 
-        DATE_TRUNC('month', recorded_at)::date as "month",
+        DATE_TRUNC('day', recorded_at)::date as "day",
         ROUND(AVG(ph)::numeric, 2) as "avgPh",
         ROUND(AVG(turbidity)::numeric, 2) as "avgTurbidity"
       FROM "public"."water_qualities"
-      WHERE "districtId" = ${districtId} AND ph IS NOT NULL
-      GROUP BY "month"
-      ORDER BY "month" ASC;
+      WHERE "districtId" = ${districtId} AND (ph IS NOT NULL OR turbidity IS NOT NULL)
+      GROUP BY "day"
+      ORDER BY "day" ASC;
     `;
     return this.prisma.$queryRaw(query);
   }
@@ -363,6 +362,36 @@ export class AnalyticsService {
       WHERE pt.frequency_min IS NOT NULL
       ORDER BY pt.frequency_min ASC
       LIMIT ${limit};
+    `;
+    return this.prisma.$queryRaw(query);
+  }
+
+  async getAirQualityRankingByDistrict() {
+    const query = Prisma.sql`
+      SELECT
+        d.name as "districtName",
+        d.code as "districtCode",
+        ROUND(AVG(aq.pm25)::numeric, 2) as "avgPm25"
+      FROM "public"."air_qualities" aq
+      JOIN "public"."districts" d ON aq."districtId" = d.id
+      WHERE aq.recorded_at >= NOW() - INTERVAL '7 days' AND aq.pm25 IS NOT NULL
+      GROUP BY d.id
+      ORDER BY "avgPm25" DESC;
+    `;
+    return this.prisma.$queryRaw(query);
+  }
+
+  async getWaterQualityRankingByDistrict() {
+    const query = Prisma.sql`
+      SELECT
+        d.name as "districtName",
+        d.code as "districtCode",
+        ROUND(AVG(wq.contamination_index)::numeric, 2) as "avgContaminationIndex"
+      FROM "public"."water_qualities" wq
+      JOIN "public"."districts" d ON wq."districtId" = d.id
+      WHERE wq.recorded_at >= NOW() - INTERVAL '30 days' AND wq.contamination_index IS NOT NULL
+      GROUP BY d.id
+      ORDER BY "avgContaminationIndex" DESC;
     `;
     return this.prisma.$queryRaw(query);
   }

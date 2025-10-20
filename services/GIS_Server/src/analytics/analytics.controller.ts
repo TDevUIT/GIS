@@ -73,6 +73,8 @@ export class AnalyticsController {
 
   @ApiOperation({ summary: 'Get water quality history for a district' })
   @ApiParam({ name: 'districtId', description: 'District ID' })
+  @ApiResponse({ status: 200, description: 'Water quality history data' })
+  @ApiResponse({ status: 404, description: 'District not found' })
   @Get('water-quality-history/:districtId')
   getWaterQualityHistory(@Param('districtId') districtId: string) {
     return this.analyticsService.getWaterQualityHistory(districtId);
@@ -165,5 +167,25 @@ export class AnalyticsController {
   @Get('most-frequent-routes')
   getMostFrequentRoutes() {
     return this.analyticsService.getMostFrequentRoutes();
+  }
+
+  @ApiOperation({ summary: 'Get air quality ranking by district' })
+  @ApiResponse({
+    status: 200,
+    description: 'List of districts ranked by average PM2.5',
+  })
+  @Get('air-quality-ranking-by-district')
+  getAirQualityRankingByDistrict() {
+    return this.analyticsService.getAirQualityRankingByDistrict();
+  }
+
+  @ApiOperation({ summary: 'Get water quality ranking by district' })
+  @ApiResponse({
+    status: 200,
+    description: 'List of districts ranked by average contamination index',
+  })
+  @Get('water-quality-ranking-by-district')
+  getWaterQualityRankingByDistrict() {
+    return this.analyticsService.getWaterQualityRankingByDistrict();
   }
 }
