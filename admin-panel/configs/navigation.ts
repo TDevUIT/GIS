@@ -35,8 +35,7 @@ export const navigation: NavigationItem[] = [
     { name: 'Populations', href: '/populations', icon: UserGroupIcon },
     { name: 'Traffics', href: '/traffics', icon: ExclamationTriangleIcon },
     { name: 'Public Transports', href: '/public-transports', icon: TruckIcon },
-    { name: 'Air Qualities', href: '/air-qualities', icon: CloudIcon },
-    { name: 'Water Qualities', href: '/water-qualities', icon: BeakerIcon },
+    { name: 'Environment', href: '/environment', icon: CloudIcon },
     { name: 'Terrains', href: '/terrains', icon: GlobeAltIcon },
     { name: 'Users', href: '/users', icon: UsersIcon, adminOnly: true },
 ];

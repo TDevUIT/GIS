@@ -102,4 +102,8 @@ function onFormSubmit() {
 .form-select {
     @apply block w-full rounded-md border-0 bg-white/5 py-1.5 pl-3 pr-10 text-white ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6;
 }
+.form-select option {
+    background-color: #1f2937;
+    color: white;
+}
 </style>

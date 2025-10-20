@@ -94,4 +94,8 @@ function onFormSubmit() {
 .form-cancel-button {
     @apply rounded-md border border-gray-600 bg-transparent py-2 px-4 text-sm font-medium text-gray-300 hover:bg-gray-700;
 }
+.form-select option {
+    background-color: #1f2937;
+    color: white;
+}
 </style>

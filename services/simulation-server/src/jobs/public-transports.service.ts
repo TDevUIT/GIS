@@ -50,7 +50,7 @@ export class PublicTransportsJobService {
     this.gisServerUrl = url;
   }
 
-  @Cron(CronExpression.EVERY_5_MINUTES)
+  @Cron(CronExpression.EVERY_HOUR)
   async simulateNetworkExpansion() {
     this.logger.log('--- Starting Public Transport Network Expansion Job ---');
     try {
@@ -120,7 +120,7 @@ export class PublicTransportsJobService {
     }
   }
 
-  @Cron(CronExpression.EVERY_MINUTE)
+  @Cron(CronExpression.EVERY_30_MINUTES)
   async optimizeRouteOperations() {
     this.logger.log('--- Starting Route Operations Optimization Job ---');
     try {

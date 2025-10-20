@@ -18,6 +18,8 @@ import type {
     PublicTransportSummaryByMode,
     PublicTransportCapacityByMode,
     MostFrequentRoute,
+    AirQualityRanking,
+    WaterQualityRanking,
 } from '../types/api/analytics';
 
 type OFetch = typeof ofetch;
@@ -123,6 +125,18 @@ export default (apiFetch: OFetch) => ({
 
     getMostFrequentRoutes() {
         return apiFetch<ApiResponse<MostFrequentRoute[]>>('/analytics/most-frequent-routes', {
+            method: 'GET',
+        });
+    },
+
+    getAirQualityRankingByDistrict() {
+        return apiFetch<ApiResponse<AirQualityRanking[]>>('/analytics/air-quality-ranking-by-district', {
+            method: 'GET',
+        });
+    },
+
+    getWaterQualityRankingByDistrict() {
+        return apiFetch<ApiResponse<WaterQualityRanking[]>>('/analytics/water-quality-ranking-by-district', {
             method: 'GET',
         });
     },

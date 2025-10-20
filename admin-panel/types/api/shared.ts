@@ -65,3 +65,10 @@ export enum AccidentSeverity {
     HIGH = 'HIGH',
     CRITICAL = 'CRITICAL',
 }
+
+export enum QualityLevel {
+  GOOD = 'GOOD',
+  MODERATE = 'MODERATE',
+  UNHEALTHY = 'UNHEALTHY',
+  HAZARDOUS = 'HAZARDOUS',
+}

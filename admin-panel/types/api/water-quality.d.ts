@@ -1,10 +1,12 @@
 import type { GeoJSONPoint } from './shared';
+import { QualityLevel } from './shared';
 
 export interface WaterQuality {
   id: string;
   ph: number | null;
   turbidity: number | null;
   contaminationIndex: number | null;
+  level: QualityLevel | null;
   recordedAt: string;
   geom: GeoJSONPoint | null;
   districtId: string;

@@ -47,7 +47,7 @@ export interface GetLandUseSummaryQuery {
 }
 
 export interface WaterQualityHistoryPoint {
-    month: string;
+    day: string;
     avgPh: number;
     avgTurbidity: number;
 }
@@ -119,4 +119,16 @@ export interface MostFrequentRoute {
     mode: TransportMode;
     frequencyMin: number;
     districtName: string;
+}
+
+export interface AirQualityRanking {
+    districtName: string;
+    districtCode: string;
+    avgPm25: number;
+}
+
+export interface WaterQualityRanking {
+    districtName: string;
+    districtCode: string;
+    avgContaminationIndex: number;
 }
