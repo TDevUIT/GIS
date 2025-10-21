@@ -395,4 +395,61 @@ export class AnalyticsService {
     `;
     return this.prisma.$queryRaw(query);
   }
+
+  async getTerrainSummaryByDistrict() {
+    const query = Prisma.sql`
+    SELECT
+      d.name as "districtName",
+      d.code as "districtCode",
+      ROUND(AVG(t.elevation)::numeric, 2) as "avgElevation",
+      MAX(t.elevation) as "maxElevation",
+      MIN(t.elevation) as "minElevation",
+      ROUND(AVG(t.slope)::numeric, 2) as "avgSlope"
+    FROM "public"."terrains" t
+    JOIN "public"."districts" d ON t."districtId" = d.id
+    WHERE t.elevation IS NOT NULL AND t.slope IS NOT NULL
+    GROUP BY d.id
+    ORDER BY "avgElevation" DESC;
+  `;
+    return this.prisma.$queryRaw(query);
+  }
+  async getLandslideRiskAreas(slopeThreshold: number = 15) {
+    const query = Prisma.sql`
+    SELECT
+      t.id,
+      t.slope,
+      t.soil_type as "soilType",
+      d.name as "districtName",
+      ST_AsGeoJSON(t.geom) as geom
+    FROM "public"."terrains" t
+    JOIN "public"."districts" d ON t."districtId" = d.id
+    WHERE t.slope >= ${slopeThreshold};
+  `;
+    return this.prisma.$queryRaw(query);
+  }
+  async getFloodProneAreas(elevationThreshold: number = 2) {
+    const query = Prisma.sql`
+    SELECT
+      t.id,
+      t.elevation,
+      d.name as "districtName",
+      ST_AsGeoJSON(t.geom) as geom
+    FROM "public"."terrains" t
+    JOIN "public"."districts" d ON t."districtId" = d.id
+    WHERE t.elevation <= ${elevationThreshold};
+  `;
+    return this.prisma.$queryRaw(query);
+  }
+  async getSoilTypeDistribution() {
+    const query = Prisma.sql`
+    SELECT
+      t.soil_type as "soilType",
+      COUNT(t.id)::int as "count"
+    FROM "public"."terrains" t
+    WHERE t.soil_type IS NOT NULL
+    GROUP BY t.soil_type
+    ORDER BY "count" DESC;
+  `;
+    return this.prisma.$queryRaw(query);
+  }
 }

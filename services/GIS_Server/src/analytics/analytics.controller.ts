@@ -1,4 +1,11 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
+import {
+  Controller,
+  DefaultValuePipe,
+  Get,
+  Param,
+  ParseFloatPipe,
+  Query,
+} from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
@@ -187,5 +194,66 @@ export class AnalyticsController {
   @Get('water-quality-ranking-by-district')
   getWaterQualityRankingByDistrict() {
     return this.analyticsService.getWaterQualityRankingByDistrict();
+  }
+
+  @ApiOperation({ summary: 'Get terrain summary by district' })
+  @ApiResponse({
+    status: 200,
+    description:
+      'Summary of terrain statistics for each district (avg/max/min elevation, avg slope)',
+  })
+  @Get('terrain-summary-by-district')
+  getTerrainSummaryByDistrict() {
+    return this.analyticsService.getTerrainSummaryByDistrict();
+  }
+
+  @ApiOperation({ summary: 'Get potential landslide risk areas' })
+  @ApiQuery({
+    name: 'slopeThreshold',
+    description: 'Minimum slope to be considered at risk (degrees)',
+    required: false,
+    example: 15,
+  })
+  @ApiResponse({
+    status: 200,
+    description:
+      'List of terrain areas with slope greater than the specified threshold',
+  })
+  @Get('landslide-risk-areas')
+  getLandslideRiskAreas(
+    @Query('slopeThreshold', new DefaultValuePipe(15), ParseFloatPipe)
+    slopeThreshold: number,
+  ) {
+    return this.analyticsService.getLandslideRiskAreas(slopeThreshold);
+  }
+
+  @ApiOperation({ summary: 'Get potential flood-prone areas' })
+  @ApiQuery({
+    name: 'elevationThreshold',
+    description: 'Maximum elevation to be considered at risk (meters)',
+    required: false,
+    example: 2,
+  })
+  @ApiResponse({
+    status: 200,
+    description:
+      'List of terrain areas with elevation lower than the specified threshold',
+  })
+  @Get('flood-prone-areas')
+  getFloodProneAreas(
+    @Query('elevationThreshold', new DefaultValuePipe(2), ParseFloatPipe)
+    elevationThreshold: number,
+  ) {
+    return this.analyticsService.getFloodProneAreas(elevationThreshold);
+  }
+
+  @ApiOperation({ summary: 'Get soil type distribution' })
+  @ApiResponse({
+    status: 200,
+    description: 'Count of terrain records for each soil type',
+  })
+  @Get('soil-type-distribution')
+  getSoilTypeDistribution() {
+    return this.analyticsService.getSoilTypeDistribution();
   }
 }

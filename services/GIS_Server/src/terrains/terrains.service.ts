@@ -42,12 +42,28 @@ export class TerrainsService {
     await this.prisma.$executeRaw(query);
     return this.findOne(id);
   }
-
   async findAll(districtId?: string) {
     const whereClause = districtId
       ? Prisma.sql`WHERE t."districtId" = ${districtId}`
       : Prisma.empty;
-    const query = Prisma.sql`SELECT ${this.selectFields} ${this.fromTable} ${whereClause}`;
+    const query = Prisma.sql`
+      SELECT
+        t.id, t.elevation, t.slope, t.soil_type as "soilType",
+        t."districtId", d.name as "districtName",
+        ST_AsGeoJSON(t.geom) as geom,
+        CASE
+          WHEN t.elevation IS NULL THEN 'UNKNOWN'
+          WHEN t.elevation < 5 THEN 'VERY_LOW'
+          WHEN t.elevation >= 5 AND t.elevation < 15 THEN 'LOW'
+          WHEN t.elevation >= 15 AND t.elevation < 30 THEN 'MEDIUM'
+          WHEN t.elevation >= 30 AND t.elevation < 50 THEN 'HIGH'
+          ELSE 'VERY_HIGH'
+        END as "elevationCategory"
+      FROM "public"."terrains" t
+      LEFT JOIN "public"."districts" d ON t."districtId" = d.id
+      ${whereClause}
+    `;
+
     return this.prisma.$queryRaw(query);
   }
 

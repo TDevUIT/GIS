@@ -1,4 +1,4 @@
-import { InfraCategory, AccidentSeverity, TransportMode } from './shared';
+import { InfraCategory, AccidentSeverity, TransportMode, type GeoJSONPolygon } from './shared';
 
 export interface GlobalSummary {
     totalDistricts: number;
@@ -131,4 +131,37 @@ export interface WaterQualityRanking {
     districtName: string;
     districtCode: string;
     avgContaminationIndex: number;
+}
+export interface TerrainSummaryByDistrict {
+    districtName: string;
+    districtCode: string;
+    avgElevation: number;
+    maxElevation: number;
+    minElevation: number;
+    avgSlope: number;
+}
+
+export interface LandslideRiskArea {
+    id: string;
+    slope: number;
+    soilType: string | null;
+    districtName: string;
+    geom: GeoJSONPolygon;
+}
+
+export interface FloodProneArea {
+    id: string;
+    elevation: number;
+    districtName: string;
+    geom: GeoJSONPolygon;
+}
+
+export interface SoilTypeDistribution {
+    soilType: string;
+    count: number;
+}
+
+export interface GetRiskAreasQuery {
+    slopeThreshold?: number;
+    elevationThreshold?: number;
 }

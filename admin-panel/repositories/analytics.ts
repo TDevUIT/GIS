@@ -20,6 +20,11 @@ import type {
     MostFrequentRoute,
     AirQualityRanking,
     WaterQualityRanking,
+    TerrainSummaryByDistrict,
+    GetRiskAreasQuery,
+    LandslideRiskArea,
+    FloodProneArea,
+    SoilTypeDistribution,
 } from '../types/api/analytics';
 
 type OFetch = typeof ofetch;
@@ -137,6 +142,32 @@ export default (apiFetch: OFetch) => ({
 
     getWaterQualityRankingByDistrict() {
         return apiFetch<ApiResponse<WaterQualityRanking[]>>('/analytics/water-quality-ranking-by-district', {
+            method: 'GET',
+        });
+    },
+
+    getTerrainSummaryByDistrict() {
+        return apiFetch<ApiResponse<TerrainSummaryByDistrict[]>>('/analytics/terrain-summary-by-district', {
+            method: 'GET',
+        });
+    },
+
+    getLandslideRiskAreas(params?: GetRiskAreasQuery) {
+        return apiFetch<ApiResponse<LandslideRiskArea[]>>('/analytics/landslide-risk-areas', {
+            method: 'GET',
+            query: params,
+        });
+    },
+
+    getFloodProneAreas(params?: GetRiskAreasQuery) {
+        return apiFetch<ApiResponse<FloodProneArea[]>>('/analytics/flood-prone-areas', {
+            method: 'GET',
+            query: params,
+        });
+    },
+
+    getSoilTypeDistribution() {
+        return apiFetch<ApiResponse<SoilTypeDistribution[]>>('/analytics/soil-type-distribution', {
             method: 'GET',
         });
     },
