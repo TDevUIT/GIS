@@ -5,12 +5,40 @@ import {
   ApiResponse,
   ApiParam,
   ApiQuery,
+  ApiProperty,
 } from '@nestjs/swagger';
 import { AnalyticsService } from './analytics.service';
+import { Type } from 'class-transformer';
+import { IsNumber, IsOptional } from 'class-validator';
 
 class LandUseSummaryQuery {
+  @ApiProperty({ description: 'District ID', example: '1' })
   districtId: string;
+
+  @ApiProperty({ required: false, description: 'Year', example: 2024 })
   year?: number;
+}
+
+class RiskAreaQuery {
+  @ApiProperty({
+    required: false,
+    description: 'Minimum slope in degrees',
+    example: 15,
+  })
+  @IsNumber()
+  @IsOptional()
+  @Type(() => Number)
+  slopeThreshold?: number;
+
+  @ApiProperty({
+    required: false,
+    description: 'Maximum elevation in meters',
+    example: 2,
+  })
+  @IsNumber()
+  @IsOptional()
+  @Type(() => Number)
+  elevationThreshold?: number;
 }
 
 @ApiTags('Analytics')
@@ -285,5 +313,72 @@ export class AnalyticsController {
   })
   getWaterQualityRankingByDistrict() {
     return this.analyticsService.getWaterQualityRankingByDistrict();
+  }
+
+  @Get('terrain-summary-by-district')
+  @ApiOperation({
+    summary: 'Get terrain summary by district',
+    description:
+      'Retrieve terrain statistics (elevation, slope) for each district',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Terrain summary retrieved successfully',
+  })
+  getTerrainSummaryByDistrict() {
+    return this.analyticsService.getTerrainSummaryByDistrict();
+  }
+
+  @Get('landslide-risk-areas')
+  @ApiOperation({
+    summary: 'Get potential landslide risk areas',
+    description:
+      'Retrieve terrain areas with high slope, indicating landslide risk',
+  })
+  @ApiQuery({
+    name: 'slopeThreshold',
+    required: false,
+    description: 'Minimum slope in degrees',
+    example: 15,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Landslide risk areas retrieved successfully',
+  })
+  getLandslideRiskAreas(@Query() query: RiskAreaQuery) {
+    return this.analyticsService.getLandslideRiskAreas(query.slopeThreshold);
+  }
+
+  @Get('flood-prone-areas')
+  @ApiOperation({
+    summary: 'Get potential flood-prone areas',
+    description: 'Retrieve low-elevation terrain areas, indicating flood risk',
+  })
+  @ApiQuery({
+    name: 'elevationThreshold',
+    required: false,
+    description: 'Maximum elevation in meters',
+    example: 2,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Flood-prone areas retrieved successfully',
+  })
+  getFloodProneAreas(@Query() query: RiskAreaQuery) {
+    return this.analyticsService.getFloodProneAreas(query.elevationThreshold);
+  }
+
+  @Get('soil-type-distribution')
+  @ApiOperation({
+    summary: 'Get soil type distribution',
+    description:
+      'Retrieve statistics on the distribution of different soil types',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Soil type distribution retrieved successfully',
+  })
+  getSoilTypeDistribution() {
+    return this.analyticsService.getSoilTypeDistribution();
   }
 }

@@ -189,4 +189,40 @@ export class AnalyticsService {
     );
     return response.data;
   }
+
+  async getTerrainSummaryByDistrict() {
+    const url = `${this.gisServerUrl}/analytics/terrain-summary-by-district`;
+    const response = await firstValueFrom(
+      this.httpService.get(url).pipe(catchError(this.handleError)),
+    );
+    return response.data;
+  }
+
+  async getLandslideRiskAreas(slopeThreshold?: number) {
+    const url = `${this.gisServerUrl}/analytics/landslide-risk-areas`;
+    const response = await firstValueFrom(
+      this.httpService
+        .get(url, { params: { slopeThreshold } })
+        .pipe(catchError(this.handleError)),
+    );
+    return response.data;
+  }
+
+  async getFloodProneAreas(elevationThreshold?: number) {
+    const url = `${this.gisServerUrl}/analytics/flood-prone-areas`;
+    const response = await firstValueFrom(
+      this.httpService
+        .get(url, { params: { elevationThreshold } })
+        .pipe(catchError(this.handleError)),
+    );
+    return response.data;
+  }
+
+  async getSoilTypeDistribution() {
+    const url = `${this.gisServerUrl}/analytics/soil-type-distribution`;
+    const response = await firstValueFrom(
+      this.httpService.get(url).pipe(catchError(this.handleError)),
+    );
+    return response.data;
+  }
 }
