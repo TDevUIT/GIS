@@ -55,7 +55,7 @@
                     </button>
                 </div>
                 <div class="text-right">
-                    <a href="#" class="text-sm font-medium text-blue-400 hover:text-blue-300">Forgot password?</a>
+                    <NuxtLink to="/forgot-password" class="text-sm font-medium text-blue-400 hover:text-blue-300">Forgot password?</NuxtLink>
                 </div>
                 <div>
                     <button
@@ -73,53 +73,56 @@
 </template>
 
 <script setup lang="ts">
-import { useNuxtApp } from 'nuxt/app';
-import { ref } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import { useAuthStore } from '../store/auth';
+import { useNuxtApp } from 'nuxt/app'
+import { ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { useAuthStore } from '../store/auth'
 
 definePageMeta({
     layout: 'auth',
-});
+    middleware: ['guest']
+})
 
-const { $api } = useNuxtApp();
-const authStore = useAuthStore();
-const route = useRoute();
-const router = useRouter();
+const { $api } = useNuxtApp()
+const authStore = useAuthStore()
+const route = useRoute()
+const router = useRouter()
 
-const email = ref('');
-const password = ref('');
-const isLoading = ref(false);
-const error = ref<string | null>(null);
-const isPasswordVisible = ref(false);
+const email = ref('')
+const password = ref('')
+const isLoading = ref(false)
+const error = ref<string | null>(null)
+const isPasswordVisible = ref(false)
 
 async function handleLogin() {
-    isLoading.value = true;
-    error.value = null;
+    isLoading.value = true
+    error.value = null
     try {
         const response = await $api.auth.login({
             email: email.value,
             password: password.value,
-        });
+        })
+
         if (response.mustChangePassword) {
-            error.value = 'First login: Please set a new password.'; 
-            return; 
+            await router.push(`/set-password?token=${response.accessToken}`)
+            return
         }
-        const user = await $api.auth.getProfile();
-        authStore.setUser(user);
-        const redirectPath = route.query.redirect as string | undefined;
-        await router.push(redirectPath || '/');
+
+        const user = await $api.auth.getProfile()
+        authStore.setUser(user)
+        const redirectPath = route.query.redirect as string | undefined
+        await router.push(redirectPath || '/')
     } catch (e: any) {
-        console.error("Login request failed:", e);
-        let errorMessage = 'An unexpected error occurred.';
+        console.error('Login request failed:', e)
+        let errorMessage = 'An unexpected error occurred.'
         if (e.data && e.data.message) {
-            errorMessage = Array.isArray(e.data.message) ? e.data.message.join(', ') : e.data.message;
+            errorMessage = Array.isArray(e.data.message) ? e.data.message.join(', ') : e.data.message
         } else if (e.message) {
-            errorMessage = e.message;
+            errorMessage = e.message
         }
-        error.value = errorMessage;
+        error.value = errorMessage
     } finally {
-        isLoading.value = false;
+        isLoading.value = false
     }
 }
 </script>

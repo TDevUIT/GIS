@@ -1,27 +1,22 @@
 import {
     HomeIcon,
-    UsersIcon,
     MapIcon,
     MapPinIcon,
     BuildingOffice2Icon,
-    UserGroupIcon,
-    GlobeAltIcon,
-    CloudIcon,
-    BeakerIcon,
-    RadioIcon,
-    ExclamationTriangleIcon,
-    TruckIcon,
     DocumentTextIcon,
     LightBulbIcon,
-    ChartBarIcon,
+    UsersIcon as UserGroupIcon,
+    ExclamationTriangleIcon,
+    TruckIcon,
+    CloudIcon,
+    GlobeEuropeAfricaIcon,
+    UsersIcon,
 } from '@heroicons/vue/24/outline';
-import { shallowRef } from 'vue';
-import type { FunctionalComponent } from 'vue';
 
 export interface NavigationItem {
     name: string;
     href: string;
-    icon: FunctionalComponent;
+    icon: any;
     adminOnly?: boolean;
 }
 
@@ -36,6 +31,11 @@ export const navigation: NavigationItem[] = [
     { name: 'Traffics', href: '/traffics', icon: ExclamationTriangleIcon },
     { name: 'Public Transports', href: '/public-transports', icon: TruckIcon },
     { name: 'Environment', href: '/environment', icon: CloudIcon },
-    { name: 'Terrains', href: '/terrains', icon: GlobeAltIcon },
-    { name: 'Users', href: '/users', icon: UsersIcon, adminOnly: true },
+    { name: 'Terrains', href: '/terrains', icon: GlobeEuropeAfricaIcon },
+    { 
+        name: 'Users', 
+        href: '/users', 
+        icon: UsersIcon, 
+        adminOnly: true 
+    },
 ];

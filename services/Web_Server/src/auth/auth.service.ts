@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-require-imports */
 import {
@@ -10,6 +11,7 @@ import {
   ForbiddenException,
   Logger,
 } from '@nestjs/common';
+import * as crypto from 'crypto';
 import { PrismaService } from '../prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -72,14 +74,20 @@ export class AuthService implements OnModuleInit {
   }
 
   async createSupervisor(dto: CreateSupervisorDto) {
-    const existingUser = await this.prisma.user.findUnique({
-      where: { email: dto.email },
+    const existingUser = await this.prisma.user.findFirst({
+      where: {
+        OR: [{ email: dto.email }, { phone: dto.phone }],
+      },
     });
 
     if (existingUser) {
-      throw new ConflictException('Email already in use.');
+      if (existingUser.email === dto.email) {
+        throw new ConflictException('Email already in use.');
+      }
+      if (existingUser.phone === dto.phone) {
+        throw new ConflictException('Phone number already in use.');
+      }
     }
-
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const hashedPassword = await bcrypt.hash(otp, 10);
 
@@ -95,7 +103,14 @@ export class AuthService implements OnModuleInit {
       },
     });
 
-    await this.emailService.sendSupervisorCredentials(user.email, otp);
+    const dashboardUrl =
+      this.configService.get<string>('CLIENT_URL') ?? 'http://localhost:3000';
+    await this.emailService.sendSupervisorCredentials(
+      user.email,
+      otp,
+      dashboardUrl,
+      { name: user.name },
+    );
 
     return {
       message:
@@ -184,20 +199,42 @@ export class AuthService implements OnModuleInit {
   }
 
   async refreshToken(refreshToken: string) {
+    this.logger.debug(
+      `[AuthService] Attempting to refresh with token: ${refreshToken}`,
+    );
+
     const tokenRecord = await this.prisma.token.findUnique({
       where: { refreshToken },
       include: { user: true },
     });
 
-    if (!tokenRecord || dayjs(tokenRecord.expiresAt).isBefore(dayjs())) {
+    if (!tokenRecord) {
+      this.logger.error(`[AuthService] Refresh token not found in database.`);
+      throw new UnauthorizedException('Invalid or expired refresh token.');
+    }
+
+    this.logger.debug(
+      `[AuthService] Found token record for user: ${tokenRecord.user.email}`,
+    );
+
+    if (dayjs(tokenRecord.expiresAt).isBefore(dayjs())) {
+      this.logger.error(
+        `[AuthService] Refresh token has expired. Expires at: ${tokenRecord.expiresAt}`,
+      );
+      await this.prisma.token.delete({ where: { id: tokenRecord.id } });
       throw new UnauthorizedException('Invalid or expired refresh token.');
     }
 
     if (!tokenRecord.user.isActive) {
+      this.logger.error(
+        `[AuthService] User account is inactive: ${tokenRecord.user.email}`,
+      );
       throw new ForbiddenException('User account is inactive.');
     }
-
     await this.prisma.token.delete({ where: { id: tokenRecord.id } });
+    this.logger.debug(
+      `[AuthService] Old token deleted. Generating new tokens...`,
+    );
 
     return this.generateTokens(tokenRecord.userId);
   }
@@ -243,5 +280,71 @@ export class AuthService implements OnModuleInit {
     } catch (error) {
       throw new InternalServerErrorException('Failed to update user role.');
     }
+  }
+
+  async requestPasswordReset(email: string) {
+    const user = await this.prisma.user.findUnique({ where: { email } });
+
+    if (!user) {
+      this.logger.warn(
+        `Password reset requested for non-existent email: ${email}`,
+      );
+      return {
+        message:
+          'If an account with this email exists, a password reset link has been sent.',
+      };
+    }
+
+    const resetToken = crypto.randomBytes(32).toString('hex');
+
+    const passwordResetToken = crypto
+      .createHash('sha256')
+      .update(resetToken)
+      .digest('hex');
+
+    const passwordResetExpires = dayjs().add(10, 'minutes').toDate();
+
+    await this.prisma.user.update({
+      where: { email },
+      data: { passwordResetToken, passwordResetExpires },
+    });
+
+    const resetUrl = `${this.configService.get('CLIENT_URL')}/reset-password?token=${resetToken}`;
+    await this.emailService.sendPasswordResetLink(user.email, resetUrl);
+
+    return {
+      message:
+        'If an account with this email exists, a password reset link has been sent.',
+    };
+  }
+
+  async resetPassword(token: string, dto: SetPasswordDto) {
+    const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+
+    const user = await this.prisma.user.findFirst({
+      where: {
+        passwordResetToken: hashedToken,
+        passwordResetExpires: { gt: new Date() },
+      },
+    });
+
+    if (!user) {
+      throw new UnauthorizedException(
+        'Password reset token is invalid or has expired.',
+      );
+    }
+
+    const newHashedPassword = await bcrypt.hash(dto.newPassword, 10);
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: {
+        password: newHashedPassword,
+        passwordResetToken: null,
+        passwordResetExpires: null,
+        mustChangePassword: false,
+      },
+    });
+
+    return { message: 'Password has been reset successfully.' };
   }
 }

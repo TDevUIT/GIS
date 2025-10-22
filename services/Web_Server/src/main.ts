@@ -17,6 +17,9 @@ async function bootstrap() {
     credentials: true,
   });
 
+  app.use(cookieParser());
+  app.use(passport.initialize());
+
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -78,9 +81,6 @@ async function bootstrap() {
     customfavIcon: 'https://nestjs.com/img/logo-small.svg',
     customCss: '.swagger-ui .topbar { display: none }',
   });
-
-  app.use(cookieParser());
-  app.use(passport.initialize());
 
   const port = 8000;
   await app.listen(port, '0.0.0.0');

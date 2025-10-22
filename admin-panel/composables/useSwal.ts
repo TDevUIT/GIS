@@ -1,4 +1,4 @@
-import Swal from 'sweetalert2';
+import Swal, { type SweetAlertOptions } from 'sweetalert2';
 import 'sweetalert2/src/sweetalert2.scss';
 
 export const useSwal = () => {
@@ -7,25 +7,34 @@ export const useSwal = () => {
         color: '#F9FAFB',
         confirmButtonColor: '#3B82F6',
         cancelButtonColor: '#4B5563',
+        heightAuto: false,
     });
 
-    const confirmDelete = (itemName: string) => {
+    const confirm = (options: SweetAlertOptions) => {
         return swal.fire({
-            title: 'Are you sure?',
-            text: `You won't be able to revert this! The item "${itemName}" will be permanently deleted.`,
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonText: 'Yes, delete it!',
-            cancelButtonText: 'No, cancel',
+            confirmButtonText: 'Confirm',
+            cancelButtonText: 'Cancel',
+            ...options,
         });
     };
 
-    const toastSuccess = (title: string) => {
+    const confirmDelete = (itemName: string) => {
+        return confirm({
+            title: 'Are you sure?',
+            text: `You won't be able to revert this! The item "${itemName}" will be permanently deleted.`,
+            confirmButtonText: 'Yes, delete it!',
+        });
+    };
+
+    const toastSuccess = (title: string, text?: string) => {
         swal.fire({
             toast: true,
             position: 'top-end',
             icon: 'success',
             title,
+            text,
             showConfirmButton: false,
             timer: 3000,
             timerProgressBar: true,
@@ -46,6 +55,7 @@ export const useSwal = () => {
 
     return {
         swal,
+        confirm,
         confirmDelete,
         toastSuccess,
         toastError,

@@ -1,35 +1,28 @@
 import { defineStore } from 'pinia';
-import type { User } from '../types/api/auth';
+// <<< SỬA LỖI: Thêm đuôi file `.ts` vào cuối đường dẫn import
+import { type User, Role } from '../types/api/auth';
 
 interface AuthState {
     user: User | null;
-    isAuthenticated: boolean;
 }
 
 export const useAuthStore = defineStore('auth', {
     state: (): AuthState => ({
         user: null,
-        isAuthenticated: false,
     }),
 
     getters: {
-        isAdmin: (state): boolean => state.user?.role === 'ADMIN',
-        isSupervisor: (state): boolean => state.user?.role === 'SUPERVISOR',
+        isAuthenticated: (state): boolean => !!state.user,
+        isAdmin: (state): boolean => !!state.user && state.user.role === Role.ADMIN,
+        isSupervisor: (state): boolean => !!state.user && state.user.role === Role.SUPERVISOR,
     },
 
     actions: {
         setUser(userData: User | null) {
-            if (userData) {
-                this.user = userData;
-                this.isAuthenticated = true;
-            } else {
-                this.user = null;
-                this.isAuthenticated = false;
-            }
+            this.user = userData;
         },
         clear() {
             this.user = null;
-            this.isAuthenticated = false;
         },
     },
 

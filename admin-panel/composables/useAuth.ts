@@ -8,9 +8,6 @@ export const useAuth = () => {
     const authStore = useAuthStore();
 
     const fetchUser = async (): Promise<User | null> => {
-        if (authStore.isAuthenticated) {
-            return authStore.user;
-        }
         try {
             const user = await $api.auth.getProfile();
             if (user) {
