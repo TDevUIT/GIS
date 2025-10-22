@@ -1,5 +1,4 @@
 import { defineStore } from 'pinia';
-// <<< SỬA LỖI: Thêm đuôi file `.ts` vào cuối đường dẫn import
 import { type User, Role } from '../types/api/auth';
 
 interface AuthState {
@@ -8,13 +7,13 @@ interface AuthState {
 
 export const useAuthStore = defineStore('auth', {
     state: (): AuthState => ({
-        user: null,
+        user: null
     }),
 
     getters: {
         isAuthenticated: (state): boolean => !!state.user,
         isAdmin: (state): boolean => !!state.user && state.user.role === Role.ADMIN,
-        isSupervisor: (state): boolean => !!state.user && state.user.role === Role.SUPERVISOR,
+        isSupervisor: (state): boolean => !!state.user && state.user.role === Role.SUPERVISOR
     },
 
     actions: {
@@ -23,8 +22,18 @@ export const useAuthStore = defineStore('auth', {
         },
         clear() {
             this.user = null;
-        },
+        }
     },
 
-    persist: true,
+    persist: {
+        storage: {
+            getItem: (key: string) => {
+                if (process.client) return localStorage.getItem(key);
+                return null;
+            },
+            setItem: (key: string, value: string) => {
+                if (process.client) localStorage.setItem(key, value);
+            }
+        }
+    }
 });

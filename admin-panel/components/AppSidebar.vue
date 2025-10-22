@@ -1,11 +1,11 @@
 <template>
-    <aside 
-        class="flex flex-shrink-0 flex-col border-r border-gray-700/50 bg-gray-900 transition-all duration-300 ease-in-out"
+    <aside
+        class="flex flex-shrink-0 flex-col border-r border-gray-700/50 bg-gray-900/100 backdrop-blur-sm transition-all duration-300 ease-in-out"
         :class="isCollapsed ? 'w-20' : 'w-64'"
     >
         <div class="flex h-16 flex-shrink-0 items-center justify-between border-b border-gray-700/50 px-4">
-            <NuxtLink 
-                to="/" 
+            <NuxtLink
+                to="/"
                 class="flex items-center gap-3 overflow-hidden transition-opacity duration-200"
                 :class="isCollapsed ? 'opacity-0' : 'opacity-100'"
             >
@@ -16,6 +16,7 @@
                 <ChevronDoubleLeftIcon class="h-6 w-6 transition-transform duration-300" :class="{ 'rotate-180': isCollapsed }" />
             </button>
         </div>
+
         <nav class="flex-1 overflow-y-auto overflow-x-hidden p-2">
             <ul class="flex flex-col gap-1">
                 <li v-for="item in filteredNavigation" :key="item.name">
@@ -25,10 +26,7 @@
                         active-class="!bg-blue-600 !text-white"
                     >
                         <component :is="item.icon" class="h-5 w-5 flex-shrink-0" />
-                        <span 
-                            class="whitespace-nowrap transition-all duration-200"
-                            :class="isCollapsed ? 'opacity-0 w-0' : 'opacity-100 w-auto'"
-                        >
+                        <span class="whitespace-nowrap transition-all duration-200" :class="isCollapsed ? 'opacity-0 w-0' : 'opacity-100 w-auto'">
                             {{ item.name }}
                         </span>
                     </NuxtLink>

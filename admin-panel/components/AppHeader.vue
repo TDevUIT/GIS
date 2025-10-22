@@ -1,5 +1,5 @@
 <template>
-    <header class="flex h-16 flex-shrink-0 items-center justify-between border-b border-gray-700/50 bg-gray-900 px-6">
+    <header class="flex h-16 flex-shrink-0 items-center justify-between border-b border-gray-700/50 bg-gray-900/40 backdrop-blur-sm px-6">
         <h1 class="text-xl font-semibold capitalize text-white">
             {{ pageTitle }}
         </h1>
@@ -18,7 +18,7 @@
                 leave-from-class="transform opacity-100 scale-100"
                 leave-to-class="transform opacity-0 scale-95"
             >
-                <div v-if="isMenuOpen" class="absolute right-0 mt-2 w-48 origin-top-right rounded-md bg-gray-800 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                <div v-if="isMenuOpen" class="absolute right-0 mt-2 w-48 origin-top-right rounded-md bg-gray-800/80 backdrop-blur-xl shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                     <div class="py-1">
                         <div class="border-b border-gray-700 px-4 py-2">
                             <p class="text-sm font-medium text-white">{{ user?.name }}</p>
