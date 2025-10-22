@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/require-await */
@@ -13,6 +14,8 @@ import {
   Patch,
   HttpStatus,
   ForbiddenException,
+  Logger,
+  Param,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -21,7 +24,7 @@ import {
   ApiBearerAuth,
   ApiBody,
 } from '@nestjs/swagger';
-import type { Response, Request } from 'express';
+import type { Response, Request, CookieOptions } from 'express';
 import { AuthService } from './auth.service';
 import { AuthGuard } from '@nestjs/passport';
 import { Role } from '../../generated/prisma';
@@ -32,6 +35,8 @@ import { SetPasswordDto } from './dto/set-password.dto';
 @ApiTags('Authentication')
 @Controller('auth')
 export class AuthController {
+  private readonly logger = new Logger(AuthController.name);
+
   constructor(private authService: AuthService) {}
 
   @Post('supervisor')
@@ -107,15 +112,33 @@ export class AuthController {
   @Post('refresh')
   @ApiOperation({ summary: 'Refresh access token' })
   async refresh(@Req() req: Request, @Res() res: Response) {
-    const refreshToken = req.cookies.refreshToken;
+    this.logger.debug('--- Refresh Token Endpoint Hit ---');
+    this.logger.debug(`Request cookies: ${JSON.stringify(req.cookies)}`);
+
+    const refreshToken = req.cookies?.refreshToken;
+
     if (!refreshToken) {
+      this.logger.error('No refresh token found in cookies.');
       return res
         .status(HttpStatus.UNAUTHORIZED)
         .json({ message: 'No refresh token provided' });
     }
-    const tokens = await this.authService.refreshToken(refreshToken);
-    this.setAuthCookies(res, tokens);
-    return res.json({ message: 'Token refreshed' });
+
+    this.logger.debug(`Found refresh token: ${refreshToken}`);
+
+    try {
+      const tokens = await this.authService.refreshToken(refreshToken);
+      this.setAuthCookies(res, tokens);
+      this.logger.debug('Token refreshed successfully.');
+      return res.json({ message: 'Token refreshed' });
+    } catch (error) {
+      this.logger.error(`Refresh token failed: ${error.message}`);
+      res.clearCookie('accessToken');
+      res.clearCookie('refreshToken');
+      return res
+        .status(HttpStatus.UNAUTHORIZED)
+        .json({ message: error.message || 'Invalid refresh token' });
+    }
   }
 
   @Post('logout')
@@ -134,6 +157,21 @@ export class AuthController {
     res.clearCookie('accessToken', cookieOptions);
     res.clearCookie('refreshToken', cookieOptions);
     return { message: 'Logged out successfully' };
+  }
+
+  @Post('forgot-password')
+  @ApiOperation({ summary: 'Request a password reset link' })
+  async forgotPassword(@Body('email') email: string) {
+    return this.authService.requestPasswordReset(email);
+  }
+
+  @Post('reset-password/:token')
+  @ApiOperation({ summary: 'Reset password using a token' })
+  async resetPassword(
+    @Param('token') token: string,
+    @Body() setPasswordDto: SetPasswordDto,
+  ) {
+    return this.authService.resetPassword(token, setPasswordDto);
   }
 
   @Patch('role')
@@ -169,22 +207,18 @@ export class AuthController {
     tokens: { accessToken: string; refreshToken: string },
   ) {
     const isProduction = process.env.NODE_ENV === 'production';
-    const secureFlag = isProduction;
-    const lax = 'lax' as const;
-
-    res.cookie('accessToken', tokens.accessToken, {
+    const cookieOptions: CookieOptions = {
       httpOnly: true,
-      secure: secureFlag,
-      sameSite: lax,
+      secure: isProduction,
+      sameSite: 'lax',
       path: '/',
+    };
+    res.cookie('accessToken', tokens.accessToken, {
+      ...cookieOptions,
       maxAge: 24 * 60 * 60 * 1000,
     });
-
     res.cookie('refreshToken', tokens.refreshToken, {
-      httpOnly: true,
-      secure: secureFlag,
-      sameSite: lax,
-      path: '/',
+      ...cookieOptions,
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
   }

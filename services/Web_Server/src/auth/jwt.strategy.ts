@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { Request } from 'express';
@@ -19,25 +19,33 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
           const token = request?.cookies?.accessToken;
           return typeof token === 'string' ? token : null;
         },
+        ExtractJwt.fromAuthHeaderAsBearerToken(),
       ]),
       ignoreExpiration: false,
       secretOrKey: jwtSecret,
     });
   }
 
-  async validate(payload: { sub: string; email: string }) {
+  async validate(payload: { sub: string }) {
     const user = await this.prisma.user.findUnique({
       where: { id: payload.sub },
       select: {
         id: true,
-        name: true,
         email: true,
+        name: true,
+        phone: true,
         role: true,
+        isActive: true,
+        mustChangePassword: true,
       },
     });
 
     if (!user) {
-      throw new Error('User not found');
+      throw new UnauthorizedException('User not found.');
+    }
+
+    if (!user.isActive) {
+      throw new UnauthorizedException('User account is inactive.');
     }
 
     return user;

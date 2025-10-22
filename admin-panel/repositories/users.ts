@@ -12,16 +12,18 @@ export default (apiFetch: OFetch) => ({
         });
     },
 
-    getAll() {
-        return apiFetch<ApiResponse<User[]>>('/users', {
+    async getAll(): Promise<User[]> {
+        const response = await apiFetch<ApiResponse<User[]>>('/users', {
             method: 'GET',
         });
+        return response.data;
     },
 
-    getById(id: string) {
-        return apiFetch<ApiResponse<User>>(`/users/${id}`, {
+    async getById(id: string): Promise<User> {
+        const response = await apiFetch<ApiResponse<User>>(`/users/${id}`, {
             method: 'GET',
         });
+        return response.data;
     },
 
     activate(id: string) {

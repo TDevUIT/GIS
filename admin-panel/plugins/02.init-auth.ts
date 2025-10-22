@@ -1,11 +1,12 @@
 import { useAuth } from "~/composables/useAuth";
-import { useAuthStore } from "~/store/auth";
+import { useAuthInit } from "~/composables/useAuthInit";
 
 export default defineNuxtPlugin(async (nuxtApp) => {
-    const authStore = useAuthStore();
     const { fetchUser } = useAuth();
+    const { setAuthInitPromise } = useAuthInit();
 
-    if (process.client && !authStore.isAuthenticated) {
-        await fetchUser();
+    if (process.client) {
+        const promise = fetchUser().then(() => {});
+        setAuthInitPromise(promise);
     }
 });
