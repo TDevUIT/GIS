@@ -69,9 +69,10 @@ defineProps<{
     columns: DataTableColumn[];
     data: any[];
     selectedId?: string | null;
+    hoveredId?: string | null;
 }>();
 
-defineEmits(['row-click']);
+defineEmits(['row-click', 'row-hover']);
 
 const slots = useSlots();
 const hasActions = computed(() => !!slots.actions);

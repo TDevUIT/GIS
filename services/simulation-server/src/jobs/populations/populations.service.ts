@@ -50,7 +50,7 @@ export class PopulationsJobService {
     this.gisServerUrl = url;
   }
 
-  @Cron(CronExpression.EVERY_HOUR)
+  @Cron(CronExpression.EVERY_30_MINUTES)
   async simulateYearlyPopulationGrowth() {
     this.logger.log('--- Starting Yearly Population Simulation Job ---');
     try {
