@@ -13,19 +13,22 @@
                 Update the details for "{{ infra.name }}".
             </p>
         </header>
+
         <div v-if="pending" class="text-center py-10">Loading data...</div>
-        <div v-else-if="error" class="text-red-400">
-            Failed to load data: {{ error.message }}
-        </div>
-        <div
-            v-else-if="infra && districts"
-            class="rounded-lg border border-gray-700 bg-gray-800/50 p-6"
-        >
+        <div v-else-if="error" class="text-red-400">Failed to load data: {{ error.message }}</div>
+
+        <div v-else-if="infra && districts" class="rounded-lg border border-gray-700 bg-gray-800/50 p-6">
             <FeaturesInfrastructuresInfrastructureForm
                 :initial-data="infra"
                 :districts="districts"
                 :is-submitting="isSubmitting"
                 @submit="handleSubmit"
+            />
+
+            <FeaturesInfrastructuresImageManager
+                :infra-id="infraId"
+                :initial-images="infra.images || []"
+                @images-updated="refresh"
             />
         </div>
     </div>
@@ -47,7 +50,7 @@ const router = useRouter();
 const { toastSuccess, toastError } = useSwal();
 const isSubmitting = ref(false);
 
-const { data: pageData, pending, error } = await useAsyncData(
+const { data: pageData, pending, error, refresh } = await useAsyncData(
     `infra-edit-${infraId}`,
     async () => {
         const infraRes = await $api.infrastructures.getById(infraId);
@@ -56,7 +59,8 @@ const { data: pageData, pending, error } = await useAsyncData(
             infra: infraRes.data.data,
             districts: districtsRes.data.data,
         };
-    }
+    },
+    { lazy: false }
 );
 
 const infra = computed(() => pageData.value?.infra);
@@ -67,7 +71,7 @@ async function handleSubmit(formData: UpdateInfrastructureDTO) {
     try {
         await $api.infrastructures.update(infraId, formData);
         toastSuccess('Infrastructure updated successfully!');
-        router.push('/infrastructures');
+        await refresh();
     } catch (err: any) {
         const message = Array.isArray(err.data?.message)
             ? err.data.message.join(', ')

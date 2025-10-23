@@ -1,5 +1,5 @@
 <template>
-    <div class="relative h-72">
+    <div class="relative h-full w-full">
         <div v-if="isLoading" class="absolute inset-0 flex items-center justify-center bg-gray-800/50 text-gray-400 z-10 rounded-lg">
             <svg class="animate-spin h-6 w-6 mr-3 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -7,16 +7,19 @@
             </svg>
             <span>Loading Chart Data...</span>
         </div>
-        <div v-else-if="chartData.labels && chartData.labels.length > 0" class="h-full">
-            <Line :data="chartData" :options="chartOptions" />
+
+        <div v-else-if="chartData && chartData.labels && chartData.labels.length > 0" class="h-full">
+            <Line :data="chartData" :options="options" />
         </div>
+
         <div v-else class="absolute inset-0 flex items-center justify-center text-gray-500">
-            No data available for the selected district.
+            No data available for the selected period.
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue';
 import { Line } from 'vue-chartjs';
 import {
     Chart as ChartJS,
@@ -27,17 +30,19 @@ import {
     PointElement,
     CategoryScale,
     LinearScale,
+    Filler
 } from 'chart.js';
 import type { ChartData, ChartOptions } from 'chart.js';
 
-ChartJS.register(Title, Tooltip, Legend, LineElement, PointElement, CategoryScale, LinearScale);
+ChartJS.register(Title, Tooltip, Legend, LineElement, PointElement, CategoryScale, LinearScale, Filler);
 
-defineProps<{
+const props = defineProps<{
     chartData: ChartData<'line'>;
+    chartOptions?: ChartOptions<'line'>;
     isLoading?: boolean;
 }>();
 
-const chartOptions: ChartOptions<'line'> = {
+const defaultOptions: ChartOptions<'line'> = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
@@ -49,18 +54,36 @@ const chartOptions: ChartOptions<'line'> = {
                 boxWidth: 12,
                 usePointStyle: true,
                 pointStyle: 'circle'
-            },
-        },
+            }
+        }
     },
     scales: {
         x: {
             ticks: { color: '#9CA3AF' },
-            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+            grid: { color: 'rgba(255, 255, 255, 0.05)' }
         },
         y: {
             ticks: { color: '#9CA3AF' },
-            grid: { color: 'rgba(255, 255, 255, 0.1)' },
-        },
-    },
+            grid: { color: 'rgba(255, 255, 255, 0.1)' }
+        }
+    }
 };
+
+const options = computed(() => {
+    const mergedOptions: ChartOptions<'line'> = { ...defaultOptions };
+
+    if (props.chartOptions) {
+        Object.assign(mergedOptions, props.chartOptions);
+
+        if (props.chartOptions.scales) {
+            mergedOptions.scales = { ...defaultOptions.scales, ...props.chartOptions.scales };
+        }
+
+        if (props.chartOptions.plugins) {
+            mergedOptions.plugins = { ...defaultOptions.plugins, ...props.chartOptions.plugins };
+        }
+    }
+
+    return mergedOptions;
+});
 </script>
