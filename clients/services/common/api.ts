@@ -1,5 +1,5 @@
+import apiClient from '@/config/axios';
 import { AxiosResponse } from 'axios';
-import { apiClient } from '../config/axios';
 
 export interface ApiResponse<T = any> {
   data: T;
