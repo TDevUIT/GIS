@@ -13,6 +13,7 @@ import BackButton from '@/components/maps/BackButton'
 import FeatureToolbar from '@/components/maps/FeatureToolbar'
 import QuickAccessToolbar from '@/components/maps/QuickAccessToolbar'
 import FeatureNotification from '@/components/maps/FeatureNotification'
+import UnifiedBottomToolbar from '@/components/maps/UnifiedBottomToolbar'
 import { LocationData, MapLayer } from '@/types/map'
 import { MAP_LOCATIONS, DEFAULT_MAP_CENTER, DEFAULT_MAP_ZOOM } from '@/constants/mapLocations'
 import { FeatureAction } from '@/constants/featureCategories'
@@ -76,6 +77,9 @@ export default function MapView() {
         ))}
 
         <ZoomControl />
+        
+        {/* Unified Bottom Toolbar - drawing, icons, and categories */}
+        <UnifiedBottomToolbar />
       </MapContainer>
 
       <BackButton />

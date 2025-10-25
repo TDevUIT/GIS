@@ -42,7 +42,7 @@ export default function MapToolbar() {
 
   return (
     <div className="absolute left-6 top-36 z-[1000] flex flex-col">
-      <div className="bg-gradient-to-b from-sky-400 to-sky-500 rounded-2xl border-2 border-white/50">
+      <div className="bg-gradient-to-b from-sky-400 to-sky-500 rounded-2xl border-2 border-white/50 shadow-lg">
         {toolbarItems.map((item, index) => (
           <button
             key={item.id}

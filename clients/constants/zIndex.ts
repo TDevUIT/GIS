@@ -22,6 +22,10 @@ export const Z_INDEX = {
   LAYER_BUTTON: 960,
   FEATURE_BUTTON: 970,
   
+  // Drawing and draggable icons
+  DRAWING_TOOLBAR: 980,
+  DRAGGABLE_ICONS: 985,
+  
   // Backdrop overlay
   BACKDROP: 999,
   
