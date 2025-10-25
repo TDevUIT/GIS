@@ -1,4 +1,4 @@
-import { apiGet, ApiResponse } from './api';
+import { apiGet, ApiResponse } from './common/api';
 import { District, Ward, Location } from '../types';
 
 export const getDistricts = async (): Promise<ApiResponse<District[]>> => {

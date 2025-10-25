@@ -1,18 +1,26 @@
-import { apiGet, apiPost, ApiResponse } from './api';
-import { TrafficData, Incident } from '../types';
+import { apiGet, apiPost, ApiResponse } from './common/api';
 
-export const getTrafficData = async (districtId?: string): Promise<ApiResponse<TrafficData[]>> => {
-  return apiGet<TrafficData[]>(`/traffic${districtId ? `?district=${districtId}` : ''}`);
+interface TrafficQuery {
+  districtId?: string;
+  roadName?: string;
+}
+
+// GET all traffic data
+export const getAllTraffics = async (query?: TrafficQuery): Promise<ApiResponse> => {
+  const params = new URLSearchParams();
+  if (query?.districtId) params.append('districtId', query.districtId);
+  if (query?.roadName) params.append('roadName', query.roadName);
+
+  const queryString = params.toString();
+  return apiGet(`/traffics${queryString ? `?${queryString}` : ''}`);
 };
 
-export const getTrafficIncidents = async (): Promise<ApiResponse<Incident[]>> => {
-  return apiGet<Incident[]>('/traffic/incidents');
+// POST find intersecting traffic data
+export const findIntersectingTraffics = async (wkt: string): Promise<ApiResponse> => {
+  return apiPost('/traffics/intersects-with', { wkt });
 };
 
-export const reportTrafficIncident = async (incident: Partial<Incident>): Promise<ApiResponse<Incident>> => {
-  return apiPost<Incident>('/traffic/incidents', incident);
-};
-
-export const getTrafficAnalytics = async (dateRange: string): Promise<ApiResponse<any>> => {
-  return apiGet(`/traffic/analytics?range=${dateRange}`);
+// GET traffic by ID
+export const getTrafficById = async (id: string): Promise<ApiResponse> => {
+  return apiGet(`/traffics/${id}`);
 };

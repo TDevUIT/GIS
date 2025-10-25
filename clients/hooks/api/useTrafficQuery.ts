@@ -1,47 +1,32 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getTrafficData, getTrafficIncidents, getTrafficAnalytics, reportTrafficIncident } from '../../services/trafficService';
-import { queryKeys } from '../../config/queryKeys';
-import { QUERY_CONFIG } from '../../config/queryConfig';
-import { TrafficData, Incident } from '../../types';
+import { getAllTraffics, getTrafficById, findIntersectingTraffics } from '@/services/trafficService';
+import { queryKeys } from '@/config/queryKeys';
+import { QUERY_STALE_TIME } from '@/config/queryConfig';
 
-export function useTrafficData(districtId?: string) {
+export function useTraffics(districtId?: string, roadName?: string) {
   return useQuery({
-    queryKey: queryKeys.traffic.list(districtId || ''),
-    queryFn: () => getTrafficData(districtId),
-    enabled: true,
-    staleTime: QUERY_CONFIG.traffic.data.staleTime,
+    queryKey: queryKeys.traffic.list(districtId, roadName),
+    queryFn: () => getAllTraffics(districtId, roadName),
+    staleTime: QUERY_STALE_TIME.SHORT,
   });
 }
 
-export function useTrafficIncidents() {
+export function useTraffic(id: string) {
   return useQuery({
-    queryKey: queryKeys.traffic.incidents(),
-    queryFn: () => getTrafficIncidents(),
-    refetchInterval: QUERY_CONFIG.traffic.incidents.refetchInterval,
+    queryKey: queryKeys.traffic.detail(id),
+    queryFn: () => getTrafficById(id),
+    enabled: !!id,
+    staleTime: QUERY_STALE_TIME.SHORT,
   });
 }
 
-export function useTrafficAnalytics(dateRange: string) {
-  return useQuery({
-    queryKey: queryKeys.traffic.analytics(dateRange),
-    queryFn: () => getTrafficAnalytics(dateRange),
-    enabled: !!dateRange,
-    staleTime: QUERY_CONFIG.traffic.analytics.staleTime,
-  });
-}
-
-export function useReportIncident() {
+export function useTrafficIntersects() {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
-    mutationFn: (incident: Partial<Incident>) => reportTrafficIncident(incident),
+    mutationFn: (wkt: string) => findIntersectingTraffics(wkt),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.traffic.incidents() });
       queryClient.invalidateQueries({ queryKey: queryKeys.traffic.all });
-      console.log('✅ Traffic incident reported successfully');
-    },
-    onError: (error) => {
-      console.error('❌ Failed to report traffic incident:', error);
     },
   });
 }
