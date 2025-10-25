@@ -1,7 +1,7 @@
 import { AxiosResponse } from 'axios';
 import { gisApiClient } from '../../config/gisAxios';
 
-export interface ApiResponse<T = any> {
+export interface GisApiResponse<T = any> {
   data: T;
   message?: string;
   status: number;
@@ -18,45 +18,45 @@ const handleError = (error: any): Error => {
   }
 };
 
-export const gisApiGet = async <T = any>(endpoint: string): Promise<ApiResponse<T>> => {
+export const gisApiGet = async <T = any>(endpoint: string): Promise<GisApiResponse<T>> => {
   try {
-    const response: AxiosResponse<ApiResponse<T>> = await gisApiClient.get(endpoint);
+    const response: AxiosResponse<GisApiResponse<T>> = await gisApiClient.get(endpoint);
     return response.data;
   } catch (error) {
     throw handleError(error);
   }
 };
 
-export const gisApiPost = async <T = any>(endpoint: string, data?: any): Promise<ApiResponse<T>> => {
+export const gisApiPost = async <T = any>(endpoint: string, data?: any): Promise<GisApiResponse<T>> => {
   try {
-    const response: AxiosResponse<ApiResponse<T>> = await gisApiClient.post(endpoint, data);
+    const response: AxiosResponse<GisApiResponse<T>> = await gisApiClient.post(endpoint, data);
     return response.data;
   } catch (error) {
     throw handleError(error);
   }
 };
 
-export const gisApiPut = async <T = any>(endpoint: string, data?: any): Promise<ApiResponse<T>> => {
+export const gisApiPut = async <T = any>(endpoint: string, data?: any): Promise<GisApiResponse<T>> => {
   try {
-    const response: AxiosResponse<ApiResponse<T>> = await gisApiClient.put(endpoint, data);
+    const response: AxiosResponse<GisApiResponse<T>> = await gisApiClient.put(endpoint, data);
     return response.data;
   } catch (error) {
     throw handleError(error);
   }
 };
 
-export const gisApiDelete = async <T = any>(endpoint: string): Promise<ApiResponse<T>> => {
+export const gisApiDelete = async <T = any>(endpoint: string): Promise<GisApiResponse<T>> => {
   try {
-    const response: AxiosResponse<ApiResponse<T>> = await gisApiClient.delete(endpoint);
+    const response: AxiosResponse<GisApiResponse<T>> = await gisApiClient.delete(endpoint);
     return response.data;
   } catch (error) {
     throw handleError(error);
   }
 };
 
-export const gisApiPatch = async <T = any>(endpoint: string, data?: any): Promise<ApiResponse<T>> => {
+export const gisApiPatch = async <T = any>(endpoint: string, data?: any): Promise<GisApiResponse<T>> => {
   try {
-    const response: AxiosResponse<ApiResponse<T>> = await gisApiClient.patch(endpoint, data);
+    const response: AxiosResponse<GisApiResponse<T>> = await gisApiClient.patch(endpoint, data);
     return response.data;
   } catch (error) {
     throw handleError(error);

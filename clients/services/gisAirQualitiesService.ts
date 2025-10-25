@@ -1,4 +1,4 @@
-import { gisApiGet, ApiResponse } from './common/gisApi';
+import { gisApiGet, GisApiResponse } from './common/gisApi';
 
 interface AirQualityQuery {
   districtId?: string;
@@ -7,7 +7,7 @@ interface AirQualityQuery {
 }
 
 // GET all air quality records (GIS Server)
-export const getAllAirQualitiesGIS = async (query?: AirQualityQuery): Promise<ApiResponse> => {
+export const getAllAirQualitiesGIS = async (query?: AirQualityQuery): Promise<GisApiResponse> => {
   const params = new URLSearchParams();
   if (query?.districtId) params.append('districtId', query.districtId);
   if (query?.from) params.append('from', query.from);
@@ -18,6 +18,6 @@ export const getAllAirQualitiesGIS = async (query?: AirQualityQuery): Promise<Ap
 };
 
 // GET air quality by ID (GIS Server)
-export const getAirQualityByIdGIS = async (id: string): Promise<ApiResponse> => {
+export const getAirQualityByIdGIS = async (id: string): Promise<GisApiResponse> => {
   return gisApiGet(`/air-qualities/${id}`);
 };

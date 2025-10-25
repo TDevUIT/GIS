@@ -1,4 +1,4 @@
-import { gisApiGet, ApiResponse } from './common/gisApi';
+import { gisApiGet, GisApiResponse } from './common/gisApi';
 
 interface WaterQualityQuery {
   districtId?: string;
@@ -7,7 +7,7 @@ interface WaterQualityQuery {
 }
 
 // GET all water quality records (GIS Server)
-export const getAllWaterQualitiesGIS = async (query?: WaterQualityQuery): Promise<ApiResponse> => {
+export const getAllWaterQualitiesGIS = async (query?: WaterQualityQuery): Promise<GisApiResponse> => {
   const params = new URLSearchParams();
   if (query?.districtId) params.append('districtId', query.districtId);
   if (query?.from) params.append('from', query.from);
@@ -18,6 +18,6 @@ export const getAllWaterQualitiesGIS = async (query?: WaterQualityQuery): Promis
 };
 
 // GET water quality by ID (GIS Server)
-export const getWaterQualityByIdGIS = async (id: string): Promise<ApiResponse> => {
+export const getWaterQualityByIdGIS = async (id: string): Promise<GisApiResponse> => {
   return gisApiGet(`/water-qualities/${id}`);
 };

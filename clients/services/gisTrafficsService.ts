@@ -1,4 +1,4 @@
-import { gisApiGet, gisApiPost, ApiResponse } from './common/gisApi';
+import { gisApiGet, gisApiPost, GisApiResponse } from './common/gisApi';
 
 interface TrafficQuery {
   districtId?: string;
@@ -6,7 +6,7 @@ interface TrafficQuery {
 }
 
 // GET all traffic records (GIS Server)
-export const getAllTrafficsGIS = async (query?: TrafficQuery): Promise<ApiResponse> => {
+export const getAllTrafficsGIS = async (query?: TrafficQuery): Promise<GisApiResponse> => {
   const params = new URLSearchParams();
   if (query?.districtId) params.append('districtId', query.districtId);
   if (query?.roadName) params.append('roadName', query.roadName);
@@ -16,11 +16,11 @@ export const getAllTrafficsGIS = async (query?: TrafficQuery): Promise<ApiRespon
 };
 
 // POST find intersecting traffic records (GIS Server)
-export const findIntersectingTrafficsGIS = async (wkt: string): Promise<ApiResponse> => {
+export const findIntersectingTrafficsGIS = async (wkt: string): Promise<GisApiResponse> => {
   return gisApiPost('/traffics/intersects-with', { wkt });
 };
 
 // GET traffic record by ID (GIS Server)
-export const getTrafficByIdGIS = async (id: string): Promise<ApiResponse> => {
+export const getTrafficByIdGIS = async (id: string): Promise<GisApiResponse> => {
   return gisApiGet(`/traffics/${id}`);
 };

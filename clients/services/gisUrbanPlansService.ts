@@ -1,4 +1,4 @@
-import { gisApiGet, gisApiPost, ApiResponse } from './common/gisApi';
+import { gisApiGet, gisApiPost, GisApiResponse } from './common/gisApi';
 
 interface UrbanPlanQuery {
   districtId?: string;
@@ -6,7 +6,7 @@ interface UrbanPlanQuery {
 }
 
 // GET all urban plans (GIS Server)
-export const getAllUrbanPlansGIS = async (query?: UrbanPlanQuery): Promise<ApiResponse> => {
+export const getAllUrbanPlansGIS = async (query?: UrbanPlanQuery): Promise<GisApiResponse> => {
   const params = new URLSearchParams();
   if (query?.districtId) params.append('districtId', query.districtId);
   if (query?.zoningType) params.append('zoningType', query.zoningType);
@@ -16,16 +16,16 @@ export const getAllUrbanPlansGIS = async (query?: UrbanPlanQuery): Promise<ApiRe
 };
 
 // GET urban plan at point (GIS Server)
-export const getUrbanPlanAtPointGIS = async (lng: number, lat: number): Promise<ApiResponse> => {
+export const getUrbanPlanAtPointGIS = async (lng: number, lat: number): Promise<GisApiResponse> => {
   return gisApiGet(`/urban-plans/at-point?lng=${lng}&lat=${lat}`);
 };
 
 // POST find intersecting urban plans (GIS Server)
-export const findIntersectingUrbanPlansGIS = async (wkt: string): Promise<ApiResponse> => {
+export const findIntersectingUrbanPlansGIS = async (wkt: string): Promise<GisApiResponse> => {
   return gisApiPost('/urban-plans/intersects-with', { wkt });
 };
 
 // GET urban plan by ID (GIS Server)
-export const getUrbanPlanByIdGIS = async (id: string): Promise<ApiResponse> => {
+export const getUrbanPlanByIdGIS = async (id: string): Promise<GisApiResponse> => {
   return gisApiGet(`/urban-plans/${id}`);
 };

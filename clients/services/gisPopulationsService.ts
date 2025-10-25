@@ -1,7 +1,7 @@
-import { gisApiGet, ApiResponse } from './common/gisApi';
+import { gisApiGet, GisApiResponse } from './common/gisApi';
 
 // GET all population records (GIS Server)
-export const getAllPopulationsGIS = async (districtId?: string, year?: number): Promise<ApiResponse> => {
+export const getAllPopulationsGIS = async (districtId?: string, year?: number): Promise<GisApiResponse> => {
   const params = new URLSearchParams();
   if (districtId) params.append('districtId', districtId);
   if (year) params.append('year', year.toString());
@@ -11,6 +11,6 @@ export const getAllPopulationsGIS = async (districtId?: string, year?: number): 
 };
 
 // GET population by ID (GIS Server)
-export const getPopulationByIdGIS = async (id: string): Promise<ApiResponse> => {
+export const getPopulationByIdGIS = async (id: string): Promise<GisApiResponse> => {
   return gisApiGet(`/populations/${id}`);
 };

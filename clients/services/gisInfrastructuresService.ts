@@ -1,12 +1,12 @@
-import { gisApiGet, ApiResponse } from './common/gisApi';
+import { gisApiGet, GisApiResponse } from './common/gisApi';
 
-type InfraCategory = 'SCHOOL' | 'HOSPITAL' | 'PARK' | 'MARKET' | 'UTILITY' | 'ADMINISTRATIVE' | 'OTHER';
+export type InfraCategory = 'SCHOOL' | 'HOSPITAL' | 'PARK' | 'MARKET' | 'UTILITY' | 'ADMINISTRATIVE' | 'OTHER';
 
 // GET all infrastructures (GIS Server)
 export const getAllInfrastructuresGIS = async (
   districtId?: string,
   category?: InfraCategory
-): Promise<ApiResponse> => {
+): Promise<GisApiResponse> => {
   const params = new URLSearchParams();
   if (districtId) params.append('districtId', districtId);
   if (category) params.append('category', category);
@@ -20,11 +20,11 @@ export const getInfrastructuresWithinRadiusGIS = async (
   lng: number,
   lat: number,
   radiusInMeters: number
-): Promise<ApiResponse> => {
+): Promise<GisApiResponse> => {
   return gisApiGet(`/infrastructures/within-radius?lng=${lng}&lat=${lat}&radiusInMeters=${radiusInMeters}`);
 };
 
 // GET infrastructure by ID (GIS Server)
-export const getInfrastructureByIdGIS = async (id: string): Promise<ApiResponse> => {
+export const getInfrastructureByIdGIS = async (id: string): Promise<GisApiResponse> => {
   return gisApiGet(`/infrastructures/${id}`);
 };

@@ -1,11 +1,11 @@
-import { gisApiGet, ApiResponse } from './common/gisApi';
+import { gisApiGet, GisApiResponse } from './common/gisApi';
 
 // GET all accidents (GIS Server)
-export const getAllAccidentsGIS = async (): Promise<ApiResponse> => {
+export const getAllAccidentsGIS = async (): Promise<GisApiResponse> => {
   return gisApiGet('/accidents');
 };
 
 // GET accident by ID (GIS Server)
-export const getAccidentByIdGIS = async (id: string): Promise<ApiResponse> => {
+export const getAccidentByIdGIS = async (id: string): Promise<GisApiResponse> => {
   return gisApiGet(`/accidents/${id}`);
 };
