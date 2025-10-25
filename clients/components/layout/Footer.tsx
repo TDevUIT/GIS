@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Facebook, Twitter, Instagram, Rss, Mail } from "lucide-react";
+import { ROUTES } from "@/constants/routes";
 
 const Footer = () => {
   const year = new Date().getFullYear();
@@ -10,7 +11,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
 
           <div className="space-y-4">
-            <Link href="/" className="inline-block">
+            <Link href={ROUTES.HOME} className="inline-block">
               <h2 className="text-2xl font-bold">
                 Urban<span className="font-normal">Scale</span>
               </h2>
@@ -33,9 +34,9 @@ const Footer = () => {
               <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="hover:opacity-80">
                 <Instagram className="w-5 h-5" />
               </a>
-              <a href="/rss" className="hover:opacity-80">
+              <Link href="/rss" className="hover:opacity-80">
                 <Rss className="w-5 h-5" />
-              </a>
+              </Link>
             </div>
           </div>
 
@@ -53,7 +54,7 @@ const Footer = () => {
                 </a>
               </li>
               <li>
-                <Link href="/" className="text-white/90 hover:text-white">
+                <Link href={ROUTES.HOME} className="text-white/90 hover:text-white">
                   Website
                 </Link>
               </li>

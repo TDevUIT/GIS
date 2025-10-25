@@ -8,6 +8,8 @@ import {
   getAllActions 
 } from '@/constants/featureCategories'
 import { Code, Sparkles, Layout, Layers } from 'lucide-react'
+import Link from 'next/link'
+import { ROUTES } from '@/constants/routes'
 
 export default function FeaturesDemo() {
   const [selectedAction, setSelectedAction] = useState<FeatureAction | null>(null)
@@ -208,12 +210,12 @@ export default function FeaturesDemo() {
           </div>
 
           <div className="mt-6 flex gap-4">
-            <a 
-              href="/maps" 
+            <Link 
+              href={ROUTES.MAPS.INDEX} 
               className="px-6 py-3 bg-purple-600 hover:bg-purple-700 rounded-lg font-semibold transition-colors"
             >
               View on Map
-            </a>
+            </Link>
             <a 
               href="/components/maps/FEATURES_README.md" 
               className="px-6 py-3 bg-gray-700 hover:bg-gray-600 rounded-lg font-semibold transition-colors"

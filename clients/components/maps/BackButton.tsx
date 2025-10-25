@@ -2,11 +2,12 @@
 
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
+import { ROUTES } from '@/constants/routes'
 
 export default function BackButton() {
   return (
     <div className="absolute left-6 top-6 z-[1000]">
-      <Link href="/">
+      <Link href={ROUTES.HOME}>
         <button
           className="group flex items-center overflow-hidden px-2.5 py-2 bg-white hover:bg-blue-50 transition-all duration-300 rounded-lg border border-gray-200 shadow-md hover:shadow-lg hover:pr-4"
           title="Về trang chủ"
