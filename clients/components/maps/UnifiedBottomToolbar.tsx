@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useMap } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet-draw/dist/leaflet.draw.css'
@@ -34,6 +34,7 @@ import {
   Layers2
 } from 'lucide-react'
 import { Z_INDEX } from '@/constants/zIndex'
+import { useToolbarStore } from '@/stores/toolbarControlStore'
 
 interface DrawingTool {
   id: string
@@ -225,11 +226,19 @@ const categoryItems: CategoryItem[] = [
 type TabType = 'draw' | 'icons' | 'categories'
 
 export default function UnifiedBottomToolbar() {
-  const [activeTab, setActiveTab] = useState<TabType>('draw')
-  const [activeTool, setActiveTool] = useState<string | null>(null)
-  const [selectedIcon, setSelectedIcon] = useState<IconItem | null>(null)
-  const [activeCategory, setActiveCategory] = useState<string | null>(null)
-  const [isExpanded, setIsExpanded] = useState(true)
+  // Use Zustand store
+  const {
+    activeTab,
+    activeTool,
+    selectedIcon,
+    activeCategory,
+    isExpanded,
+    setActiveTab: setStoreActiveTab,
+    setActiveTool,
+    setSelectedIcon,
+    setActiveCategory,
+    setIsExpanded,
+  } = useToolbarStore()
 
   const map = useMap()
   const drawnItemsRef = useState<L.FeatureGroup | null>(() => {
@@ -238,23 +247,39 @@ export default function UnifiedBottomToolbar() {
     map.addLayer(fg)
     return fg
   })[0]
-  const currentDrawHandlerRef = useState<any>(null)[0]
+  const [currentDrawHandler, setCurrentDrawHandler] = useState<any>(null)
+  const mapClickHandlerRef = useRef<((e: L.LeafletMouseEvent) => void) | null>(null)
+
+  // Cleanup function for map interactions
+  const cleanupMapInteractions = () => {
+    if (!map) return
+
+    // Disable drawing handler
+    if (currentDrawHandler) {
+      currentDrawHandler.disable()
+      setCurrentDrawHandler(null)
+    }
+
+    // Remove map click handler for icons
+    if (mapClickHandlerRef.current) {
+      map.off('click', mapClickHandlerRef.current)
+      mapClickHandlerRef.current = null
+    }
+
+    // Reset cursor
+    map.getContainer().style.cursor = ''
+  }
 
   const handleTabChange = (tab: TabType) => {
-    setActiveTab(tab)
+    // Clean up all interactions first
+    cleanupMapInteractions()
 
-    if (tab !== 'icons') {
-      setSelectedIcon(null)
-      if (map) {
-        map.getContainer().style.cursor = ''
-      }
-    }
-    if (tab !== 'draw') {
-      setActiveTool(null)
-      if (currentDrawHandlerRef) {
-        currentDrawHandlerRef.disable()
-      }
-    }
+    // Reset all states when changing tabs
+    setActiveTool(null)
+    setSelectedIcon(null)
+
+    // Set new active tab
+    setStoreActiveTab(tab)
   }
 
   const handleToolClick = (tool: DrawingTool) => {
@@ -266,8 +291,10 @@ export default function UnifiedBottomToolbar() {
       map.getContainer().style.cursor = ''
     }
 
-    if (currentDrawHandlerRef) {
-      currentDrawHandlerRef.disable()
+    // Disable current drawing handler before starting new one
+    if (currentDrawHandler) {
+      currentDrawHandler.disable()
+      setCurrentDrawHandler(null)
     }
 
     if (tool.type === 'delete') {
@@ -363,29 +390,44 @@ export default function UnifiedBottomToolbar() {
 
     if (drawHandler) {
       drawHandler.enable()
+      setCurrentDrawHandler(drawHandler)
     }
   }
 
   const handleIconSelect = (item: IconItem) => {
     if (!map) return
 
-    if (currentDrawHandlerRef) {
-      currentDrawHandlerRef.disable()
-    }
-    setActiveTool(null)
-
+    // If clicking the same icon, deselect it
     if (selectedIcon?.id === item.id) {
+      cleanupMapInteractions()
       setSelectedIcon(null)
-      map.getContainer().style.cursor = ''
       return
     }
 
+    // Clean up before selecting new icon
+    cleanupMapInteractions()
+    setActiveTool(null)
+
+    // Select new icon
     setSelectedIcon(item)
     map.getContainer().style.cursor = 'crosshair'
   }
 
-  if (map && selectedIcon) {
+  // Effect to manage map click handler for icon placement
+  useEffect(() => {
+    if (!map || !selectedIcon) {
+      // Clean up handler when no icon is selected
+      if (mapClickHandlerRef.current) {
+        map?.off('click', mapClickHandlerRef.current)
+        mapClickHandlerRef.current = null
+      }
+      return
+    }
+
+    // Create new handler
     const handleMapClick = (e: L.LeafletMouseEvent) => {
+      if (!selectedIcon) return
+
       const customIcon = L.icon({
         iconUrl: selectedIcon.iconUrl,
         shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
@@ -395,8 +437,11 @@ export default function UnifiedBottomToolbar() {
         shadowSize: [41, 41],
       })
 
-      const marker = L.marker(e.latlng, { icon: customIcon, draggable: true })
+      const marker = L.marker(e.latlng, { icon: customIcon, draggable: false })
       marker.addTo(map)
+      if (drawnItemsRef) {
+        drawnItemsRef.addLayer(marker)
+      }
       marker.bindPopup(`
         <div class="text-sm">
           <h3 class="font-bold text-base mb-1">${selectedIcon.label}</h3>
@@ -412,15 +457,46 @@ export default function UnifiedBottomToolbar() {
       marker.on('click', () => marker.openPopup())
     }
 
-    map.off('click', handleMapClick)
+    // Remove old handler if exists
+    if (mapClickHandlerRef.current) {
+      map.off('click', mapClickHandlerRef.current)
+    }
+
+    // Add new handler
+    mapClickHandlerRef.current = handleMapClick
     map.on('click', handleMapClick)
-  }
+
+    // Cleanup on unmount or when dependencies change
+    return () => {
+      if (mapClickHandlerRef.current) {
+        map.off('click', mapClickHandlerRef.current)
+        mapClickHandlerRef.current = null
+      }
+    }
+  }, [map, selectedIcon, drawnItemsRef])
 
   if (map && drawnItemsRef) {
     map.off(L.Draw.Event.CREATED)
     map.on(L.Draw.Event.CREATED, (e: any) => {
       const layer = e.layer
+
+      // Disable editing for the created shape
+      if (layer.editing) {
+        layer.editing.disable()
+      }
+
+      // Make the layer non-draggable and non-editable
+      if (layer.options) {
+        layer.options.draggable = false
+      }
+
       drawnItemsRef.addLayer(layer)
+
+      // Disable handler after drawing is complete
+      if (currentDrawHandler) {
+        currentDrawHandler.disable()
+        setCurrentDrawHandler(null)
+      }
       setActiveTool(null)
     })
   }
@@ -448,8 +524,9 @@ export default function UnifiedBottomToolbar() {
       style={{ zIndex: Z_INDEX.DRAWING_TOOLBAR }}
     >
       <div className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-gray-200/50 pointer-events-auto overflow-hidden max-w-3xl">
-        <div className="flex items-center justify-between border-b border-gray-200/50 bg-gradient-to-r from-gray-50 to-white px-3 py-1.5">
-          <div className="flex gap-1.5">
+        <div className="flex items-center justify-between border-b border-gray-200/50 bg-gradient-to-r from-gray-50 to-white px-3 py-2">
+          <div className="flex items-center gap-3">
+            <div className="flex gap-1.5">
             <button
               onClick={() => handleTabChange('draw')}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 flex items-center gap-1.5 ${
@@ -483,6 +560,17 @@ export default function UnifiedBottomToolbar() {
               <Layers2 className="w-3.5 h-3.5" />
               Danh mục
             </button>
+            </div>
+
+            {/* Status indicator */}
+            {(activeTool || selectedIcon) && (
+              <div className="flex items-center gap-2 px-3 py-1 bg-blue-50 border border-blue-200 rounded-lg">
+                <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                <span className="text-xs text-blue-700 font-medium">
+                  {activeTool ? `Đang vẽ: ${drawingTools.find(t => t.id === activeTool)?.label}` : `Chọn vị trí cho: ${selectedIcon?.label}`}
+                </span>
+              </div>
+            )}
           </div>
 
           <button
@@ -505,7 +593,7 @@ export default function UnifiedBottomToolbar() {
                     relative p-3 rounded-xl transition-all duration-200 group
                     hover:shadow-lg
                     ${activeTool === tool.id
-                      ? 'bg-blue-500 text-white shadow-md scale-105'
+                      ? 'bg-blue-500 text-white shadow-md scale-105 ring-2 ring-blue-300'
                       : 'bg-gray-50 text-gray-700 hover:bg-blue-50'
                     }
                     ${tool.type === 'delete' ? 'hover:bg-red-50 hover:text-red-500' : ''}
@@ -524,27 +612,28 @@ export default function UnifiedBottomToolbar() {
 
           {activeTab === 'icons' && (
             <div>
-              <div className="grid grid-cols-6 gap-2 max-h-48 overflow-y-auto pr-2 overflow-hidden ">
+              <div className="grid grid-cols-6 gap-2 max-h-48 overflow-hidden pr-2  ">
                 {iconItems.map((item) => (
                   <button
                     key={item.id}
                     onClick={() => handleIconSelect(item)}
                     className={`
-                      flex flex-col items-center gap-1 p-2 rounded-xl
-                      border-2 transition-all duration-200 cursor-pointer
-                      hover:shadow-lg
-                      ${selectedIcon?.id === item.id
-                        ? 'border-2 border-black'
-                        : ''
-                      }
-                    `}
-                    style={{
-                      borderColor: item.color,
-                      backgroundColor: selectedIcon?.id === item.id
-                        ? `${item.color}30`
-                        : `${item.color}15`,
-                    }}
-                    title={item.label}
+                    flex flex-col items-center gap-1 p-2 rounded-xl
+                    border-2 transition-all duration-200 cursor-pointer
+                    mt-1
+                    ${selectedIcon?.id === item.id
+                      ? 'border-2 border-black'
+                      : ''
+                    }
+                  `}
+                  style={{
+                    borderColor: selectedIcon?.id === item.id ? '#000' : item.color,
+                    backgroundColor: selectedIcon?.id === item.id
+                      ? `${item.color}40`
+                      : `${item.color}15`,
+                    boxShadow: selectedIcon?.id === item.id ? `0 0 0 3px ${item.color}40` : 'none',
+                  }}
+                  title={item.label}
                   >
                     <div style={{ color: item.color }}>
                       {item.icon}
@@ -567,12 +656,12 @@ export default function UnifiedBottomToolbar() {
                     key={item.id}
                     onClick={() => setActiveCategory(item.id)}
                     className={`
-                      px-3 py-1.5 rounded-lg transition-all duration-200 flex items-center gap-1.5
-                      ${activeCategory === item.id
-                        ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-md scale-105'
-                        : 'bg-gray-50 text-gray-700 hover:bg-emerald-50 hover:text-emerald-600'
-                      }
-                    `}
+                    px-3 py-1.5 rounded-lg transition-all duration-200 flex items-center gap-1.5
+                    ${activeCategory === item.id
+                      ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-md scale-105 ring-2 ring-emerald-300'
+                      : 'bg-gray-50 text-gray-700 hover:bg-emerald-50 hover:text-emerald-600 hover:scale-105'
+                    }
+                  `}
                   >
                     <div className="w-4 h-4">{item.icon}</div>
                     <span className="text-xs font-medium">{item.label}</span>
