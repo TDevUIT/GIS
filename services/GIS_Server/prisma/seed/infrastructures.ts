@@ -136,36 +136,24 @@ export async function seedInfrastructures(prisma: PrismaClient) {
       },
     },
     {
-      "districtId": district1.id,
-      "name": "Công viên Tào Đàn",
-      "address": "55C Nguyễn Thị Minh Khai, P. Bến Thành",
-      "category": InfraCategory.PARK,
-      "geom": "POINT(106.693087 10.774802)",
-      "details": {
-        "area_m2": 100000
+      districtId: district1.id,
+      name: "Công viên Tào Đàn",
+      address: "55C Nguyễn Thị Minh Khai, P. Bến Thành",
+      category: InfraCategory.PARK,
+      geom: "POINT(106.693087 10.774802)",
+      details: {
+        area_m2: 100000
      }
     },
     {
-      "districtId": district1.id,
-      "name": "Công viên Lê Văn Tám",
-      "address": "Hai Bà Trưng, P. Đa Kao",
-      "category": InfraCategory.PARK,
-      "geom": "POINT(106.693742 10.788220)",
-      "details": {
-        "area_m2": 100000
-      }
-    },
-    {
-      districtId: district3.id,
-      name: 'Trường THPT Marie Curie',
-      address: '159 Nam Kỳ Khởi Nghĩa, P. Võ Thị Sáu',
-      category: InfraCategory.SCHOOL,
-      geom: 'POINT(106.690756 10.782351)',
+      districtId: district1.id,
+      name: "Công viên Lê Văn Tám",
+      address: "Hai Bà Trưng, P. Đa Kao",
+      category: InfraCategory.PARK,
+      geom: "POINT(106.693742 10.788220)",
       details: {
-        level: SchoolLevel.HIGH_SCHOOL,
-        studentCapacity: 2000,
-        teacherCount: 150,
-      },
+        area_m2: 100000
+      }
     },
     {
       districtId: district1.id,
@@ -192,17 +180,6 @@ export async function seedInfrastructures(prisma: PrismaClient) {
       }
     },
     {
-      districtId: district3.id,
-      name: 'Nhà máy nước Sài Gòn',
-      address: '1 Công trường Quốc Tế, P. Võ Thị Sáu',
-      category: InfraCategory.UTILITY,
-      geom: 'POINT(106.6974 10.7833)',
-      details: {
-        type: UtilityType.WATER_SUPPLY,
-        capacity: 300000,
-      },
-    },
-    {
       districtId: district1.id,
       name: 'Tổng công ty Điện lực Thành phố Hồ Chí Minh',
       address: '35 Tôn Đức Thắng, P. Bến Nghé',
@@ -223,6 +200,154 @@ export async function seedInfrastructures(prisma: PrismaClient) {
         type: UtilityType.GAS_STATION,
         capacity: 3000
       }
+    },
+    {
+      districtId: district3.id,
+      name: 'Bệnh viện Bình Dân',
+      address: '371 Điện Biên Phủ, P. Bàn Cờ',
+      category: InfraCategory.HOSPITAL,
+      geom: 'POINT(106.68127603839207 10.774015209552527)',
+      details: {
+        type: HospitalType.GENERAL,
+        bedCapacity: 790,
+        doctorCount: 200
+      },
+    },
+    {
+      districtId: district3.id,
+      name: 'Bệnh viện Mắt TP.HCM',
+      address: '280 Điện Biên Phủ, P. Xuân Hòa',
+      category: InfraCategory.HOSPITAL,
+      geom: 'POINT(106.68505215073964 10.778622517108307)',
+      details: {
+        type: HospitalType.SPECIALIZED,
+        bedCapacity: 270,
+        doctorCount: 80
+      }
+    },
+    {
+      districtId: district3.id,
+      name: "Co.op mart Nguyễn Đình Chiểu",
+      address: "168 Nguyễn Đình Chiểu, P. Xuân Hòa",
+      category: InfraCategory.MARKET,
+      geom: "POINT(106.692384 10.781405)",
+      details: {
+          type: MarketType.SUPERMARKET,
+          stallCount: 50
+        }
+    },
+    {
+      districtId: district3.id,
+      name: "Saigon Mall",
+      address: "19 Cao Thắng, P. Bàn Cờ",
+      category: InfraCategory.MARKET,
+      geom: "POINT(106.68265474668141 10.769315791246925)",
+      details: {
+          type: MarketType.MALL,
+          stallCount: 150
+        }
+    },
+    {
+      districtId: district3.id,
+      name: "Chợ Vườn Chuối",
+      address: "428 Nguyễn Đình Chiểu, P. Xuân Hòa",
+      category: InfraCategory.MARKET,
+      geom: "POINT(106.68459474364212 10.772961286038473)",
+      details: {
+        type: MarketType.TRADITIONAL,
+        stallCount: 45
+      }
+    },
+    {
+      districtId: district3.id,
+      name: "Công viên Nguyễn Thiện Thuật",
+      address: "Đ. Điện Biên Phủ, P. Bàn Cờ",
+      category: InfraCategory.PARK,
+      geom: "POINT(106.67785226671445 10.769083378815159)",
+      details: {
+        area: 3843
+      }
+    },
+    {
+      districtId: district3.id,
+      name: 'Trường THPT Marie Curie',
+      address: '159 Nam Kỳ Khởi Nghĩa, P. Xuân Hòa',
+      category: InfraCategory.SCHOOL,
+      geom: 'POINT(106.690756 10.782351)',
+      details: {
+        level: SchoolLevel.HIGH_SCHOOL,
+        studentCapacity: 2000,
+        teacherCount: 150,
+      },
+    },
+    {
+      districtId: district3.id,
+      name: 'Trường THPT Nguyễn Thị Minh Khai',
+      address: '275 Nguyễn Thị Minh Khai, P. Xuân Hoà',
+      category: InfraCategory.SCHOOL,
+      geom: 'POINT(106.68697492011356 10.779266763217379)',
+      details: {
+        level: SchoolLevel.HIGH_SCHOOL,
+        studentCapacity: 2500,
+        teacherCount: 160,
+      },
+    },
+    {
+      districtId: district3.id,
+      name: 'Trường THCS Lê Quý Đôn',
+      address: '9B Võ Văn Tần, P. Xuân Hoà',
+      category: InfraCategory.SCHOOL,
+      geom: 'POINT(106.69305251885531 10.782208512877554)',
+      details: {
+        level: SchoolLevel.SECONDARY,
+        studentCapacity: 1500,
+        teacherCount: 90,
+      },
+    },
+    {
+      districtId: district3.id,
+      name: 'Trường Tiểu học Kỳ Đồng',
+      address: '24 Kỳ Đồng, P. Nhiêu Lộc',
+      category: InfraCategory.SCHOOL,
+      geom: 'POINT(106.68096650133157 10.782522693128119)',
+      details: {
+        level: SchoolLevel.PRIMARY,
+        studentCapacity: 1200,
+        teacherCount: 70,
+      },
+    },
+    {
+      districtId: district3.id,
+      name: 'Nhà máy nước Sài Gòn',
+      address: '1 Công trường Quốc Tế, P. Xuân Hòa',
+      category: InfraCategory.UTILITY,
+      geom: 'POINT(106.6974 10.7833)',
+      details: {
+        type: UtilityType.WATER_SUPPLY,
+        capacity: 300000,
+      },
+    },
+    {
+      districtId: district3.id,
+      name: 'Trạm xử lý nước thải Kỳ Đồng',
+      address: '32 Kỳ Đồng, P. Nhiêu Lộc',
+      category: InfraCategory.UTILITY,
+      geom: 'POINT(106.68134017197467 10.781312500817481)',
+      details: {
+        type: UtilityType.SEWAGE_TREATMENT,
+        capacity: 50000,
+      },
+    },
+    {
+      districtId: district3.id,
+      name: 'Trạm trung chuyển rác Nguyễn Thị Minh Khai',
+      address: 'Nguyễn Thị Minh Khai, P. Bàn Cờ',
+      category: InfraCategory.UTILITY,
+      geom: 'POINT(106.69405340018608 10.778727686841174)',
+      details: {
+        type: UtilityType.WASTE_TREATMENT,
+        capacity: 20000,
+      },
     }
   ];
 
