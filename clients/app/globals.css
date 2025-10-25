@@ -134,76 +134,6 @@
     @apply bg-background text-foreground;
   }
 }
-
-/* Header scroll state enhancements */
-header.is-scrolled {
-  background-color: rgb(0, 0, 0);
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
-  border-bottom-color: rgba(255, 255, 255, 0.08);
-}
-header.is-scrolled .header-inner {
-  height: 4rem; /* shrink from 5rem (h-20) */
-}
-
-/* Header default (transparent over hero) */
-header[data-site-header] .nav-link {
-  color: rgba(255, 255, 255, 0.9);
-}
-header[data-site-header] .nav-link:hover {
-  color: rgba(255, 255, 255, 1);
-}
-header[data-site-header] .logo-text {
-  color: rgba(255, 255, 255, 0.95);
-}
-header[data-site-header] .login-btn {
-  color: #fff;
-  border-color: rgba(255, 255, 255, 0.6);
-  background-color: transparent;
-}
-header[data-site-header] .login-btn:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-}
-header[data-site-header] .mobile-menu-trigger {
-  background-color: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.4);
-  color: #fff;
-}
-header[data-site-header] .mobile-menu-trigger:hover {
-  background-color: rgba(255, 255, 255, 0.2);
-}
-
-/* Scrolled overrides on light background */
-header.is-scrolled .nav-link {
-  color: rgba(255, 255, 255, 0.9);
-}
-header.is-scrolled .nav-link:hover {
-  color: #fff;
-}
-header.is-scrolled .logo-text {
-  color: #fff;
-}
-header.is-scrolled .login-btn {
-  color: #fff;
-  border-color: rgba(255, 255, 255, 0.5);
-  background-color: rgba(255, 255, 255, 0.06);
-}
-header.is-scrolled .login-btn:hover {
-  background-color: rgba(255, 255, 255, 0.12);
-}
-header.is-scrolled .mobile-menu-trigger {
-  background-color: rgba(255, 255, 255, 0.06);
-  border-color: rgba(255, 255, 255, 0.4);
-  color: #fff;
-}
-header.is-scrolled .mobile-menu-trigger:hover {
-  background-color: rgba(255, 255, 255, 0.12);
-}
-
-/* Responsive embed defaults */
-.sketchfab-embed-wrapper, .sketchfab-embed-wrapper iframe {
-  display: block;
-}
-
 /* Smooth scrolling for in-page anchors */
 html {
   scroll-behavior: smooth;
@@ -233,4 +163,39 @@ html {
 .rounded-b-4xl {
   border-bottom-right-radius: var(--radius-4xl) /* 2rem = 32px */;
   border-bottom-left-radius: var(--radius-4xl) /* 2rem = 32px */;
+}
+
+/* Hero section animations */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-20px); }
+}
+
+@keyframes float-delayed {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-15px); }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-float-delayed {
+  animation: float-delayed 4s ease-in-out infinite;
+  animation-delay: 1s;
+}
+
+.animate-fade-in {
+  animation: fade-in 1s ease-out;
 }

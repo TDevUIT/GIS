@@ -2,20 +2,20 @@
 import Link from "next/link"
 import React, { useEffect, useState } from "react"
 import { Button } from "../ui/button"
-import { Menu } from "lucide-react"
+import { Menu, X, Home, Map, BarChart3, Info } from "lucide-react"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "../ui/sheet"
+import Image from "next/image"
 
 const Header = () => {
     const NavItems = [
-        {name: "Home", href: "/"},
-        {name: "About", href: "/about"},
-        {name: "Industries", href: "/industries"},
-        {name: "Blog", href: "/blog"},
-        {name: "Resources", href: "/resources"},
-        {name: "Support", href: "/support"},
+        {name: "Trang Chủ", href: "/", icon: Home},
+        {name: "Bản Đồ", href: "/maps", icon: Map},
+        {name: "Thống Kê", href: "/statistic", icon: BarChart3},
+        {name: "Về Chúng Tôi", href: "/about", icon: Info},
     ]
 
     const [scrolled, setScrolled] = useState(false);
+    const [isOpen, setIsOpen] = useState(false);
 
     useEffect(() => {
         const el = document.querySelector("header[data-site-header]") as HTMLElement | null;
@@ -36,12 +36,14 @@ const Header = () => {
     return (
         <header
             data-site-header
-            className={`px-4 sm:px-6 md:px-10 lg:px-12 fixed top-0 left-0 w-full z-50 text-white/95 border-b border-transparent transition-colors duration-200 ${scrolled ? "bg-black" : "bg-transparent"}`}
+            className={`px-4 sm:px-6 md:px-16 lg:px-24 sticky top-0 left-0 w-full z-50 transition-all duration-300 ${
+                scrolled ? 'bg-white/80 backdrop-blur-lg shadow-sm' : 'bg-transparent'
+            }`}
         >
-            <div className="header-inner h-16 sm:h-20 flex justify-between items-center transition-[height] duration-200 ">
+            <div className="h-16 sm:h-20 flex justify-between items-center">
                 <div className="flex items-center ">
                     <Link href="/" className="logo-text text-2xl font-semibold italic tracking-wide hover:opacity-90 transition-opacity">
-                        URBAN <span className="text-white/90">SCALE</span>
+                        <Image src="/images/logo.svg" alt="Logo" width={215} height={28} />
                     </Link>
                 </div>
                 <nav className="hidden md:flex items-center gap-6 lg:gap-8">
@@ -49,46 +51,64 @@ const Header = () => {
                         <Link
                             key={item.name}
                             href={item.href}
-                            className="nav-link transition-colors"
+                            className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors relative group"
                         >
                             {item.name}
+                            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-blue-500 transition-all group-hover:w-full"></span>
                         </Link>
                     ))}
-                    <Link href="/login">
-                        <Button
-                            className="login-btn rounded-full bg-transparent border border-white/60 text-white hover:bg-white/10 px-5 lg:px-6 h-10 lg:h-11 transition-colors"
-                            variant="outline"
-                        >
-                            Login
-                        </Button>
-                    </Link>
                 </nav>
 
                 <div className="md:hidden">
-                    <Sheet>
+                    <Sheet open={isOpen} onOpenChange={setIsOpen}>
                         <SheetTrigger asChild>
-                            <Button variant="outline" className="mobile-menu-trigger rounded-full h-10 w-10 p-0 transition-colors">
-                                <Menu className="h-5 w-5" />
+                            <Button
+                                variant="ghost"
+                                className="h-10 w-10 p-0 hover:bg-gray-100 rounded-lg"
+                                onClick={() => setIsOpen(true)}
+                            >
+                                <Menu className="h-6 w-6 text-gray-700" />
                                 <span className="sr-only">Open menu</span>
                             </Button>
                         </SheetTrigger>
-                        <SheetContent side="right" className="bg-background text-foreground">
-                            <SheetHeader>
-                                <SheetTitle>
-                                    <Link href="/" className="text-xl font-semibold italic tracking-wide">
-                                        URBAN <span className="text-primary">X</span>
-                                    </Link>
-                                </SheetTitle>
+                        <SheetContent side="right" className="w-[300px] sm:w-[400px] bg-white p-0">
+                            <SheetHeader className="px-6 pt-6 pb-4 border-b">
+                                <div className="flex items-center justify-between">
+                                    <SheetTitle>
+                                        <Link href="/" onClick={() => setIsOpen(false)}>
+                                            <Image src="/images/logo.svg" alt="Logo" width={180} height={24} />
+                                        </Link>
+                                    </SheetTitle>
+                                </div>
                             </SheetHeader>
-                            <nav className="mt-2 flex flex-col gap-3">
-                                {NavItems.map((item) => (
-                                    <Link key={item.name} href={item.href} className="text-foreground/90 hover:text-foreground text-base">
-                                        {item.name}
-                                    </Link>
-                                ))}
-                                <Link href="/login">
-                                    <Button className="mt-2 rounded-full" variant="outline">Login</Button>
-                                </Link>
+
+                            <nav className="px-4 py-6">
+                                <div className="space-y-2">
+                                    {NavItems.map((item) => {
+                                        const Icon = item.icon;
+                                        return (
+                                            <Link
+                                                key={item.name}
+                                                href={item.href}
+                                                onClick={() => setIsOpen(false)}
+                                                className="flex items-center gap-4 px-4 py-3 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-600 font-medium group"
+                                            >
+                                                <Icon className="h-5 w-5 text-gray-500 group-hover:text-blue-600" />
+                                                <span>{item.name}</span>
+                                            </Link>
+                                        );
+                                    })}
+                                </div>
+
+                                <div className="mt-8 pt-6 border-t">
+                                    <div className="px-4 space-y-3">
+                                        <p className="text-sm font-semibold text-gray-900">Liên hệ</p>
+                                        <div className="space-y-2 text-sm text-gray-600">
+                                            <p>(+84) 900 000 000</p>
+                                            <p>urbanscale@uit-se.hcmuaf</p>
+                                        </div>
+                                    </div>
+                                </div>
                             </nav>
                         </SheetContent>
                     </Sheet>
