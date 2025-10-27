@@ -1,4 +1,4 @@
-import { apiGet, apiPost, ApiResponse } from './common/api';
+import { apiGet, apiPost, apiPut, apiDelete, ApiResponse } from './common/api';
 
 // GET all districts
 export const getAllDistricts = async (): Promise<ApiResponse> => {
@@ -23,4 +23,19 @@ export const findIntersectingDistricts = async (wkt: string): Promise<ApiRespons
 // GET wards of a district
 export const getWardsOfDistrict = async (districtId: string): Promise<ApiResponse> => {
   return apiGet(`/districts/${districtId}/wards`);
+};
+
+// POST create district
+export const createDistrict = async (data: any): Promise<ApiResponse> => {
+  return apiPost('/districts', data);
+};
+
+// PUT update district
+export const updateDistrict = async (id: string, data: any): Promise<ApiResponse> => {
+  return apiPut(`/districts/${id}`, data);
+};
+
+// DELETE district
+export const deleteDistrict = async (id: string): Promise<ApiResponse> => {
+  return apiDelete(`/districts/${id}`);
 };

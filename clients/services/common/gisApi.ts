@@ -20,7 +20,24 @@ const handleError = (error: any): Error => {
 
 export const gisApiGet = async <T = any>(endpoint: string): Promise<GisApiResponse<T>> => {
   try {
-    const response: AxiosResponse<GisApiResponse<T>> = await gisApiClient.get(endpoint);
+    const response: AxiosResponse<any> = await gisApiClient.get(endpoint);
+    // GIS Server returns nested structure: { data: { data: { data: {...} } } }
+    // Unwrap twice to get the actual data with geom
+    if (response.data?.data?.data) {
+      return {
+        data: response.data.data.data,
+        message: response.data.data.message || response.data.message,
+        status: response.status,
+      };
+    }
+    // Fallback for single-nested structure
+    if (response.data?.data) {
+      return {
+        data: response.data.data,
+        message: response.data.message,
+        status: response.status,
+      };
+    }
     return response.data;
   } catch (error) {
     throw handleError(error);
@@ -29,7 +46,23 @@ export const gisApiGet = async <T = any>(endpoint: string): Promise<GisApiRespon
 
 export const gisApiPost = async <T = any>(endpoint: string, data?: any): Promise<GisApiResponse<T>> => {
   try {
-    const response: AxiosResponse<GisApiResponse<T>> = await gisApiClient.post(endpoint, data);
+    const response: AxiosResponse<any> = await gisApiClient.post(endpoint, data);
+    // GIS Server returns nested structure: { data: { data: { data: {...} } } }
+    if (response.data?.data?.data) {
+      return {
+        data: response.data.data.data,
+        message: response.data.data.message || response.data.message,
+        status: response.status,
+      };
+    }
+    // Fallback for single-nested structure
+    if (response.data?.data) {
+      return {
+        data: response.data.data,
+        message: response.data.message,
+        status: response.status,
+      };
+    }
     return response.data;
   } catch (error) {
     throw handleError(error);
@@ -38,7 +71,23 @@ export const gisApiPost = async <T = any>(endpoint: string, data?: any): Promise
 
 export const gisApiPut = async <T = any>(endpoint: string, data?: any): Promise<GisApiResponse<T>> => {
   try {
-    const response: AxiosResponse<GisApiResponse<T>> = await gisApiClient.put(endpoint, data);
+    const response: AxiosResponse<any> = await gisApiClient.put(endpoint, data);
+    // GIS Server returns nested structure: { data: { data: { data: {...} } } }
+    if (response.data?.data?.data) {
+      return {
+        data: response.data.data.data,
+        message: response.data.data.message || response.data.message,
+        status: response.status,
+      };
+    }
+    // Fallback for single-nested structure
+    if (response.data?.data) {
+      return {
+        data: response.data.data,
+        message: response.data.message,
+        status: response.status,
+      };
+    }
     return response.data;
   } catch (error) {
     throw handleError(error);
@@ -47,7 +96,23 @@ export const gisApiPut = async <T = any>(endpoint: string, data?: any): Promise<
 
 export const gisApiDelete = async <T = any>(endpoint: string): Promise<GisApiResponse<T>> => {
   try {
-    const response: AxiosResponse<GisApiResponse<T>> = await gisApiClient.delete(endpoint);
+    const response: AxiosResponse<any> = await gisApiClient.delete(endpoint);
+    // GIS Server returns nested structure: { data: { data: { data: {...} } } }
+    if (response.data?.data?.data) {
+      return {
+        data: response.data.data.data,
+        message: response.data.data.message || response.data.message,
+        status: response.status,
+      };
+    }
+    // Fallback for single-nested structure
+    if (response.data?.data) {
+      return {
+        data: response.data.data,
+        message: response.data.message,
+        status: response.status,
+      };
+    }
     return response.data;
   } catch (error) {
     throw handleError(error);
@@ -56,7 +121,23 @@ export const gisApiDelete = async <T = any>(endpoint: string): Promise<GisApiRes
 
 export const gisApiPatch = async <T = any>(endpoint: string, data?: any): Promise<GisApiResponse<T>> => {
   try {
-    const response: AxiosResponse<GisApiResponse<T>> = await gisApiClient.patch(endpoint, data);
+    const response: AxiosResponse<any> = await gisApiClient.patch(endpoint, data);
+    // GIS Server returns nested structure: { data: { data: { data: {...} } } }
+    if (response.data?.data?.data) {
+      return {
+        data: response.data.data.data,
+        message: response.data.data.message || response.data.message,
+        status: response.status,
+      };
+    }
+    // Fallback for single-nested structure
+    if (response.data?.data) {
+      return {
+        data: response.data.data,
+        message: response.data.message,
+        status: response.status,
+      };
+    }
     return response.data;
   } catch (error) {
     throw handleError(error);
