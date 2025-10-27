@@ -1,6 +1,6 @@
 import axios, { AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 
-const gisBaseURL = process.env.NEXT_PUBLIC_GIS_API_URL || 'http://localhost:3002/api';
+const gisBaseURL = process.env.NEXT_PUBLIC_GIS_SERVER_URL || 'http://localhost:3002/api/v1';
 
 export const gisApiClient: AxiosInstance = axios.create({
   baseURL: gisBaseURL,
@@ -13,14 +13,14 @@ export const gisApiClient: AxiosInstance = axios.create({
 gisApiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     console.log('🗺️ GIS API Request:', config.method?.toUpperCase(), config.url);
-    
+
     if (typeof window !== 'undefined') {
       const token = localStorage.getItem('access_token');
       if (token && config.headers) {
         config.headers.Authorization = `Bearer ${token}`;
       }
     }
-    
+
     return config;
   },
   (error) => {
@@ -36,13 +36,13 @@ gisApiClient.interceptors.response.use(
   },
   (error) => {
     console.error('❌ GIS Response Error:', error.response?.status, error.response?.data);
-    
+
     if (error.response?.status === 401) {
       if (typeof window !== 'undefined') {
         localStorage.removeItem('access_token');
       }
     }
-    
+
     return Promise.reject(error);
   }
 );
