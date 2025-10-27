@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getAllDistricts, getDistrictById, getDistrictContainingPoint, findIntersectingDistricts, getWardsOfDistrict } from '@/services/districtsService';
+import { getAllDistricts, getDistrictById, getDistrictContainingPoint, findIntersectingDistricts, getWardsOfDistrict, createDistrict, updateDistrict, deleteDistrict } from '@/services/districtsService';
 import { queryKeys } from '@/config/queryKeys';
 import { QUERY_STALE_TIME } from '@/config/queryConfig';
 
@@ -46,5 +46,39 @@ export function useDistrictWards(districtId: string) {
     queryFn: () => getWardsOfDistrict(districtId),
     enabled: !!districtId,
     staleTime: QUERY_STALE_TIME.DAILY,
+  });
+}
+
+export function useCreateDistrict() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: any) => createDistrict(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.districts.lists() });
+    },
+  });
+}
+
+export function useUpdateDistrict() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: any }) => updateDistrict(id, data),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.districts.detail(variables.id) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.districts.lists() });
+    },
+  });
+}
+
+export function useDeleteDistrict() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => deleteDistrict(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.districts.lists() });
+    },
   });
 }

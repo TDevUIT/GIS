@@ -8,10 +8,15 @@ import {
 import { queryKeys } from '@/config/queryKeys';
 import { QUERY_STALE_TIME } from '@/config/queryConfig';
 
-export function useGisUrbanPlans(districtId?: string, zoningType?: string) {
+interface UrbanPlanQuery {
+  districtId?: string;
+  zoningType?: string;
+}
+
+export function useGisUrbanPlans(query?: UrbanPlanQuery) {
   return useQuery({
-    queryKey: queryKeys.gis.urbanPlans.list(districtId, zoningType),
-    queryFn: () => getAllUrbanPlansGIS(districtId, zoningType),
+    queryKey: queryKeys.gis.urbanPlans.list(query?.districtId, query?.zoningType),
+    queryFn: () => getAllUrbanPlansGIS(query),
     staleTime: QUERY_STALE_TIME.HOURLY,
   });
 }

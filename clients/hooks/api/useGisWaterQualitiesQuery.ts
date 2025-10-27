@@ -3,10 +3,16 @@ import { getAllWaterQualitiesGIS, getWaterQualityByIdGIS } from '@/services/gisW
 import { queryKeys } from '@/config/queryKeys';
 import { QUERY_STALE_TIME } from '@/config/queryConfig';
 
-export function useGisWaterQualities(districtId?: string, from?: string, to?: string) {
+interface WaterQualityQuery {
+  districtId?: string;
+  from?: string;
+  to?: string;
+}
+
+export function useGisWaterQualities(query?: WaterQualityQuery) {
   return useQuery({
-    queryKey: queryKeys.gis.waterQualities.list(districtId, from, to),
-    queryFn: () => getAllWaterQualitiesGIS(districtId, from, to),
+    queryKey: queryKeys.gis.waterQualities.list(query?.districtId, query?.from, query?.to),
+    queryFn: () => getAllWaterQualitiesGIS(query),
     staleTime: QUERY_STALE_TIME.MEDIUM,
   });
 }

@@ -16,10 +16,13 @@ export function useGisWards(districtId?: string) {
   });
 }
 
-export function useGisWard(id: string) {
+export function useGisWard(id?: string) {
   return useQuery({
-    queryKey: queryKeys.gis.wards.detail(id),
-    queryFn: () => getWardByIdGIS(id),
+    queryKey: queryKeys.gis.wards.detail(id || 'none'),
+    queryFn: () => {
+      if (!id) throw new Error('Ward ID is required');
+      return getWardByIdGIS(id);
+    },
     enabled: !!id,
     staleTime: QUERY_STALE_TIME.DAILY,
   });

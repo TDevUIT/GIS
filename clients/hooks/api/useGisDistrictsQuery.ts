@@ -17,10 +17,13 @@ export function useGisDistricts() {
   });
 }
 
-export function useGisDistrict(id: string) {
+export function useGisDistrict(id?: string) {
   return useQuery({
-    queryKey: queryKeys.gis.districts.detail(id),
-    queryFn: () => getDistrictByIdGIS(id),
+    queryKey: queryKeys.gis.districts.detail(id || 'none'),
+    queryFn: () => {
+      if (!id) throw new Error('District ID is required');
+      return getDistrictByIdGIS(id);
+    },
     enabled: !!id,
     staleTime: QUERY_STALE_TIME.DAILY,
   });
@@ -46,10 +49,13 @@ export function useGisDistrictIntersects() {
   });
 }
 
-export function useGisDistrictWards(districtId: string) {
+export function useGisDistrictWards(districtId?: string) {
   return useQuery({
-    queryKey: queryKeys.gis.districts.wards(districtId),
-    queryFn: () => getWardsOfDistrictGIS(districtId),
+    queryKey: queryKeys.gis.districts.wards(districtId || 'none'),
+    queryFn: () => {
+      if (!districtId) throw new Error('District ID is required');
+      return getWardsOfDistrictGIS(districtId);
+    },
     enabled: !!districtId,
     staleTime: QUERY_STALE_TIME.DAILY,
   });

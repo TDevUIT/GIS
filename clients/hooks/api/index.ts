@@ -11,6 +11,7 @@ export * from './useWaterQualityQuery';
 export * from './useTrafficQuery';
 export * from './useAirQualityQuery';
 export * from './useAnalyticsQuery';
+export * from './useReportQuery';
 
 export * from './useGisAccidentsQuery';
 export * from './useGisDistrictsQuery';

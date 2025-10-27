@@ -7,10 +7,17 @@ import {
 import { queryKeys } from '@/config/queryKeys';
 import { QUERY_STALE_TIME } from '@/config/queryConfig';
 
-export function useGisPublicTransports(districtId?: string, mode?: string) {
+type TransportMode = 'BUS' | 'METRO' | 'BRT' | 'WATERWAY';
+
+interface PublicTransportQuery {
+  districtId?: string;
+  mode?: TransportMode;
+}
+
+export function useGisPublicTransports(query?: PublicTransportQuery) {
   return useQuery({
-    queryKey: queryKeys.gis.publicTransports.list(districtId, mode),
-    queryFn: () => getAllPublicTransportsGIS(districtId, mode),
+    queryKey: queryKeys.gis.publicTransports.list(query?.districtId, query?.mode),
+    queryFn: () => getAllPublicTransportsGIS(query),
     staleTime: QUERY_STALE_TIME.MEDIUM,
   });
 }

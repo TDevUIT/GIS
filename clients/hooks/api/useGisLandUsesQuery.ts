@@ -8,10 +8,15 @@ import {
 import { queryKeys } from '@/config/queryKeys';
 import { QUERY_STALE_TIME } from '@/config/queryConfig';
 
-export function useGisLandUses(districtId?: string, type?: string) {
+interface LandUseQuery {
+  districtId?: string;
+  type?: string;
+}
+
+export function useGisLandUses(query?: LandUseQuery) {
   return useQuery({
-    queryKey: queryKeys.gis.landUses.list(districtId, type),
-    queryFn: () => getAllLandUsesGIS(districtId, type),
+    queryKey: queryKeys.gis.landUses.list(query?.districtId, query?.type),
+    queryFn: () => getAllLandUsesGIS(query),
     staleTime: QUERY_STALE_TIME.HOURLY,
   });
 }
