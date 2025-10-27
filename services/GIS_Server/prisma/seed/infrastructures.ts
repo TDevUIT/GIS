@@ -142,7 +142,7 @@ export async function seedInfrastructures(prisma: PrismaClient) {
       "category": InfraCategory.PARK,
       "geom": "POINT(106.693087 10.774802)",
       "details": {
-        "area_m2": 100000
+        "area": 100000
      }
     },
     {
@@ -152,7 +152,7 @@ export async function seedInfrastructures(prisma: PrismaClient) {
       "category": InfraCategory.PARK,
       "geom": "POINT(106.693742 10.788220)",
       "details": {
-        "area_m2": 100000
+        "area": 100000
       }
     },
     {
