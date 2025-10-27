@@ -5,12 +5,13 @@ import { Button } from "../ui/button"
 import { Menu, X, Home, Map, BarChart3, Info } from "lucide-react"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "../ui/sheet"
 import Image from "next/image"
+import { ROUTES } from "@/constants/routes"
 
 const Header = () => {
     const NavItems = [
-        {name: "Trang Chủ", href: "/", icon: Home},
-        {name: "Bản Đồ", href: "/maps", icon: Map},
-        {name: "Thống Kê", href: "/statistic", icon: BarChart3},
+        {name: "Trang Chủ", href: ROUTES.HOME, icon: Home},
+        {name: "Bản Đồ", href: ROUTES.MAPS.INDEX, icon: Map},
+        {name: "Báo cáo", href: ROUTES.REPORTS.INDEX, icon: BarChart3},
         {name: "Về Chúng Tôi", href: "/about", icon: Info},
     ]
 
@@ -42,7 +43,7 @@ const Header = () => {
         >
             <div className="h-16 sm:h-20 flex justify-between items-center">
                 <div className="flex items-center ">
-                    <Link href="/" className="logo-text text-2xl font-semibold italic tracking-wide hover:opacity-90 transition-opacity">
+                    <Link href={ROUTES.HOME} className="logo-text text-2xl font-semibold italic tracking-wide hover:opacity-90 transition-opacity">
                         <Image src="/images/logo.svg" alt="Logo" width={215} height={28} />
                     </Link>
                 </div>
@@ -75,7 +76,7 @@ const Header = () => {
                             <SheetHeader className="px-6 pt-6 pb-4 border-b">
                                 <div className="flex items-center justify-between">
                                     <SheetTitle>
-                                        <Link href="/" onClick={() => setIsOpen(false)}>
+                                        <Link href={ROUTES.HOME} onClick={() => setIsOpen(false)}>
                                             <Image src="/images/logo.svg" alt="Logo" width={180} height={24} />
                                         </Link>
                                     </SheetTitle>

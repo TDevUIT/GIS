@@ -1,6 +1,6 @@
 import axios, { AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 
-const baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+const baseURL = process.env.NEXT_PUBLIC_WEB_SERVER_URL || 'http://localhost:8000/api';
 
 export const apiClient: AxiosInstance = axios.create({
   baseURL,
@@ -13,14 +13,14 @@ export const apiClient: AxiosInstance = axios.create({
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     console.log('🚀 API Request:', config.method?.toUpperCase(), config.url);
-    
+
     if (typeof window !== 'undefined') {
       const token = localStorage.getItem('access_token');
       if (token && config.headers) {
         config.headers.Authorization = `Bearer ${token}`;
       }
     }
-    
+
     return config;
   },
   (error) => {
@@ -36,13 +36,13 @@ apiClient.interceptors.response.use(
   },
   (error) => {
     console.error('❌ Response Error:', error.response?.status, error.response?.data);
-    
+
     if (error.response?.status === 401) {
       if (typeof window !== 'undefined') {
         localStorage.removeItem('access_token');
       }
     }
-    
+
     return Promise.reject(error);
   }
 );

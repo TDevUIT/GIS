@@ -1,3 +1,6 @@
+import Link from 'next/link';
+import { ROUTES } from '@/constants/routes';
+
 export default function Header() {
   return (
     <header className="bg-white shadow-sm border-b">
@@ -8,11 +11,10 @@ export default function Header() {
             <p className="text-gray-600">IE402 GIS System</p>
           </div>
           <nav className="flex space-x-6">
-            <a href="/dashboard" className="text-gray-600 hover:text-gray-800">Dashboard</a>
-            <a href="/maps" className="text-gray-600 hover:text-gray-800">Maps</a>
-            <a href="/analytics" className="text-gray-600 hover:text-gray-800">Analytics</a>
-            <a href="/reports" className="text-gray-600 hover:text-gray-800">Reports</a>
-            <a href="/incidents" className="text-gray-600 hover:text-gray-800">Incidents</a>
+            <Link href={ROUTES.DASHBOARD} className="text-gray-600 hover:text-gray-800">Dashboard</Link>
+            <Link href={ROUTES.MAPS.INDEX} className="text-gray-600 hover:text-gray-800">Maps</Link>
+            <Link href={ROUTES.REPORTS.INDEX} className="text-gray-600 hover:text-gray-800">Reports & Analytics</Link>
+            <Link href={ROUTES.INCIDENTS.INDEX} className="text-gray-600 hover:text-gray-800">Incidents</Link>
           </nav>
         </div>
       </div>
