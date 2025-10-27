@@ -16,7 +16,7 @@ export default function Footer() {
             <ul className="space-y-2 text-gray-300">
               <li><Link href={ROUTES.DASHBOARD} className="hover:text-white">Dashboard</Link></li>
               <li><Link href={ROUTES.MAPS.INDEX} className="hover:text-white">Maps</Link></li>
-              <li><Link href={ROUTES.ANALYTICS.INDEX} className="hover:text-white">Analytics</Link></li>
+              <li><Link href={ROUTES.REPORTS.INDEX} className="hover:text-white">Reports & Analytics</Link></li>
             </ul>
           </div>
           <div>

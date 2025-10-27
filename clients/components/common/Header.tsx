@@ -13,8 +13,7 @@ export default function Header() {
           <nav className="flex space-x-6">
             <Link href={ROUTES.DASHBOARD} className="text-gray-600 hover:text-gray-800">Dashboard</Link>
             <Link href={ROUTES.MAPS.INDEX} className="text-gray-600 hover:text-gray-800">Maps</Link>
-            <Link href={ROUTES.ANALYTICS.INDEX} className="text-gray-600 hover:text-gray-800">Analytics</Link>
-            <Link href={ROUTES.REPORTS.INDEX} className="text-gray-600 hover:text-gray-800">Reports</Link>
+            <Link href={ROUTES.REPORTS.INDEX} className="text-gray-600 hover:text-gray-800">Reports & Analytics</Link>
             <Link href={ROUTES.INCIDENTS.INDEX} className="text-gray-600 hover:text-gray-800">Incidents</Link>
           </nav>
         </div>

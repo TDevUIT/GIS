@@ -16,11 +16,8 @@ export default function Sidebar() {
         <Link href={ROUTES.MAPS.INDEX} className="block p-3 rounded hover:bg-gray-800">
           <span className="font-medium">Maps</span>
         </Link>
-        <Link href={ROUTES.ANALYTICS.INDEX} className="block p-3 rounded hover:bg-gray-800">
-          <span className="font-medium">Analytics</span>
-        </Link>
         <Link href={ROUTES.REPORTS.INDEX} className="block p-3 rounded hover:bg-gray-800">
-          <span className="font-medium">Reports</span>
+          <span className="font-medium">Reports & Analytics</span>
         </Link>
         <Link href={ROUTES.INCIDENTS.INDEX} className="block p-3 rounded hover:bg-gray-800">
           <span className="font-medium">Incidents</span>

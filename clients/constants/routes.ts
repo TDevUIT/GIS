@@ -30,14 +30,14 @@ export const ROUTES = {
     EXPORT: '/reports/export',
   },
 
-  // Analytics
-  ANALYTICS: {
-    INDEX: '/analytics',
-    OVERVIEW: '/analytics/overview',
-    TRENDS: '/analytics/trends',
-    HEATMAP: '/analytics/heatmap',
-    INSIGHTS: '/analytics/insights',
-  },
+  // Analytics (Merged into Reports)
+  // ANALYTICS: {
+  //   INDEX: '/analytics',
+  //   OVERVIEW: '/analytics/overview',
+  //   TRENDS: '/analytics/trends',
+  //   HEATMAP: '/analytics/heatmap',
+  //   INSIGHTS: '/analytics/insights',
+  // },
 
   // Features Demo
   FEATURES: {
@@ -153,17 +153,18 @@ export const NAVIGATION = [
       { label: 'Create Report', path: ROUTES.REPORTS.CREATE },
     ],
   },
-  {
-    label: 'Analytics',
-    path: ROUTES.ANALYTICS.INDEX,
-    icon: 'chart',
-    requiresAuth: true,
-    children: [
-      { label: 'Overview', path: ROUTES.ANALYTICS.OVERVIEW },
-      { label: 'Trends', path: ROUTES.ANALYTICS.TRENDS },
-      { label: 'Heatmap', path: ROUTES.ANALYTICS.HEATMAP },
-    ],
-  },
+  // Analytics merged into Reports page
+  // {
+  //   label: 'Analytics',
+  //   path: ROUTES.ANALYTICS.INDEX,
+  //   icon: 'chart',
+  //   requiresAuth: true,
+  //   children: [
+  //     { label: 'Overview', path: ROUTES.ANALYTICS.OVERVIEW },
+  //     { label: 'Trends', path: ROUTES.ANALYTICS.TRENDS },
+  //     { label: 'Heatmap', path: ROUTES.ANALYTICS.HEATMAP },
+  //   ],
+  // },
 ] as const;
 
 export const BREADCRUMB_LABELS: Record<string, string> = {
