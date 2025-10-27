@@ -2,6 +2,7 @@
 
 import { Users, Church, User, Building2, Briefcase } from 'lucide-react'
 import { useState } from 'react'
+import InfoPanel from './InfoPanel'
 
 interface ToolbarItem {
   id: string
@@ -40,28 +41,45 @@ const toolbarItems: ToolbarItem[] = [
 export default function MapToolbar() {
   const [activeItem, setActiveItem] = useState<string | null>(null)
 
+  const handleItemClick = (itemId: string) => {
+    if (activeItem === itemId) {
+      setActiveItem(null)
+    } else {
+      setActiveItem(itemId)
+    }
+  }
+
   return (
-    <div className="absolute left-6 top-36 z-[1000] flex flex-col">
-      <div className="bg-gradient-to-b from-sky-400 to-sky-500 rounded-2xl border-2 border-white/50 shadow-lg">
-        {toolbarItems.map((item, index) => (
-          <button
-            key={item.id}
-            onClick={() => setActiveItem(item.id)}
-            className={`
-              relative w-12 h-12 flex items-center justify-center text-white
-              transition-all duration-300 hover:bg-white/20
-              ${index === 0 ? 'rounded-t-2xl' : ''}
-              ${index === toolbarItems.length - 1 ? 'rounded-b-2xl' : ''}
-              ${activeItem === item.id ? 'bg-white/30' : ''}
-            `}
-            title={item.label}
-          >
-            <div className="relative z-10">
-              {item.icon}
-            </div>
-          </button>
-        ))}
+    <>
+      <div className="absolute left-6 top-36 z-[1000] flex flex-col">
+        <div className="bg-gradient-to-b from-sky-400 to-sky-500 rounded-2xl border-2 border-white/50 shadow-lg">
+          {toolbarItems.map((item, index) => (
+            <button
+              key={item.id}
+              onClick={() => handleItemClick(item.id)}
+              className={`
+                relative w-12 h-12 flex items-center justify-center text-white
+                transition-all duration-300 hover:bg-white/20
+                ${index === 0 ? 'rounded-t-2xl' : ''}
+                ${index === toolbarItems.length - 1 ? 'rounded-b-2xl' : ''}
+                ${activeItem === item.id ? 'bg-white/30' : ''}
+              `}
+              title={item.label}
+            >
+              <div className="relative z-10">
+                {item.icon}
+              </div>
+            </button>
+          ))}
+        </div>
       </div>
-    </div>
+
+      {activeItem && (
+        <InfoPanel 
+          type={activeItem} 
+          onClose={() => setActiveItem(null)} 
+        />
+      )}
+    </>
   )
 }

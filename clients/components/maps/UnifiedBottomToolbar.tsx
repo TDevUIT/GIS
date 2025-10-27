@@ -226,7 +226,6 @@ const categoryItems: CategoryItem[] = [
 type TabType = 'draw' | 'icons' | 'categories'
 
 export default function UnifiedBottomToolbar() {
-  // Use Zustand store
   const {
     activeTab,
     activeTool,
@@ -250,48 +249,39 @@ export default function UnifiedBottomToolbar() {
   const [currentDrawHandler, setCurrentDrawHandler] = useState<any>(null)
   const mapClickHandlerRef = useRef<((e: L.LeafletMouseEvent) => void) | null>(null)
 
-  // Cleanup function for map interactions
   const cleanupMapInteractions = () => {
     if (!map) return
 
-    // Disable drawing handler
     if (currentDrawHandler) {
       currentDrawHandler.disable()
       setCurrentDrawHandler(null)
     }
 
-    // Remove map click handler for icons
     if (mapClickHandlerRef.current) {
       map.off('click', mapClickHandlerRef.current)
       mapClickHandlerRef.current = null
     }
 
-    // Reset cursor
     map.getContainer().style.cursor = ''
   }
 
   const handleTabChange = (tab: TabType) => {
-    // Clean up all interactions first
     cleanupMapInteractions()
 
-    // Reset all states when changing tabs
     setActiveTool(null)
     setSelectedIcon(null)
 
-    // Set new active tab
     setStoreActiveTab(tab)
   }
 
   const handleToolClick = (tool: DrawingTool) => {
     if (!map || !drawnItemsRef) return
 
-    // Clear icon selection when using drawing tools
     setSelectedIcon(null)
     if (map) {
       map.getContainer().style.cursor = ''
     }
 
-    // Disable current drawing handler before starting new one
     if (currentDrawHandler) {
       currentDrawHandler.disable()
       setCurrentDrawHandler(null)
@@ -397,14 +387,12 @@ export default function UnifiedBottomToolbar() {
   const handleIconSelect = (item: IconItem) => {
     if (!map) return
 
-    // If clicking the same icon, deselect it
     if (selectedIcon?.id === item.id) {
       cleanupMapInteractions()
       setSelectedIcon(null)
       return
     }
 
-    // Clean up before selecting new icon
     cleanupMapInteractions()
     setActiveTool(null)
 
@@ -413,10 +401,8 @@ export default function UnifiedBottomToolbar() {
     map.getContainer().style.cursor = 'crosshair'
   }
 
-  // Effect to manage map click handler for icon placement
   useEffect(() => {
     if (!map || !selectedIcon) {
-      // Clean up handler when no icon is selected
       if (mapClickHandlerRef.current) {
         map?.off('click', mapClickHandlerRef.current)
         mapClickHandlerRef.current = null
@@ -424,7 +410,6 @@ export default function UnifiedBottomToolbar() {
       return
     }
 
-    // Create new handler
     const handleMapClick = (e: L.LeafletMouseEvent) => {
       if (!selectedIcon) return
 
@@ -457,16 +442,13 @@ export default function UnifiedBottomToolbar() {
       marker.on('click', () => marker.openPopup())
     }
 
-    // Remove old handler if exists
     if (mapClickHandlerRef.current) {
       map.off('click', mapClickHandlerRef.current)
     }
 
-    // Add new handler
     mapClickHandlerRef.current = handleMapClick
     map.on('click', handleMapClick)
 
-    // Cleanup on unmount or when dependencies change
     return () => {
       if (mapClickHandlerRef.current) {
         map.off('click', mapClickHandlerRef.current)
@@ -480,19 +462,16 @@ export default function UnifiedBottomToolbar() {
     map.on(L.Draw.Event.CREATED, (e: any) => {
       const layer = e.layer
 
-      // Disable editing for the created shape
       if (layer.editing) {
         layer.editing.disable()
       }
 
-      // Make the layer non-draggable and non-editable
       if (layer.options) {
         layer.options.draggable = false
       }
 
       drawnItemsRef.addLayer(layer)
 
-      // Disable handler after drawing is complete
       if (currentDrawHandler) {
         currentDrawHandler.disable()
         setCurrentDrawHandler(null)
