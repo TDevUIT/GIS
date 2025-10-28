@@ -103,7 +103,7 @@ export default function InfrastructureMap({ onPointClick }: InfrastructureMapPro
       )}
 
       <div
-        className="absolute top-32 left-6 bg-white/95 backdrop-blur-md p-3 rounded-lg shadow-lg border border-indigo-200"
+        className="absolute top-32 left-24 bg-white/95 backdrop-blur-md p-3 rounded-lg shadow-lg border border-indigo-200"
         style={{ zIndex: 1000 }}
       >
         <div className="space-y-2">

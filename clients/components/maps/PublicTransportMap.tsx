@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { GeoJSON, useMap } from 'react-leaflet';
-import L from 'leaflet';
 import { useGisPublicTransports } from '@/hooks/api/useGisPublicTransportsQuery';
 import {
   convertPublicTransportToRoute,
@@ -99,7 +98,7 @@ export default function PublicTransportMap({ onRouteClick }: PublicTransportMapP
       )}
 
       <div
-        className="absolute bottom-20 left-6 bg-white/95 backdrop-blur-md p-3 rounded-lg shadow-lg border border-blue-200"
+        className="absolute bottom-20 left-24 bg-white/95 backdrop-blur-md p-3 rounded-lg shadow-lg border border-blue-200"
         style={{ zIndex: 1000 }}
       >
         <div className="space-y-2">

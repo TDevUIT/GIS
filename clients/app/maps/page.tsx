@@ -2,8 +2,6 @@
 
 import dynamic from 'next/dynamic'
 
-// Dynamic import with SSR disabled to prevent "window is not defined" error
-// Leaflet requires the browser's window object
 const MapView = dynamic(() => import('@/components/maps/MapView'), {
   ssr: false,
   loading: () => (

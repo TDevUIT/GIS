@@ -29,6 +29,11 @@ export const Z_INDEX = {
   LAYER_BUTTONS: 1100,     // Layer toggle buttons (Layers, Accident, Traffic)
   ACCIDENT_CONTROLS: 1000, // Accident clustering/heatmap controls
   
+  // Search and routing - Higher priority
+  SEARCH_BAR: 1200,        // Map search bar (above layer buttons)
+  ROUTING_PANEL: 1150,     // Routing panel
+  NEAREST_SEARCH_PANEL: 1150, // Nearest point search panel
+  
   // Drawing and draggable icons
   DRAWING_TOOLBAR: 1080,
   DRAGGABLE_ICONS: 1085,
