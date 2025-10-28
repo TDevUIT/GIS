@@ -98,7 +98,7 @@ export default function LandUseMap({ onPolygonClick }: LandUseMapProps) {
       )}
 
       <div
-        className="absolute top-44 left-6 bg-white/95 backdrop-blur-md p-3 rounded-lg shadow-lg border border-amber-200"
+        className="absolute top-44 left-24 bg-white/95 backdrop-blur-md p-3 rounded-lg shadow-lg border border-amber-200"
         style={{ zIndex: 1000 }}
       >
         <div className="space-y-2">

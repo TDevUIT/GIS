@@ -14,6 +14,8 @@ import FeatureToolbar from '@/components/maps/FeatureToolbar'
 import QuickAccessToolbar from '@/components/maps/QuickAccessToolbar'
 import FeatureNotification from '@/components/maps/FeatureNotification'
 import UnifiedBottomToolbar from '@/components/maps/UnifiedBottomToolbar'
+import MapSearchBar from '@/components/maps/MapSearchBar'
+import MapInstanceProvider from '@/components/maps/MapInstanceProvider'
 import DistrictMap from '@/components/maps/DistrictMap'
 import WardMap from '@/components/maps/WardMap'
 import AccidentMap from '@/components/maps/AccidentMap'
@@ -40,8 +42,9 @@ import { UrbanPlanPolygon } from '@/utils/urbanPlanHelpers'
 import { MAP_LOCATIONS, DEFAULT_MAP_CENTER, DEFAULT_MAP_ZOOM } from '@/constants/mapLocations'
 import { FeatureAction } from '@/constants/featureCategories'
 import { Z_INDEX } from '@/constants/zIndex'
-import { Layers, AlertTriangle, Activity, Wind, Droplets, Building2, Map as MapIcon, Users, Bus, Mountain, FileText, BarChart3 } from 'lucide-react'
+import { Layers, AlertTriangle, Activity, Wind, Droplets, Building2, Map as MapIcon, Users, Bus, Mountain, FileText, BarChart3, MapPin } from 'lucide-react'
 import { getCongestionLabel } from '@/utils/trafficHelpers'
+import { GeocodingResult } from '@/services/geocodingService'
 
 delete (L.Icon.Default.prototype as any)._getIconUrl
 L.Icon.Default.mergeOptions({
@@ -50,7 +53,34 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 })
 
+// Custom icon for current location
+const currentLocationIcon = new L.Icon({
+  iconUrl: 'data:image/svg+xml;base64,' + btoa(`
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="32" height="32">
+      <circle cx="12" cy="12" r="10" fill="#3b82f6" stroke="white" stroke-width="2"/>
+      <circle cx="12" cy="12" r="4" fill="white"/>
+    </svg>
+  `),
+  iconSize: [32, 32],
+  iconAnchor: [16, 16],
+  popupAnchor: [0, -16],
+})
+
+// Custom icon for search result
+const searchResultIcon = new L.Icon({
+  iconUrl: 'data:image/svg+xml;base64,' + btoa(`
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="36" height="36">
+      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="#ef4444" stroke="white" stroke-width="1.5"/>
+      <circle cx="12" cy="9" r="3" fill="white"/>
+    </svg>
+  `),
+  iconSize: [36, 36],
+  iconAnchor: [18, 36],
+  popupAnchor: [0, -36],
+})
+
 export default function MapView() {
+  const [currentLocation, setCurrentLocation] = useState<[number, number] | null>(null)
   const [selectedLocation, setSelectedLocation] = useState<LocationData | null>(null)
   const [selectedDistrict, setSelectedDistrict] = useState<DistrictGeoJSON | null>(null)
   const [selectedWard, setSelectedWard] = useState<WardGeoJSON | null>(null)
@@ -64,6 +94,7 @@ export default function MapView() {
   const [selectedPublicTransport, setSelectedPublicTransport] = useState<PublicTransportRoute | null>(null)
   const [selectedTerrain, setSelectedTerrain] = useState<TerrainPolygon | null>(null)
   const [selectedUrbanPlan, setSelectedUrbanPlan] = useState<UrbanPlanPolygon | null>(null)
+  const [showDistrictsLayer, setShowDistrictsLayer] = useState(false)
   const [showWardsLayer, setShowWardsLayer] = useState(false)
   const [showAccidentsLayer, setShowAccidentsLayer] = useState(false)
   const [showTrafficLayer, setShowTrafficLayer] = useState(false)
@@ -78,6 +109,9 @@ export default function MapView() {
   const [showLayerPanel, setShowLayerPanel] = useState(false)
   const [showAnalyticsPanel, setShowAnalyticsPanel] = useState(false)
   const [activeLayer, setActiveLayer] = useState<MapLayer>('street')
+  const [searchMarker, setSearchMarker] = useState<[number, number] | null>(null)
+  const [searchResult, setSearchResult] = useState<GeocodingResult | null>(null)
+  const [mapInstance, setMapInstance] = useState<L.Map | null>(null)
   const [activeFeature, setActiveFeature] = useState<FeatureAction | null>(null)
   const [activeQuickAction, setActiveQuickAction] = useState<string | undefined>()
 
@@ -147,9 +181,40 @@ export default function MapView() {
     console.log('Selected terrain:', polygon.elevation, polygon.slope)
   }
 
-  const handleUrbanPlanClick = (polygon: UrbanPlanPolygon) => {
-    setSelectedUrbanPlan(polygon)
-    console.log('Selected urban plan:', polygon.planName, polygon.zoningType)
+  const handleUrbanPlanClick = (urbanPlan: UrbanPlanPolygon) => {
+    setSelectedUrbanPlan(urbanPlan)
+    console.log('Selected urban plan:', urbanPlan.planName)
+  }
+
+  const handleLocationFound = (lat: number, lng: number) => {
+    setCurrentLocation([lat, lng])
+    console.log('Current location:', lat, lng)
+  }
+
+  const handleLocationSelect = (result: GeocodingResult) => {
+    const coords: [number, number] = [result.lat, result.lon]
+    setSearchMarker(coords)
+    setSearchResult(result)
+    console.log('Selected location:', result.display_name)
+  }
+
+  const handleCurrentLocationClick = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const lat = position.coords.latitude
+          const lng = position.coords.longitude
+          setCurrentLocation([lat, lng])
+          console.log('Current location found:', lat, lng)
+        },
+        (error) => {
+          console.error('Error getting location:', error)
+          alert('Không thể lấy vị trí hiện tại')
+        }
+      )
+    } else {
+      alert('Trình duyệt không hỗ trợ geolocation')
+    }
   }
 
   return (
@@ -161,9 +226,10 @@ export default function MapView() {
         className="h-full w-full"
         zoomControl={false}
       >
+        <MapInstanceProvider onMapReady={setMapInstance} />
         <MapLayers activeLayer={activeLayer} />
 
-        {!showWardsLayer && (
+        {showDistrictsLayer && !showWardsLayer && (
           <DistrictMap
             onDistrictClick={handleDistrictClick}
             highlightedDistrictId={selectedDistrict?.id}
@@ -242,6 +308,37 @@ export default function MapView() {
           />
         )}
 
+        {/* Current Location Marker */}
+        {currentLocation && (
+          <Marker
+            position={currentLocation}
+            icon={currentLocationIcon}
+          >
+            <Popup>
+              <div className="text-sm">
+                <h3 className="font-bold text-base mb-1">📍 Vị trí của bạn</h3>
+                <p className="text-gray-600 mb-1">Lat: {currentLocation[0].toFixed(6)}</p>
+                <p className="text-gray-600">Lng: {currentLocation[1].toFixed(6)}</p>
+              </div>
+            </Popup>
+          </Marker>
+        )}
+
+        {/* Search Result Marker */}
+        {searchMarker && searchResult && (
+          <Marker position={searchMarker} icon={searchResultIcon}>
+            <Popup>
+              <div className="text-sm">
+                <h3 className="font-bold text-base mb-1">🔍 {searchResult.display_name.split(',')[0]}</h3>
+                <p className="text-gray-600 mb-1">{searchResult.display_name}</p>
+                <p className="text-gray-500 text-xs">
+                  {searchResult.lat.toFixed(6)}, {searchResult.lon.toFixed(6)}
+                </p>
+              </div>
+            </Popup>
+          </Marker>
+        )}
+
         {MAP_LOCATIONS.map((location, index) => (
           <Marker
             key={index}
@@ -260,25 +357,26 @@ export default function MapView() {
           </Marker>
         ))}
 
-        <ZoomControl />
+        <ZoomControl onLocationFound={handleLocationFound} />
         <UnifiedBottomToolbar />
       </MapContainer>
 
       <BackButton />
       <MapToolbar />
 
-      {/* Quick Access Toolbar */}
-      {/* <QuickAccessToolbar
-        onQuickAction={handleQuickAction}
-        activeButtonId={activeQuickAction}
-      /> */}
+      {/* Search Bar */}
+      <div 
+        className="absolute top-6 left-1/2 -translate-x-1/2 w-full max-w-2xl px-6"
+        style={{ zIndex: Z_INDEX.SEARCH_BAR }}
+      >
+        <MapSearchBar
+          onLocationSelect={handleLocationSelect}
+          onCurrentLocationClick={handleCurrentLocationClick}
+        />
+      </div>
 
-      {/* Feature Toolbar */}
-      {/* <FeatureToolbar onFeatureSelect={handleFeatureSelect} /> */}
-
-      {/* Layer Buttons */}
       <div
-        className="absolute top-6 right-6 pointer-events-none flex flex-col gap-2"
+        className="absolute top-6 right-6 pointer-events-none grid grid-cols-2 gap-2"
         style={{ zIndex: Z_INDEX.LAYER_BUTTONS }}
       >
         <button
@@ -299,6 +397,18 @@ export default function MapView() {
           title="Analytics"
         >
           <BarChart3 className="w-4 h-4" />
+        </button>
+
+        <button
+          onClick={() => setShowDistrictsLayer(!showDistrictsLayer)}
+          className={`pointer-events-auto p-2.5 rounded-lg shadow-md transition-all hover:shadow-lg border ${
+            showDistrictsLayer
+              ? 'bg-blue-600 border-blue-700 text-white'
+              : 'bg-white/95 backdrop-blur-md hover:bg-white border-gray-200 text-gray-700'
+          }`}
+          title="Districts Layer"
+        >
+          <MapPin className="w-4 h-4" />
         </button>
 
         <button
@@ -420,6 +530,7 @@ export default function MapView() {
         >
           <FileText className="w-4 h-4" />
         </button>
+
       </div>
 
       <LayerPanel
@@ -626,6 +737,7 @@ export default function MapView() {
       {showAnalyticsPanel && (
         <AnalyticsPanel onClose={() => setShowAnalyticsPanel(false)} />
       )}
+
 
       <FeatureNotification
         feature={activeFeature}
