@@ -4,8 +4,9 @@ import { PrismaClient, HousingType, IncomeLevel } from '@prisma/client';
 export async function seedPopulations(prisma: PrismaClient) {
   const district1 = await prisma.district.findUnique({ where: { code: 'Q1' } });
   const district3 = await prisma.district.findUnique({ where: { code: 'Q3' } });
+  const district4 = await prisma.district.findUnique({ where: { code: 'Q4' } });
 
-  if (!district1 || !district3) {
+  if (!district1 || !district3 || !district4) {
     console.error('Required districts not found. Skipping population seeding.');
     return;
   }
@@ -13,9 +14,9 @@ export async function seedPopulations(prisma: PrismaClient) {
   const populationsData = [
     {
       districtId: district1.id,
-      year: 2022,
-      populationTotal: 195000,
-      householdsTotal: 48000,
+      year: 2019,
+      populationTotal: 142625,
+      householdsTotal: 38428,
       households: [
         {
           householdSize: 2,
@@ -34,9 +35,9 @@ export async function seedPopulations(prisma: PrismaClient) {
         },
       ],
       demographics: [
-        { ageMin: 0, ageMax: 14, male: 18000, female: 17500 },
-        { ageMin: 15, ageMax: 64, male: 75000, female: 78000 },
-        { ageMin: 65, ageMax: null, male: 3000, female: 3500 },
+        { ageMin: 0, ageMax: 14, male: 17000, female: 18656 },
+        { ageMin: 15, ageMax: 64, male: 42000, female: 47600 },
+        { ageMin: 65, ageMax: null, male: 7000, female: 10400 },
       ],
     },
     {
@@ -58,7 +59,7 @@ export async function seedPopulations(prisma: PrismaClient) {
       ],
       demographics: [
         { ageMin: 0, ageMax: 14, male: 19000, female: 18200 },
-        { ageMin: 15, ageMax: 64, male: 78000, female: 79000 },
+        { ageMin: 15, ageMax: 64, male: 77503, female: 78497 },
         { ageMin: 65, ageMax: null, male: 3100, female: 4200 },
       ],
     },
@@ -71,7 +72,27 @@ export async function seedPopulations(prisma: PrismaClient) {
         {
           householdSize: 3,
           incomeLevel: IncomeLevel.TrungBinh,
+          housingType: HousingType.NhaTrongHem,
+        },
+        {
+          householdSize: 3,
+          incomeLevel: IncomeLevel.TrungBinh,
           housingType: HousingType.NhaRieng,
+        },
+        {
+          householdSize: 3,
+          incomeLevel: IncomeLevel.Thap,
+          housingType: HousingType.NhaTrongHem,
+        },
+        {
+          householdSize: 3,
+          incomeLevel: IncomeLevel.Cao,
+          housingType: HousingType.ChungCuCaoCap,
+        },
+        {
+          householdSize: 4,
+          incomeLevel: IncomeLevel.Cao,
+          housingType: HousingType.NhaTrongHem,
         },
         {
           householdSize: 4,
@@ -83,6 +104,82 @@ export async function seedPopulations(prisma: PrismaClient) {
         { ageMin: 0, ageMax: 14, male: 17000, female: 16500 },
         { ageMin: 15, ageMax: 64, male: 74000, female: 76000 },
         { ageMin: 65, ageMax: null, male: 2800, female: 4000 },
+      ],
+    },
+    {
+      districtId: district4.id,
+      year: 2019,
+      populationTotal: 175329,
+      householdsTotal: 50000,
+      households: [
+        {
+          householdSize: 2,
+          incomeLevel: IncomeLevel.TrungBinh,
+          housingType: HousingType.ChungCuCaoCap,
+        },
+        {
+          householdSize: 2,
+          incomeLevel: IncomeLevel.Cao,
+          housingType: HousingType.ChungCuCaoCap,
+        },
+        {
+          householdSize: 2,
+          incomeLevel: IncomeLevel.Cao,
+          housingType: HousingType.NhaRieng,
+        },
+        {
+          householdSize: 3,
+          incomeLevel: IncomeLevel.TrungBinh,
+          housingType: HousingType.NhaRieng,
+        },
+        {
+          householdSize: 4,
+          incomeLevel: IncomeLevel.TrungBinh,
+          housingType: HousingType.NhaRieng,
+        },
+      ],
+      demographics: [
+        { ageMin: 0, ageMax: 14, male: 17000, female: 16000 },
+        { ageMin: 15, ageMax: 64, male: 83000, female: 82000 },
+        { ageMin: 65, ageMax: null, male: 2500, female: 2829 },
+      ],
+    },
+    {
+      districtId: district4.id,
+      year: 2024,
+      populationTotal: 190000,
+      householdsTotal: 55000,
+      households: [
+        {
+          householdSize: 2,
+          incomeLevel: IncomeLevel.Thap,
+          housingType: HousingType.NhaTrongHem,
+        },
+        {
+          householdSize: 3,
+          incomeLevel: IncomeLevel.TrungBinh,
+          housingType: HousingType.NhaRieng,
+        },
+        {
+          householdSize: 4,
+          incomeLevel: IncomeLevel.TrungBinh,
+          housingType: HousingType.NhaTrongHem,
+        },
+        {
+          householdSize: 4,
+          incomeLevel: IncomeLevel.TrungBinh,
+          housingType: HousingType.NhaRieng,
+        },
+        {
+          householdSize: 4,
+          incomeLevel: IncomeLevel.TrungBinh,
+          housingType: HousingType.NhaTrongHem,
+        },
+      ],
+      demographics: [
+        { ageMin: 0, ageMax: 14, male: 18000, female: 17200 },
+        { ageMin: 15, ageMax: 64, male: 88000, female: 87000 },
+        { ageMin: 65, ageMax: null, male: 3000, female: 3800 },
       ],
     },
   ];
