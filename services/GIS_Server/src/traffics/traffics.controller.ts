@@ -19,6 +19,7 @@ import { TrafficsService } from './traffics.service';
 import { CreateTrafficDto } from './dto/create-traffic.dto';
 import { UpdateTrafficDto } from './dto/update-traffic.dto';
 import { FindTrafficsQueryDto, IntersectsWktDto } from './dto/query.dto';
+import { FindByLocationDto } from './dto/find-by-location.dto';
 
 @ApiTags('traffics')
 @Controller('traffics')
@@ -87,5 +88,13 @@ export class TrafficsController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.trafficsService.remove(id);
+  }
+
+  @ApiOperation({ summary: 'Find nearest traffic route by location' })
+  @ApiResponse({ status: 200, description: 'Nearest traffic route found' })
+  @ApiResponse({ status: 404, description: 'No route found nearby' })
+  @Get('find-by-location')
+  findNearest(@Query() query: FindByLocationDto) {
+    return this.trafficsService.findNearest(query.lng, query.lat);
   }
 }

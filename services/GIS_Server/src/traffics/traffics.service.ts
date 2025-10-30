@@ -106,4 +106,30 @@ export class TrafficsService {
     `;
     return this.prisma.$queryRaw(query);
   }
+
+  async findNearest(lng: number, lat: number) {
+    const point = `SRID=4326;POINT(${lng} ${lat})`;
+    const result = await this.prisma.$queryRaw<
+      [{ id: string; name: string; dist: number }]
+    >`
+      SELECT
+        id,
+        "road_name" as name,
+        ST_Distance(geom::geography, ${point}::geography) as dist
+      FROM
+        traffics
+      WHERE
+        ST_DWithin(geom::geography, ${point}::geography, 500) -- Tìm trong bán kính 500 mét
+      ORDER BY
+        dist
+      LIMIT 1;
+    `;
+
+    if (result && result.length > 0) {
+      return result[0];
+    }
+    throw new NotFoundException(
+      `No traffic route found near location (${lng}, ${lat}).`,
+    );
+  }
 }
