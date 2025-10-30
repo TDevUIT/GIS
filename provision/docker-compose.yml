@@ -1,41 +1,108 @@
-name: ie402
-
-networks:
-  ie402_net:
-    driver: bridge
+version: '3.8'
 
 services:
-  web_server:
-    image: alpine:3.19 # placeholder image; replace with real build later
-    command: ["sh", "-c", "echo Web_Server placeholder running on ${WEB_SERVER_PORT} && sleep 3600"]
-    env_file:
-      - ./.env
+  postgres:
+    image: postgres:14
+    container_name: egis-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: egis_database
     ports:
-      - "${WEB_SERVER_PORT}:4000"
+      - '5432:5432'
+    volumes:
+      - egis_postgres_data:/var/lib/postgresql/data
     networks:
-      - ie402_net
+      - egis-network
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: egis-pgadmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: mrtaivietbac@gmail.com
+      PGADMIN_DEFAULT_PASSWORD: tester
+    ports:
+      - '5050:80'
+    volumes:
+      - egis_pgadmin_data:/var/lib/pgadmin
     depends_on:
-      - gis_server
-      - data_processor
-
-  gis_server:
-    image: alpine:3.19 # placeholder
-    command: ["sh", "-c", "echo GIS_Server placeholder && sleep 3600"]
+      - postgres
     networks:
-      - ie402_net
+      - egis-network
 
-  data_processor:
-    image: alpine:3.19 # placeholder
-    command: ["sh", "-c", "echo Data_Processor placeholder && sleep 3600"]
-    networks:
-      - ie402_net
-
-  web_client:
-    image: alpine:3.19 # placeholder
-    command: ["sh", "-c", "echo Web_Client placeholder running on ${WEB_CLIENT_PORT} && sleep 3600"]
-    env_file:
-      - ./.env
+  postgis_db:
+    image: postgis/postgis:15-3.4
+    container_name: gis_server_postgis
+    restart: always
+    environment:
+      POSTGRES_USER: gis_user
+      POSTGRES_PASSWORD: gis_password
+      POSTGRES_DB: gis_db
     ports:
-      - "${WEB_CLIENT_PORT}:3000"
+      - '5433:5432'
+    volumes:
+      - gis_server_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gis_user -d gis_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
-      - ie402_net
+      - egis-network
+
+  pgadmin_gis:
+    image: dpage/pgadmin4
+    container_name: gis_server_pgadmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: mrtaivietbac@gmail.com
+      PGADMIN_DEFAULT_PASSWORD: tester
+    ports:
+      - '5051:80'
+    volumes:
+      - pgadmin_gis_data:/var/lib/pgadmin
+    depends_on:
+      postgis_db:
+        condition: service_healthy
+    networks:
+      - egis-network
+
+  rabbitmq:
+    image: rabbitmq:3.11-management-alpine
+    container_name: egis-rabbitmq
+    hostname: egis-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq/
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    networks:
+      - egis-network
+
+  redis-stack:
+    image: redis/redis-stack:latest
+    container_name: egis-redis-stack
+    ports:
+      - "6379:6379"
+      - "8001:8001"
+    volumes:
+      - redis-data:/data
+    networks:
+      - egis-network
+
+volumes:
+  egis_postgres_data: {}
+  egis_pgadmin_data: {}
+  gis_server_data: {}
+  pgadmin_gis_data: {}
+  rabbitmq_data: {}
+  redis-data: {}
+
+networks:
+  egis-network:
+    driver: bridge
