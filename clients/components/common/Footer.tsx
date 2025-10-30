@@ -1,3 +1,6 @@
+import Link from 'next/link';
+import { ROUTES } from '@/constants/routes';
+
 export default function Footer() {
   return (
     <footer className="bg-gray-800 text-white py-8 mt-12">
@@ -11,9 +14,9 @@ export default function Footer() {
           <div>
             <h4 className="font-medium mb-3">Quick Links</h4>
             <ul className="space-y-2 text-gray-300">
-              <li><a href="/dashboard" className="hover:text-white">Dashboard</a></li>
-              <li><a href="/maps" className="hover:text-white">Maps</a></li>
-              <li><a href="/analytics" className="hover:text-white">Analytics</a></li>
+              <li><Link href={ROUTES.DASHBOARD} className="hover:text-white">Dashboard</Link></li>
+              <li><Link href={ROUTES.MAPS.INDEX} className="hover:text-white">Maps</Link></li>
+              <li><Link href={ROUTES.REPORTS.INDEX} className="hover:text-white">Reports & Analytics</Link></li>
             </ul>
           </div>
           <div>

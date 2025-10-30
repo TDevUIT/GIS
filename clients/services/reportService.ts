@@ -1,4 +1,4 @@
-import { apiGet, apiPost, apiDelete, ApiResponse } from './api';
+import { apiGet, apiPost, apiDelete, ApiResponse } from './common/api';
 import { Report } from '../types';
 
 export const getReports = async (type?: string): Promise<ApiResponse<Report[]>> => {

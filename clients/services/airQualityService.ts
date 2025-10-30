@@ -1,18 +1,32 @@
-import { apiGet, ApiResponse } from './api';
-import { AirQualityData } from '../types';
+import { apiGet, ApiResponse } from './common/api';
 
-export const getAirQualityData = async (districtId?: string): Promise<ApiResponse<AirQualityData[]>> => {
-  return apiGet<AirQualityData[]>(`/air-quality${districtId ? `?district=${districtId}` : ''}`);
+interface AirQualityQuery {
+  districtId?: string;
+  from?: string;
+  to?: string;
+}
+
+// GET all air quality records
+export const getAllAirQualities = async (query?: AirQualityQuery): Promise<ApiResponse> => {
+  const params = new URLSearchParams();
+  if (query?.districtId) params.append('districtId', query.districtId);
+  if (query?.from) params.append('from', query.from);
+  if (query?.to) params.append('to', query.to);
+
+  const queryString = params.toString();
+  return apiGet(`/air-qualities${queryString ? `?${queryString}` : ''}`);
 };
 
-export const getAirQualityHistory = async (dateRange: string): Promise<ApiResponse<AirQualityData[]>> => {
-  return apiGet<AirQualityData[]>(`/air-quality/history?range=${dateRange}`);
+// GET air quality within radius
+export const getAirQualityWithinRadius = async (
+  lng: number,
+  lat: number,
+  radiusInMeters: number
+): Promise<ApiResponse> => {
+  return apiGet(`/air-qualities/within-radius?lng=${lng}&lat=${lat}&radiusInMeters=${radiusInMeters}`);
 };
 
-export const getAirQualityAlerts = async (): Promise<ApiResponse<any[]>> => {
-  return apiGet('/air-quality/alerts');
-};
-
-export const getAirQualityForecast = async (days: number = 7): Promise<ApiResponse<any[]>> => {
-  return apiGet(`/air-quality/forecast?days=${days}`);
+// GET air quality by ID
+export const getAirQualityById = async (id: string): Promise<ApiResponse> => {
+  return apiGet(`/air-qualities/${id}`);
 };

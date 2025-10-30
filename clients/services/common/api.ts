@@ -1,5 +1,5 @@
+import apiClient from '@/config/axios';
 import { AxiosResponse } from 'axios';
-import { apiClient } from '../config/axios';
 
 export interface ApiResponse<T = any> {
   data: T;
@@ -20,7 +20,11 @@ const handleError = (error: any): Error => {
 
 export const apiGet = async <T = any>(endpoint: string): Promise<ApiResponse<T>> => {
   try {
-    const response: AxiosResponse<ApiResponse<T>> = await apiClient.get(endpoint);
+    const response: AxiosResponse<any> = await apiClient.get(endpoint);
+    // Check if server returns nested structure: { data: { data: [...] } }
+    if (response.data?.data && typeof response.data.data === 'object') {
+      return response.data.data;
+    }
     return response.data;
   } catch (error) {
     throw handleError(error);
@@ -29,7 +33,11 @@ export const apiGet = async <T = any>(endpoint: string): Promise<ApiResponse<T>>
 
 export const apiPost = async <T = any>(endpoint: string, data?: any): Promise<ApiResponse<T>> => {
   try {
-    const response: AxiosResponse<ApiResponse<T>> = await apiClient.post(endpoint, data);
+    const response: AxiosResponse<any> = await apiClient.post(endpoint, data);
+    // Check if server returns nested structure: { data: { data: [...] } }
+    if (response.data?.data && typeof response.data.data === 'object') {
+      return response.data.data;
+    }
     return response.data;
   } catch (error) {
     throw handleError(error);
@@ -38,7 +46,11 @@ export const apiPost = async <T = any>(endpoint: string, data?: any): Promise<Ap
 
 export const apiPut = async <T = any>(endpoint: string, data?: any): Promise<ApiResponse<T>> => {
   try {
-    const response: AxiosResponse<ApiResponse<T>> = await apiClient.put(endpoint, data);
+    const response: AxiosResponse<any> = await apiClient.put(endpoint, data);
+    // Check if server returns nested structure: { data: { data: [...] } }
+    if (response.data?.data && typeof response.data.data === 'object') {
+      return response.data.data;
+    }
     return response.data;
   } catch (error) {
     throw handleError(error);
@@ -47,7 +59,11 @@ export const apiPut = async <T = any>(endpoint: string, data?: any): Promise<Api
 
 export const apiDelete = async <T = any>(endpoint: string): Promise<ApiResponse<T>> => {
   try {
-    const response: AxiosResponse<ApiResponse<T>> = await apiClient.delete(endpoint);
+    const response: AxiosResponse<any> = await apiClient.delete(endpoint);
+    // Check if server returns nested structure: { data: { data: [...] } }
+    if (response.data?.data && typeof response.data.data === 'object') {
+      return response.data.data;
+    }
     return response.data;
   } catch (error) {
     throw handleError(error);
@@ -56,7 +72,11 @@ export const apiDelete = async <T = any>(endpoint: string): Promise<ApiResponse<
 
 export const apiPatch = async <T = any>(endpoint: string, data?: any): Promise<ApiResponse<T>> => {
   try {
-    const response: AxiosResponse<ApiResponse<T>> = await apiClient.patch(endpoint, data);
+    const response: AxiosResponse<any> = await apiClient.patch(endpoint, data);
+    // Check if server returns nested structure: { data: { data: [...] } }
+    if (response.data?.data && typeof response.data.data === 'object') {
+      return response.data.data;
+    }
     return response.data;
   } catch (error) {
     throw handleError(error);

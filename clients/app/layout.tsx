@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Header from "@/components/layout/Header";
-import Footer from "@/components/layout/Footer";
+import ConditionalLayout from "@/components/layout/ConditionalLayout";
+import AppProviders from "@/providers/AppProviders";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,8 +16,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Urban GIS for Ho Chi Minh City",
-  description:
-    "A monorepo powering an urban GIS platform for HCMC with microservices. We ingest and standardize geospatial data, transform documents into JSON, and expose robust APIs for a modern web client.",
+  description: "A monorepo powering an urban GIS platform for HCMC with microservices. We ingest and standardize geospatial data, transform documents into JSON, and expose robust APIs for a modern web client.",
 };
 
 export default function RootLayout({
@@ -26,17 +25,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en"
-      suppressHydrationWarning
-    >
+    <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased `
-      }
-      suppressHydrationWarning
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        suppressHydrationWarning
       >
-        <Header />
-        {children}
-        <Footer />
+        <AppProviders>
+          <ConditionalLayout>{children}</ConditionalLayout>
+        </AppProviders>
       </body>
     </html>
   );
