@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import {
   Injectable,
   NotFoundException,
@@ -30,7 +32,19 @@ export class AccidentsService {
   } as const;
 
   async create(createDto: CreateAccidentDto) {
-    const { trafficId, ...accidentData } = createDto;
+    const { trafficId, sourceUrl, geom, ...accidentData } = createDto as any;
+
+    const existingAccident = await this.prisma.accident.findUnique({
+      where: { sourceUrl: sourceUrl },
+    });
+
+    if (existingAccident) {
+      console.log(
+        `Accident from source ${sourceUrl} already exists. Skipping creation.`,
+      );
+      return existingAccident;
+    }
+
     const trafficExists = await this.prisma.traffic.findUnique({
       where: { id: trafficId },
     });
@@ -39,9 +53,16 @@ export class AccidentsService {
         `Traffic route with ID "${trafficId}" does not exist.`,
       );
     }
+
+    const geomString = geom
+      ? `SRID=4326;POINT(${geom.coordinates[0]} ${geom.coordinates[1]})`
+      : null;
+
     return this.prisma.accident.create({
       data: {
         ...accidentData,
+        geom: geomString,
+        sourceUrl: sourceUrl,
         traffic: {
           connect: { id: trafficId },
         },
@@ -75,7 +96,7 @@ export class AccidentsService {
 
   async update(id: string, updateDto: UpdateAccidentDto) {
     await this.findOne(id);
-    const { trafficId, ...accidentData } = updateDto;
+    const { trafficId, geom, ...accidentData } = updateDto as any;
     if (trafficId) {
       const trafficExists = await this.prisma.traffic.findUnique({
         where: { id: trafficId },
@@ -86,10 +107,15 @@ export class AccidentsService {
         );
       }
     }
+    const geomString = geom
+      ? `SRID=4326;POINT(${geom.coordinates[0]} ${geom.coordinates[1]})`
+      : undefined;
+
     return this.prisma.accident.update({
       where: { id },
       data: {
         ...accidentData,
+        ...(geomString !== undefined ? { geom: geomString } : {}),
         ...(trafficId && { traffic: { connect: { id: trafficId } } }),
       },
       include: this.includeOptions,
@@ -100,6 +126,7 @@ export class AccidentsService {
     await this.findOne(id);
     return this.prisma.accident.delete({ where: { id } });
   }
+
   async uploadImages(files: Express.Multer.File[]): Promise<ImageDto[]> {
     if (!files || files.length === 0) {
       throw new BadRequestException('Không có file nào được tải lên.');
@@ -114,7 +141,7 @@ export class AccidentsService {
   }
 
   async setImages(accidentId: string, imagesData: ImageDto[]): Promise<any> {
-    await this.findOne(accidentId); // Kiểm tra accident có tồn tại
+    await this.findOne(accidentId);
 
     return this.prisma.$transaction(async (tx) => {
       const oldImages = await tx.image.findMany({ where: { accidentId } });

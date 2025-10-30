@@ -8,6 +8,8 @@ import {
   IsDateString,
   Min,
   IsEnum,
+  IsUrl,
+  IsObject,
 } from 'class-validator';
 
 export class CreateAccidentDto {
@@ -38,6 +40,16 @@ export class CreateAccidentDto {
   @IsOptional()
   casualties?: number;
 
+  @ApiPropertyOptional({ description: 'Detailed description of the accident' })
+  @IsString()
+  @IsOptional()
+  description?: string;
+
+  @ApiProperty({ description: 'The source URL of the news article' })
+  @IsUrl()
+  @IsNotEmpty()
+  sourceUrl: string;
+
   @ApiProperty({
     description: 'ID of the traffic route where accident occurred',
     example: 'clxxxx1234567890',
@@ -45,4 +57,12 @@ export class CreateAccidentDto {
   @IsString()
   @IsNotEmpty({ message: 'Traffic route ID cannot be empty' })
   trafficId: string;
+
+  @ApiPropertyOptional({
+    description: 'GeoJSON Point geometry for the accident location',
+    example: { type: 'Point', coordinates: [106.7, 10.776] },
+  })
+  @IsOptional()
+  @IsObject()
+  geom?: { type: string; coordinates: number[] };
 }

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/require-await */
 import { Injectable, Logger } from '@nestjs/common';
@@ -21,6 +22,7 @@ interface CleanedAccidentData extends RawAccidentData {
 }
 
 interface FinalAccidentData extends CleanedAccidentData {
+  trafficId: string | null;
   geom: {
     type: 'Point';
     coordinates: [number, number];
@@ -70,11 +72,19 @@ export class AccidentProcessingService {
   public async handleCleanedData(msg: CleanedAccidentData) {
     this.logger.log(`[GIS Processor] Received cleaned data: ${msg.sourceUrl}`);
     const coordinates = await this.geocodeLocation(msg.location);
+    let trafficId: string | null = null;
+    if (coordinates) {
+      trafficId = await this.findTrafficIdByGeom(
+        coordinates.lng,
+        coordinates.lat,
+      );
+    }
     const finalData: FinalAccidentData = {
       ...msg,
       geom: coordinates
         ? { type: 'Point', coordinates: [coordinates.lng, coordinates.lat] }
         : null,
+      trafficId: trafficId,
     };
     void this.amqpConnection.publish(
       'amq.topic',
@@ -95,23 +105,22 @@ export class AccidentProcessingService {
     this.logger.log(
       `[DB Writer] Received final data, writing to DB: ${msg.sourceUrl}`,
     );
-
-    if (!msg.geom) {
+    if (!msg.geom || !msg.trafficId) {
       this.logger.warn(
-        `[DB Writer] Skipping write for accident without coordinates: ${msg.sourceUrl}`,
+        `[DB Writer] Skipping write for accident without coordinates or trafficId: ${msg.sourceUrl}`,
       );
       return;
     }
-
     try {
       const payload = {
         accidentDate: msg.dateTime,
         severity: msg.severity,
         casualties: msg.casualties.fatalities + msg.casualties.injuries,
         description: msg.description,
+        sourceUrl: msg.sourceUrl,
+        trafficId: msg.trafficId,
         geom: msg.geom,
       };
-
       await firstValueFrom(
         this.httpService.post(`${this.gisServerUrl}/accidents`, payload),
       );
@@ -123,7 +132,6 @@ export class AccidentProcessingService {
         `[DB Writer] Failed to write to DB for: ${msg.sourceUrl}`,
         error.response?.data || error.message,
       );
-      throw error;
     }
   }
 
@@ -132,7 +140,6 @@ export class AccidentProcessingService {
   ): CleanedAccidentData['severity'] {
     const { fatalities, injuries } = data.casualties;
     const description = data.description.toLowerCase();
-
     if (fatalities > 1 || description.includes('thảm khốc')) {
       return 'CRITICAL';
     }
@@ -160,5 +167,25 @@ export class AccidentProcessingService {
       };
     }
     return null;
+  }
+
+  private async findTrafficIdByGeom(
+    lng: number,
+    lat: number,
+  ): Promise<string | null> {
+    try {
+      const url = `${this.gisServerUrl}/traffics/find-by-location?lng=${lng}&lat=${lat}`;
+      const response = await firstValueFrom(this.httpService.get(url));
+      this.logger.log(
+        `[GIS Processor] Found nearest traffic: ${response.data.id} for location (${lng}, ${lat})`,
+      );
+      return response.data.id;
+    } catch (error) {
+      this.logger.warn(
+        `Could not find traffic ID for location (${lng}, ${lat})`,
+        error.response?.data?.message || error.message,
+      );
+      return null;
+    }
   }
 }

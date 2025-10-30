@@ -137,47 +137,47 @@ export async function seedInfrastructures(prisma: PrismaClient) {
     },
     {
       districtId: district1.id,
-      name: "Công viên Tào Đàn",
-      address: "55C Nguyễn Thị Minh Khai, P. Bến Thành",
+      name: 'Công viên Tào Đàn',
+      address: '55C Nguyễn Thị Minh Khai, P. Bến Thành',
       category: InfraCategory.PARK,
-      geom: "POINT(106.693087 10.774802)",
+      geom: 'POINT(106.693087 10.774802)',
       details: {
-        area_m2: 100000
-     }
-    },
-    {
-      districtId: district1.id,
-      name: "Công viên Lê Văn Tám",
-      address: "Hai Bà Trưng, P. Đa Kao",
-      category: InfraCategory.PARK,
-      geom: "POINT(106.693742 10.788220)",
-      details: {
-        area_m2: 100000
-      }
-    },
-    {
-      districtId: district1.id,
-      name: "Trường THCS Nguyễn Du",
-      address: "139 Nguyễn Du, P. Bến Thành",
-      category: InfraCategory.SCHOOL,
-      geom: "POINT(106.662507 10.844266)",
-      details: {
-          level: SchoolLevel.SECONDARY,
-          studentCapacity: 1200,
-          teacherCount: 80
+        area: 100000,
       },
     },
     {
       districtId: district1.id,
-      name: "Trường THPT Trưng Vương",
-      address: "31 Trần Nhật Duật, P. Tân Định",
+      name: 'Công viên Lê Văn Tám',
+      address: 'Hai Bà Trưng, P. Đa Kao',
+      category: InfraCategory.PARK,
+      geom: 'POINT(106.693742 10.788220)',
+      details: {
+        area: 100000,
+      },
+    },
+    {
+      districtId: district1.id,
+      name: 'Trường THCS Nguyễn Du',
+      address: '139 Nguyễn Du, P. Bến Thành',
       category: InfraCategory.SCHOOL,
-      geom: "POINT(106.706383 10.785291)",
+      geom: 'POINT(106.662507 10.844266)',
+      details: {
+        level: SchoolLevel.SECONDARY,
+        studentCapacity: 1200,
+        teacherCount: 80,
+      },
+    },
+    {
+      districtId: district1.id,
+      name: 'Trường THPT Trưng Vương',
+      address: '31 Trần Nhật Duật, P. Tân Định',
+      category: InfraCategory.SCHOOL,
+      geom: 'POINT(106.706383 10.785291)',
       details: {
         level: SchoolLevel.HIGH_SCHOOL,
         studentCapacity: 1500,
-        teacherCount: 90
-      }
+        teacherCount: 90,
+      },
     },
     {
       districtId: district1.id,
@@ -187,8 +187,8 @@ export async function seedInfrastructures(prisma: PrismaClient) {
       geom: 'POINT(106.70430244928002 10.783486674129337)',
       details: {
         type: UtilityType.POWER_PLANT,
-        capacity: 0
-      }
+        capacity: 0,
+      },
     },
     {
       districtId: district1.id,
@@ -198,8 +198,8 @@ export async function seedInfrastructures(prisma: PrismaClient) {
       geom: 'POINT(106.69521583408078 10.771423152955515)',
       details: {
         type: UtilityType.GAS_STATION,
-        capacity: 3000
-      }
+        capacity: 3000,
+      },
     },
     {
       districtId: district3.id,
@@ -210,7 +210,7 @@ export async function seedInfrastructures(prisma: PrismaClient) {
       details: {
         type: HospitalType.GENERAL,
         bedCapacity: 790,
-        doctorCount: 200
+        doctorCount: 200,
       },
     },
     {
@@ -222,51 +222,51 @@ export async function seedInfrastructures(prisma: PrismaClient) {
       details: {
         type: HospitalType.SPECIALIZED,
         bedCapacity: 270,
-        doctorCount: 80
-      }
+        doctorCount: 80,
+      },
     },
     {
       districtId: district3.id,
-      name: "Co.op mart Nguyễn Đình Chiểu",
-      address: "168 Nguyễn Đình Chiểu, P. Xuân Hòa",
+      name: 'Co.op mart Nguyễn Đình Chiểu',
+      address: '168 Nguyễn Đình Chiểu, P. Xuân Hòa',
       category: InfraCategory.MARKET,
-      geom: "POINT(106.692384 10.781405)",
+      geom: 'POINT(106.692384 10.781405)',
       details: {
-          type: MarketType.SUPERMARKET,
-          stallCount: 50
-        }
+        type: MarketType.SUPERMARKET,
+        stallCount: 50,
+      },
     },
     {
       districtId: district3.id,
-      name: "Saigon Mall",
-      address: "19 Cao Thắng, P. Bàn Cờ",
+      name: 'Saigon Mall',
+      address: '19 Cao Thắng, P. Bàn Cờ',
       category: InfraCategory.MARKET,
-      geom: "POINT(106.68265474668141 10.769315791246925)",
+      geom: 'POINT(106.68265474668141 10.769315791246925)',
       details: {
-          type: MarketType.MALL,
-          stallCount: 150
-        }
+        type: MarketType.MALL,
+        stallCount: 150,
+      },
     },
     {
       districtId: district3.id,
-      name: "Chợ Vườn Chuối",
-      address: "428 Nguyễn Đình Chiểu, P. Xuân Hòa",
+      name: 'Chợ Vườn Chuối',
+      address: '428 Nguyễn Đình Chiểu, P. Xuân Hòa',
       category: InfraCategory.MARKET,
-      geom: "POINT(106.68459474364212 10.772961286038473)",
+      geom: 'POINT(106.68459474364212 10.772961286038473)',
       details: {
         type: MarketType.TRADITIONAL,
-        stallCount: 45
-      }
+        stallCount: 45,
+      },
     },
     {
       districtId: district3.id,
-      name: "Công viên Nguyễn Thiện Thuật",
-      address: "Đ. Điện Biên Phủ, P. Bàn Cờ",
+      name: 'Công viên Nguyễn Thiện Thuật',
+      address: 'Đ. Điện Biên Phủ, P. Bàn Cờ',
       category: InfraCategory.PARK,
-      geom: "POINT(106.67785226671445 10.769083378815159)",
+      geom: 'POINT(106.67785226671445 10.769083378815159)',
       details: {
-        area: 3843
-      }
+        area: 3843,
+      },
     },
     {
       districtId: district3.id,
@@ -348,7 +348,7 @@ export async function seedInfrastructures(prisma: PrismaClient) {
         type: UtilityType.WASTE_TREATMENT,
         capacity: 20000,
       },
-    }
+    },
   ];
 
   let seededCount = 0;

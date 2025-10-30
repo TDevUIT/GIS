@@ -217,8 +217,11 @@ model Traffic {
 
 model Accident {
   id            String   @id @default(cuid())
+  description   String?  @db.Text
   accidentDate  DateTime @map("accident_date")
   severity      AccidentSeverity
+  geom          String?
+  sourceUrl     String?  @unique @map("source_url")
   casualties    Int?
   trafficId     String
   traffic       Traffic  @relation(fields: [trafficId], references: [id], onDelete: Cascade)

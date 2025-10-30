@@ -28,11 +28,11 @@ export class AccidentsScheduler implements OnApplicationBootstrap {
       this.JOB_NAME,
       {},
       {
-        repeat: { pattern: '* * * * *' },
+        repeat: { pattern: '*/5 * * * *' },
         jobId: this.JOB_NAME,
       },
     );
 
-    this.logger.log(`Job "${this.JOB_NAME}" scheduled to run every minute.`);
+    this.logger.log(`Job "${this.JOB_NAME}" scheduled to run every 5 minutes.`);
   }
 }
