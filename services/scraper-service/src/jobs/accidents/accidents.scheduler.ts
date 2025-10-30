@@ -12,8 +12,9 @@ export class AccidentsScheduler implements OnApplicationBootstrap {
   ) {}
 
   async onApplicationBootstrap() {
-    this.logger.log('Initializing repeatable jobs for Accident Scraper...');
+    this.logger.log('🔧 Initializing repeatable jobs for Accident Scraper...');
     await this.setupRepeatableJobs();
+    this.logger.log('✅ Accident Scraper job initialized successfully!');
   }
 
   private async setupRepeatableJobs() {
@@ -28,11 +29,12 @@ export class AccidentsScheduler implements OnApplicationBootstrap {
       this.JOB_NAME,
       {},
       {
-        repeat: { pattern: '*/5 * * * *' },
+        repeat: { pattern: '*/2 * * * *' },
         jobId: this.JOB_NAME,
       },
     );
 
-    this.logger.log(`Job "${this.JOB_NAME}" scheduled to run every 5 minutes.`);
+    this.logger.log(`⏰ Job "${this.JOB_NAME}" scheduled to run every 2 minutes`);
+    this.logger.log(`📰 Will process 1 article per run (slow & steady crawling)`);
   }
 }

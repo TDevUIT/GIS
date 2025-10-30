@@ -13,6 +13,8 @@ interface RawAccidentData {
   description: string;
   casualties: { fatalities: number; injuries: number };
   vehiclesInvolved: string[];
+  coordinates?: { lat: number; lng: number } | null;
+  geom?: string | null; // PostGIS POINT format
   sourceUrl: string;
   scrapedAt: string;
 }
@@ -23,10 +25,7 @@ interface CleanedAccidentData extends RawAccidentData {
 
 interface FinalAccidentData extends CleanedAccidentData {
   trafficId: string | null;
-  geom: {
-    type: 'Point';
-    coordinates: [number, number];
-  } | null;
+  // geom is inherited from CleanedAccidentData (PostGIS POINT string format)
 }
 
 @Injectable()
@@ -71,7 +70,20 @@ export class AccidentProcessingService {
   })
   public async handleCleanedData(msg: CleanedAccidentData) {
     this.logger.log(`[GIS Processor] Received cleaned data: ${msg.sourceUrl}`);
-    const coordinates = await this.geocodeLocation(msg.location);
+    
+    // Use coordinates from scraper if available, otherwise try geocoding
+    let coordinates = msg.coordinates;
+    if (!coordinates && msg.location) {
+      this.logger.log(`[GIS Processor] No coordinates from scraper, attempting geocoding...`);
+      coordinates = await this.geocodeLocation(msg.location);
+    }
+
+    if (coordinates) {
+      this.logger.log(`[GIS Processor] Using coordinates: lat=${coordinates.lat}, lng=${coordinates.lng}`);
+    } else {
+      this.logger.warn(`[GIS Processor] No coordinates available for: ${msg.sourceUrl}`);
+    }
+
     let trafficId: string | null = null;
     if (coordinates) {
       trafficId = await this.findTrafficIdByGeom(
@@ -79,11 +91,15 @@ export class AccidentProcessingService {
         coordinates.lat,
       );
     }
+
+    // Convert coordinates to PostGIS POINT format if not already present
+    const geom = msg.geom || (coordinates 
+      ? `POINT(${coordinates.lng} ${coordinates.lat})`
+      : null);
+
     const finalData: FinalAccidentData = {
       ...msg,
-      geom: coordinates
-        ? { type: 'Point', coordinates: [coordinates.lng, coordinates.lat] }
-        : null,
+      geom: geom,
       trafficId: trafficId,
     };
     void this.amqpConnection.publish(
@@ -159,14 +175,40 @@ export class AccidentProcessingService {
   private async geocodeLocation(
     location: string,
   ): Promise<{ lat: number; lng: number } | null> {
-    this.logger.log(`Geocoding location: "${location}"`);
-    if (location) {
-      return {
-        lat: 10.7769 + (Math.random() - 0.5) * 0.1,
-        lng: 106.7009 + (Math.random() - 0.5) * 0.1,
-      };
+    this.logger.log(`[Geocoder] Geocoding location: "${location}"`);
+    
+    try {
+      // Use Nominatim API as fallback
+      const encodedLocation = encodeURIComponent(location);
+      const url = `https://nominatim.openstreetmap.org/search?q=${encodedLocation}&format=json&limit=1&countrycodes=vn`;
+      
+      const response = await firstValueFrom(
+        this.httpService.get(url, {
+          headers: {
+            'User-Agent': 'IE402-Processing-Service/1.0',
+          },
+        })
+      );
+
+      if (Array.isArray(response.data) && response.data.length > 0) {
+        const result = response.data[0] as { lat: string; lon: string };
+        const coordinates = {
+          lat: parseFloat(result.lat),
+          lng: parseFloat(result.lon),
+        };
+        this.logger.log(`[Geocoder] Successfully geocoded to: ${coordinates.lat}, ${coordinates.lng}`);
+        return coordinates;
+      }
+
+      this.logger.warn(`[Geocoder] No results found for: ${location}`);
+      return null;
+    } catch (error) {
+      this.logger.error(
+        `[Geocoder] Geocoding failed for: ${location}`,
+        error.response?.data || error.message,
+      );
+      return null;
     }
-    return null;
   }
 
   private async findTrafficIdByGeom(
