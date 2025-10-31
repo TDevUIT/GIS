@@ -28,7 +28,7 @@ export class PopulationsScheduler implements OnApplicationBootstrap {
       this.JOB_NAME,
       {},
       {
-        repeat: { pattern: '*/60 * * * *' },
+        repeat: { pattern: '*/30 * * * *' },
         jobId: this.JOB_NAME,
       },
     );

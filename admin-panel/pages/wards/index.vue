@@ -13,6 +13,7 @@
                 <span>Add Ward</span>
             </button>
         </header>
+
         <div class="flex-grow grid grid-cols-1 xl:grid-cols-3 gap-8 min-h-0">
             <div class="xl:col-span-1 flex flex-col gap-4">
                 <div class="flex flex-col sm:flex-row gap-4">
@@ -31,37 +32,50 @@
                         />
                     </div>
                 </div>
-                <div class="flex-grow overflow-y-auto">
-                    <UiDataTable
-                        :columns="columns"
-                        :data="filteredWards"
-                        :selected-id="selectedWard?.id"
-                        @row-click="handleRowClick"
-                    >
-                        <template #cell-updatedAt="{ value }">
-                            {{ new Date(value).toLocaleDateString('en-GB') }}
-                        </template>
-                        <template #actions="{ item }">
-                            <div class="flex items-center justify-end gap-3">
-                                <button
-                                    @click.stop="handleEdit(item.id)"
-                                    class="text-blue-400 hover:text-blue-300 transition-colors"
-                                    title="Edit"
-                                >
-                                    <PencilSquareIcon class="h-5 w-5" />
-                                </button>
-                                <button
-                                    @click.stop="handleDelete(item.id, item.name)"
-                                    class="text-red-400 hover:text-red-300 transition-colors"
-                                    title="Delete"
-                                >
-                                    <TrashIcon class="h-5 w-5" />
-                                </button>
-                            </div>
-                        </template>
-                    </UiDataTable>
+
+                <div class="flex-grow flex flex-col min-h-0">
+                    <div class="flex-grow overflow-y-auto">
+                        <UiDataTable
+                            :columns="columns"
+                            :data="paginatedWards"
+                            :selected-id="selectedWard?.id"
+                            @row-click="handleRowClick"
+                        >
+                            <template #cell-updatedAt="{ value }">
+                                {{ new Date(value).toLocaleDateString('en-GB') }}
+                            </template>
+
+                            <template #actions="{ item }">
+                                <div class="flex items-center justify-end gap-3">
+                                    <button
+                                        @click.stop="handleEdit(item.id)"
+                                        class="text-blue-400 hover:text-blue-300 transition-colors"
+                                        title="Edit"
+                                    >
+                                        <PencilSquareIcon class="h-5 w-5" />
+                                    </button>
+                                    <button
+                                        @click.stop="handleDelete(item.id, item.name)"
+                                        class="text-red-400 hover:text-red-300 transition-colors"
+                                        title="Delete"
+                                    >
+                                        <TrashIcon class="h-5 w-5" />
+                                    </button>
+                                </div>
+                            </template>
+                        </UiDataTable>
+                    </div>
+
+                    <div v-if="totalPages > 1" class="flex-shrink-0 flex items-center justify-between mt-4">
+                        <span class="text-sm text-gray-400">Page {{ currentPage }} of {{ totalPages }}</span>
+                        <div class="flex items-center gap-2">
+                            <button @click="currentPage--" :disabled="currentPage === 1" class="pagination-btn">Previous</button>
+                            <button @click="currentPage++" :disabled="currentPage === totalPages" class="pagination-btn">Next</button>
+                        </div>
+                    </div>
                 </div>
             </div>
+
             <div class="xl:col-span-2 flex flex-col gap-8">
                 <div class="h-[40vh] xl:h-auto xl:flex-grow">
                     <ClientOnly>
@@ -81,6 +95,7 @@
                         </template>
                     </ClientOnly>
                 </div>
+
                 <div class="h-[40vh] xl:h-auto xl:flex-grow">
                     <UiDataDetailView title="Ward Details" :item="selectedWard" @close="selectedWard = null">
                         <template #default="{ item }">
@@ -135,6 +150,9 @@ const selectedWard = ref<Ward | null>(null)
 const mapRef = ref()
 const mapCenter = ref<[number, number]>([10.7769, 106.7009])
 
+const currentPage = ref(1)
+const itemsPerPage = 5
+
 useAsyncData('districts-for-filter', async () => {
     const response = await $api.districts.getAll()
     const districtData = response.data.data
@@ -175,6 +193,15 @@ const filteredWards = computed(() => {
     return allWards.value.filter((w: Ward) => w.name.toLowerCase().includes(lowerCaseQuery))
 })
 
+const totalPages = computed(() => Math.ceil(filteredWards.value.length / itemsPerPage))
+
+const paginatedWards = computed(() => {
+    if (!filteredWards.value) return []
+    const start = (currentPage.value - 1) * itemsPerPage
+    const end = start + itemsPerPage
+    return filteredWards.value.slice(start, end)
+})
+
 const wardsGeoJson = computed<FeatureCollection | null>(() => {
     if (!filteredWards.value || filteredWards.value.length === 0) return null
     return {
@@ -196,7 +223,7 @@ function geoJsonStyleFunction(feature: any) {
         weight: isSelected ? 3 : 2,
         opacity: 1,
         fillColor: isSelected ? '#FBBF24' : '#8B5CF6',
-        fillOpacity: isSelected ? 0.5 : 0.2,
+        fillOpacity: isSelected ? 0.5 : 0.2
     }
 }
 
@@ -212,9 +239,7 @@ function handleRowClick(ward: Ward) {
 function onPolygonClick(event: any) {
     const properties = event.layer.feature.properties
     const ward = filteredWards.value.find(w => w.id === properties.id)
-    if (ward) {
-        handleRowClick(ward)
-    }
+    if (ward) handleRowClick(ward)
 }
 
 function viewOnMap(ward: Ward) {
@@ -243,26 +268,43 @@ async function handleDelete(id: string, name: string) {
             toastSuccess(`Ward "${name}" has been deleted.`)
             selectedWard.value = null
             await refreshWards()
+            if (paginatedWards.value.length === 0 && currentPage.value > 1) {
+                currentPage.value--
+            }
         } catch (err: any) {
             toastError('Deletion failed', err.data?.message || 'An error occurred.')
         }
     }
 }
 
-watch(filteredWards, (newWards) => {
-    if (selectedWard.value && !newWards.some(w => w.id === selectedWard.value?.id)) {
-        selectedWard.value = null
-    }
-    const mapInstance = mapRef.value?.mapObject
-    if (!mapInstance) return
-    if (newWards.length > 0 && wardsGeoJson.value) {
-        const geoJsonLayer = L.geoJSON(wardsGeoJson.value as any)
-        const bounds = geoJsonLayer.getBounds()
-        if (bounds.isValid()) {
-            mapInstance.flyToBounds(bounds, { padding: [20, 20] })
+watch([searchQuery, selectedDistrictId], () => {
+    currentPage.value = 1
+})
+
+watch(
+    filteredWards,
+    (newWards) => {
+        if (selectedWard.value && !newWards.some(w => w.id === selectedWard.value?.id)) {
+            selectedWard.value = null
         }
-    } else {
-        mapInstance.flyTo(mapCenter.value, 11)
-    }
-}, { deep: true })
+        const mapInstance = mapRef.value?.mapObject
+        if (!mapInstance) return
+        if (newWards.length > 0 && wardsGeoJson.value) {
+            const geoJsonLayer = L.geoJSON(wardsGeoJson.value as any)
+            const bounds = geoJsonLayer.getBounds()
+            if (bounds.isValid()) {
+                mapInstance.flyToBounds(bounds, { padding: [20, 20] })
+            }
+        } else {
+            mapInstance.flyTo(mapCenter.value, 11)
+        }
+    },
+    { deep: true }
+)
 </script>
+
+<style scoped>
+.pagination-btn {
+    @apply px-3 py-1 text-sm font-medium text-gray-300 bg-gray-700 rounded-md hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors;
+}
+</style>

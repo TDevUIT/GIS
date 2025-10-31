@@ -10,6 +10,7 @@
                 <span>Add Traffic Route</span>
             </button>
         </header>
+
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
             <div class="lg:col-span-1 h-80">
                 <FeaturesTrafficsTrafficRiskTable :data="analyticsData.riskAssessment" />
@@ -21,7 +22,7 @@
                     :chart-values="analyticsData.byTimeOfDay?.values || []"
                 />
             </div>
-             <div class="lg:col-span-1 h-80">
+            <div class="lg:col-span-1 h-80">
                 <FeaturesTrafficsAccidentTimeChart
                     title="Accidents by Day of Week"
                     :chart-labels="analyticsData.byDayOfWeek?.labels || []"
@@ -29,39 +30,54 @@
                 />
             </div>
         </div>
+
         <div class="flex-grow grid grid-cols-1 xl:grid-cols-3 gap-8 min-h-0">
             <div class="xl:col-span-1 flex flex-col gap-4">
                 <div class="flex flex-col sm:flex-row gap-4">
                     <UiSearchInput v-model="searchQuery" placeholder="Search by road name..." class="flex-grow" />
                 </div>
-                <div class="flex-grow overflow-y-auto">
-                    <UiDataTable
-                        :columns="columns"
-                        :data="filteredTraffics"
-                        :selected-id="selectedTraffic?.id"
-                        @row-click="handleRowClick"
-                    >
-                        <template #cell-trafficVolume="{ value }">
-                            {{ value?.toLocaleString() ?? 'N/A' }}
-                        </template>
-                        <template #cell-accidentCount="{ item }">
-                            <span class="font-semibold" :class="item.accidents.length > 5 ? 'text-red-400' : item.accidents.length > 0 ? 'text-amber-400' : 'text-gray-400'">
-                                {{ item.accidents.length }}
-                            </span>
-                        </template>
-                        <template #actions="{ item }">
-                            <div class="flex items-center justify-end gap-3">
-                                <button @click.stop="handleEditTraffic(item.id)" class="text-blue-400 hover:text-blue-300" title="Edit">
-                                    <PencilSquareIcon class="h-5 w-5" />
-                                </button>
-                                <button @click.stop="handleDeleteTraffic(item.id, item.roadName)" class="text-red-400 hover:text-red-300" title="Delete">
-                                    <TrashIcon class="h-5 w-5" />
-                                </button>
-                            </div>
-                        </template>
-                    </UiDataTable>
+
+                <div class="flex-grow flex flex-col min-h-0">
+                    <div class="flex-grow overflow-y-auto">
+                        <UiDataTable
+                            :columns="columns"
+                            :data="paginatedTraffics"
+                            :selected-id="selectedTraffic?.id"
+                            @row-click="handleRowClick"
+                        >
+                            <template #cell-trafficVolume="{ value }">
+                                {{ value?.toLocaleString() ?? 'N/A' }}
+                            </template>
+
+                            <template #cell-accidentCount="{ item }">
+                                <span class="font-semibold" :class="item.accidents.length > 5 ? 'text-red-400' : item.accidents.length > 0 ? 'text-amber-400' : 'text-gray-400'">
+                                    {{ item.accidents.length }}
+                                </span>
+                            </template>
+
+                            <template #actions="{ item }">
+                                <div class="flex items-center justify-end gap-3">
+                                    <button @click.stop="handleEditTraffic(item.id)" class="text-blue-400 hover:text-blue-300" title="Edit">
+                                        <PencilSquareIcon class="h-5 w-5" />
+                                    </button>
+                                    <button @click.stop="handleDeleteTraffic(item.id, item.roadName)" class="text-red-400 hover:text-red-300" title="Delete">
+                                        <TrashIcon class="h-5 w-5" />
+                                    </button>
+                                </div>
+                            </template>
+                        </UiDataTable>
+                    </div>
+
+                    <div v-if="totalPages > 1" class="flex-shrink-0 flex items-center justify-between mt-4">
+                        <span class="text-sm text-gray-400">Page {{ currentPage }} of {{ totalPages }}</span>
+                        <div class="flex items-center gap-2">
+                            <button @click="currentPage--" :disabled="currentPage === 1" class="pagination-btn">Previous</button>
+                            <button @click="currentPage++" :disabled="currentPage === totalPages" class="pagination-btn">Next</button>
+                        </div>
+                    </div>
                 </div>
             </div>
+
             <div class="xl:col-span-2 flex flex-col gap-8">
                 <div class="relative h-[40vh] xl:h-auto xl:flex-grow">
                     <ClientOnly>
@@ -74,6 +90,7 @@
                                 @click="onLineClick"
                             />
                         </UiLeafletMap>
+
                         <template #fallback>
                             <div class="h-full w-full bg-gray-800 flex items-center justify-center text-gray-500 rounded-lg">
                                 Loading Map...
@@ -81,8 +98,9 @@
                         </template>
                     </ClientOnly>
                 </div>
+
                 <div class="h-[40vh] xl:h-auto xl:flex-grow">
-                     <UiDataDetailView title="Traffic Route Details" :item="selectedTrafficWithAccidents" @close="selectedTraffic = null">
+                    <UiDataDetailView title="Traffic Route Details" :item="selectedTrafficWithAccidents" @close="selectedTraffic = null">
                         <template #default="{ item }">
                             <ul class="space-y-3 text-sm mb-6">
                                 <li class="flex justify-between border-b border-gray-700 pb-2">
@@ -102,13 +120,15 @@
                                     <span class="text-white font-bold text-xl">{{ item.accidents.length }}</span>
                                 </li>
                             </ul>
+
                             <div class="flex justify-between items-center mb-2">
                                 <h4 class="text-base font-semibold text-white">Recent Accidents on this Route</h4>
                                 <button @click="openAccidentModal(null)" class="flex items-center gap-1 text-sm text-blue-400 hover:text-blue-300">
-                                    <PlusIcon class="h-4 w-4"/>
+                                    <PlusIcon class="h-4 w-4" />
                                     Add Accident
                                 </button>
                             </div>
+
                             <div class="max-h-60 overflow-y-auto pr-2">
                                 <ul v-if="item.accidents.length > 0" class="divide-y divide-gray-700">
                                     <FeaturesTrafficsAccidentListItem
@@ -126,6 +146,7 @@
                 </div>
             </div>
         </div>
+
         <FeaturesTrafficsAccidentFormModal
             :is-open="isAccidentModalOpen"
             :traffic-id="selectedTraffic?.id || null"
@@ -143,7 +164,6 @@ import { PlusIcon, PencilSquareIcon, TrashIcon } from '@heroicons/vue/24/outline
 import L from 'leaflet';
 import { getTrafficLineStyle } from '~/utils/trafficStyles';
 import type { DataTableColumn } from '~/components/ui/DataTable.vue';
-import type { District } from '~/types/api/district';
 import type { Traffic } from '~/types/api/traffic';
 import type { Accident } from '~/types/api/accident';
 import type { TrafficRisk } from '~/types/api/analytics';
@@ -158,7 +178,6 @@ const { confirmDelete, toastSuccess, toastError } = useSwal();
 
 const searchQuery = ref('');
 const selectedDistrictId = ref('');
-const districtOptions = ref<{ label: string; value: string }[]>([]);
 const allTraffics = ref<(Traffic & { accidents: Accident[] })[]>([]);
 const selectedTraffic = ref<Traffic | null>(null);
 const selectedTrafficWithAccidents = ref<(Traffic & { accidents: Accident[] }) | null>(null);
@@ -167,56 +186,59 @@ const mapCenter = ref<[number, number]>([10.7769, 106.7009]);
 const isAccidentModalOpen = ref(false);
 const editingAccident = ref<Accident | null>(null);
 
+const currentPage = ref(1);
+const itemsPerPage = 5;
+
 const analyticsData = reactive({
     riskAssessment: null as TrafficRisk[] | null,
-    byTimeOfDay: null as { labels: string[], values: number[] } | null,
-    byDayOfWeek: null as { labels: string[], values: number[] } | null,
+    byTimeOfDay: null as { labels: string[]; values: number[] } | null,
+    byDayOfWeek: null as { labels: string[]; values: number[] } | null,
 });
 
-useAsyncData('districts-for-filter', async () => {
-    const response = await $api.districts.getAll();
-    const data = response.data.data;
-    if (data) {
-        districtOptions.value = [{ label: 'All Districts', value: '' }, ...data.map(d => ({ label: d.name, value: d.id }))];
-    }
-    return data;
-});
+const { refresh: refreshAllData } = useAsyncData(
+    'traffics-and-analytics',
+    async () => {
+        selectedTraffic.value = null;
+        const [trafficRes, accidentRes, riskRes, timeOfDayRes, dayOfWeekRes] = await Promise.all([
+            $api.traffics.getAll({ districtId: selectedDistrictId.value || undefined }),
+            $api.accidents.getAll(),
+            $api.analytics.getTrafficRiskAssessment(),
+            $api.analytics.getAccidentsByTimeOfDay(),
+            $api.analytics.getAccidentsByDayOfWeek(),
+        ]);
 
-const { refresh: refreshAllData } = useAsyncData('traffics-and-analytics', async () => {
-    selectedTraffic.value = null;
-    const [trafficRes, accidentRes, riskRes, timeOfDayRes, dayOfWeekRes] = await Promise.all([
-        $api.traffics.getAll({ districtId: selectedDistrictId.value || undefined }),
-        $api.accidents.getAll(),
-        $api.analytics.getTrafficRiskAssessment(),
-        $api.analytics.getAccidentsByTimeOfDay(),
-        $api.analytics.getAccidentsByDayOfWeek(),
-    ]);
-    const traffics = (trafficRes.data.data || []).map((t: any) => ({
-        ...t,
-        geom: typeof t.geom === 'string' ? JSON.parse(t.geom) : t.geom,
-    }));
-    const accidents = accidentRes.data.data || [];
-    const accidentsByTrafficId = accidents.reduce((acc, current) => {
-        (acc[current.trafficId] = acc[current.trafficId] || []).push(current);
-        return acc;
-    }, {} as Record<string, Accident[]>);
-    allTraffics.value = traffics.map(t => ({
-        ...t,
-        accidents: (accidentsByTrafficId[t.id] || []).sort((a,b) => new Date(b.accidentDate).getTime() - new Date(a.accidentDate).getTime())
-    }));
-    analyticsData.riskAssessment = riskRes.data.data || [];
-    const timeData = timeOfDayRes.data.data || [];
-    analyticsData.byTimeOfDay = {
-        labels: timeData.map(d => d.timeOfDay.replace(/\s/g, '')),
-        values: timeData.map(d => d.accidentCount),
-    };
-    const dayData = dayOfWeekRes.data.data || [];
-    analyticsData.byDayOfWeek = {
-        labels: dayData.map(d => d.dayOfWeek.trim()),
-        values: dayData.map(d => d.accidentCount),
-    };
-    return { traffics: allTraffics.value, analytics: analyticsData };
-}, { watch: [selectedDistrictId] });
+        const traffics = (trafficRes.data.data || []).map((t: any) => ({
+            ...t,
+            geom: typeof t.geom === 'string' ? JSON.parse(t.geom) : t.geom,
+        }));
+
+        const accidents = accidentRes.data.data || [];
+        const accidentsByTrafficId = accidents.reduce((acc, current) => {
+            (acc[current.trafficId] = acc[current.trafficId] || []).push(current);
+            return acc;
+        }, {} as Record<string, Accident[]>);
+
+        allTraffics.value = traffics.map(t => ({
+            ...t,
+            accidents: (accidentsByTrafficId[t.id] || []).sort((a, b) => new Date(b.accidentDate).getTime() - new Date(a.accidentDate).getTime()),
+        }));
+
+        analyticsData.riskAssessment = riskRes.data.data || [];
+        const timeData = timeOfDayRes.data.data || [];
+        analyticsData.byTimeOfDay = {
+            labels: timeData.map(d => d.timeOfDay.replace(/\s/g, '')),
+            values: timeData.map(d => d.accidentCount),
+        };
+        const dayData = dayOfWeekRes.data.data || [];
+        analyticsData.byDayOfWeek = {
+            labels: dayData.map(d => d.dayOfWeek.trim()),
+            values: dayData.map(d => d.accidentCount),
+        };
+
+        return { traffics: allTraffics.value, analytics: analyticsData };
+    },
+    { watch: [selectedDistrictId] }
+);
 
 const columns: DataTableColumn[] = [
     { key: 'roadName', label: 'Road Name' },
@@ -230,15 +252,26 @@ const filteredTraffics = computed(() => {
     return allTraffics.value.filter(t => t.roadName.toLowerCase().includes(lowerCaseQuery));
 });
 
+const totalPages = computed(() => Math.ceil(filteredTraffics.value.length / itemsPerPage));
+
+const paginatedTraffics = computed(() => {
+    if (!filteredTraffics.value) return [];
+    const start = (currentPage.value - 1) * itemsPerPage;
+    const end = start + itemsPerPage;
+    return filteredTraffics.value.slice(start, end);
+});
+
 const trafficGeoJson = computed<FeatureCollection | null>(() => {
     if (!filteredTraffics.value.length) return null;
     return {
         type: 'FeatureCollection',
-        features: filteredTraffics.value.filter(t => t.geom).map(t => ({
-            type: 'Feature',
-            properties: { id: t.id, name: t.roadName, accidentCount: t.accidents.length },
-            geometry: t.geom as any,
-        }))
+        features: filteredTraffics.value
+            .filter(t => t.geom)
+            .map(t => ({
+                type: 'Feature',
+                properties: { id: t.id, name: t.roadName, accidentCount: t.accidents.length },
+                geometry: t.geom as any,
+            })),
     };
 });
 
@@ -292,6 +325,9 @@ async function handleDeleteTraffic(id: string, name: string) {
                 selectedTraffic.value = null;
             }
             await refreshAllData();
+            if (paginatedTraffics.value.length === 0 && currentPage.value > 1) {
+                currentPage.value--;
+            }
         } catch (err: any) {
             toastError('Deletion failed', err.data?.message || 'An error occurred.');
         }
@@ -321,13 +357,21 @@ async function handleDeleteAccident(accidentId: string) {
     }
 }
 
-watch(selectedTraffic, (newSelection) => {
-    if (newSelection) {
-        selectedTrafficWithAccidents.value = allTraffics.value.find(t => t.id === newSelection.id) || null;
-    } else {
-        selectedTrafficWithAccidents.value = null;
-    }
-}, { deep: true });
+watch(
+    selectedTraffic,
+    newSelection => {
+        if (newSelection) {
+            selectedTrafficWithAccidents.value = allTraffics.value.find(t => t.id === newSelection.id) || null;
+        } else {
+            selectedTrafficWithAccidents.value = null;
+        }
+    },
+    { deep: true }
+);
+
+watch([searchQuery, selectedDistrictId], () => {
+    currentPage.value = 1;
+});
 
 watch(filteredTraffics, () => {
     if (selectedTraffic.value && !filteredTraffics.value.some(t => t.id === selectedTraffic.value?.id)) {
@@ -335,3 +379,9 @@ watch(filteredTraffics, () => {
     }
 });
 </script>
+
+<style scoped>
+.pagination-btn {
+    @apply px-3 py-1 text-sm font-medium text-gray-300 bg-gray-700 rounded-md hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors;
+}
+</style>

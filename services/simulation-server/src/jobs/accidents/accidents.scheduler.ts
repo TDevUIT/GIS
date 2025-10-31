@@ -7,7 +7,7 @@ export class AccidentsScheduler implements OnApplicationBootstrap {
   private readonly logger = new Logger(AccidentsScheduler.name);
   private readonly JOB_NAMES = [
     'simulate-traffic-volume',
-    'simulate-daily-accidents',
+    'simulate-random-accidents',
   ];
 
   constructor(
@@ -23,8 +23,12 @@ export class AccidentsScheduler implements OnApplicationBootstrap {
     const repeatableJobs = await this.simulationQueue.getRepeatableJobs();
 
     for (const job of repeatableJobs) {
-      if (this.JOB_NAMES.includes(job.name)) {
+      if (
+        this.JOB_NAMES.includes(job.name) ||
+        job.name === 'simulate-daily-accidents'
+      ) {
         await this.simulationQueue.removeRepeatableByKey(job.key);
+        this.logger.log(`Removed old repeatable job: ${job.name} (${job.id})`);
       }
     }
 
@@ -32,20 +36,22 @@ export class AccidentsScheduler implements OnApplicationBootstrap {
       'simulate-traffic-volume',
       {},
       {
-        repeat: { pattern: '*/60 * * * *' },
+        repeat: { pattern: '*/5 * * * *' },
         jobId: 'simulate-traffic-volume',
       },
     );
 
     await this.simulationQueue.add(
-      'simulate-daily-accidents',
+      'simulate-random-accidents',
       {},
       {
-        repeat: { pattern: '*/30 * * * *' },
-        jobId: 'simulate-daily-accidents',
+        repeat: { pattern: '*/2 * * * *' },
+        jobId: 'simulate-random-accidents',
       },
     );
 
-    this.logger.log('Accident simulation jobs scheduled.');
+    this.logger.log(
+      'Accident simulation jobs scheduled with optimized timing.',
+    );
   }
 }

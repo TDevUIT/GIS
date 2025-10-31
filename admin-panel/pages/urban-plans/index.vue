@@ -32,30 +32,41 @@
                         />
                     </div>
                 </div>
-                <div class="flex-grow overflow-y-auto">
-                    <UiDataTable
-                        :columns="columns"
-                        :data="filteredUrbanPlans"
-                        :selected-id="selectedUrbanPlan?.id"
-                        @row-click="handleRowClick"
-                    >
-                        <template #cell-zoningType="{ item }">
-                            <FeaturesUrbanPlansZoningTypeBadge :type="item.zoningType" />
-                        </template>
-                        <template #cell-issuedDate="{ value }">
-                            {{ new Date(value).toLocaleDateString('en-GB') }}
-                        </template>
-                        <template #actions="{ item }">
-                            <div class="flex items-center justify-end gap-3">
-                                <button @click.stop="handleEdit(item.id)" class="text-blue-400 hover:text-blue-300" title="Edit">
-                                    <PencilSquareIcon class="h-5 w-5" />
-                                </button>
-                                <button @click.stop="handleDelete(item.id, item.planName)" class="text-red-400 hover:text-red-300" title="Delete">
-                                    <TrashIcon class="h-5 w-5" />
-                                </button>
-                            </div>
-                        </template>
-                    </UiDataTable>
+                <div class="flex-grow flex flex-col min-h-0">
+                    <div class="flex-grow overflow-y-auto">
+                        <UiDataTable
+                            :columns="columns"
+                            :data="paginatedUrbanPlans"
+                            :selected-id="selectedUrbanPlan?.id"
+                            @row-click="handleRowClick"
+                        >
+                            <template #cell-zoningType="{ item }">
+                                <FeaturesUrbanPlansZoningTypeBadge :type="item.zoningType" />
+                            </template>
+                            <template #cell-issuedDate="{ value }">
+                                {{ new Date(value).toLocaleDateString('en-GB') }}
+                            </template>
+                            <template #actions="{ item }">
+                                <div class="flex items-center justify-end gap-3">
+                                    <button @click.stop="handleEdit(item.id)" class="text-blue-400 hover:text-blue-300" title="Edit">
+                                        <PencilSquareIcon class="h-5 w-5" />
+                                    </button>
+                                    <button @click.stop="handleDelete(item.id, item.planName)" class="text-red-400 hover:text-red-300" title="Delete">
+                                        <TrashIcon class="h-5 w-5" />
+                                    </button>
+                                </div>
+                            </template>
+                        </UiDataTable>
+                    </div>
+                    <div v-if="totalPages > 1" class="flex-shrink-0 flex items-center justify-between mt-4">
+                        <span class="text-sm text-gray-400">
+                            Page {{ currentPage }} of {{ totalPages }}
+                        </span>
+                        <div class="flex items-center gap-2">
+                            <button @click="currentPage--" :disabled="currentPage === 1" class="pagination-btn">Previous</button>
+                            <button @click="currentPage++" :disabled="currentPage === totalPages" class="pagination-btn">Next</button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -143,6 +154,9 @@ const highlightedType = ref<string | null>(null)
 const mapRef = ref()
 const mapCenter = ref<[number, number]>([10.7769, 106.7009])
 
+const currentPage = ref(1)
+const itemsPerPage = 5
+
 useAsyncData('districts-for-filter', async () => {
     const response = await $api.districts.getAll()
     const districtData = response.data.data
@@ -174,7 +188,7 @@ const columns: DataTableColumn[] = [
     { key: 'planName', label: 'Plan Name' },
     { key: 'zoningType', label: 'Zoning Type' },
     { key: 'districtName', label: 'District' },
-    { key: 'issuedDate', label: 'Issued' },
+    { key: 'issuedDate', label: 'Issued' }
 ]
 
 const filteredUrbanPlans = computed(() => {
@@ -183,6 +197,17 @@ const filteredUrbanPlans = computed(() => {
     return allUrbanPlans.value.filter(up =>
         up.planName.toLowerCase().includes(lowerCaseQuery)
     )
+})
+
+const totalPages = computed(() => {
+    return Math.ceil(filteredUrbanPlans.value.length / itemsPerPage)
+})
+
+const paginatedUrbanPlans = computed(() => {
+    if (!filteredUrbanPlans.value) return []
+    const start = (currentPage.value - 1) * itemsPerPage
+    const end = start + itemsPerPage
+    return filteredUrbanPlans.value.slice(start, end)
 })
 
 const urbanPlanGeoJson = computed<FeatureCollection | null>(() => {
@@ -247,11 +272,18 @@ async function handleDelete(id: string, name: string) {
             toastSuccess(`Urban Plan has been deleted.`)
             selectedUrbanPlan.value = null
             await refreshUrbanPlans()
+            if (paginatedUrbanPlans.value.length === 0 && currentPage.value > 1) {
+                currentPage.value--
+            }
         } catch (err: any) {
             toastError('Deletion failed', err.data?.message || 'An error occurred.')
         }
     }
 }
+
+watch([searchQuery, selectedDistrictId], () => {
+    currentPage.value = 1
+})
 
 watch(filteredUrbanPlans, (newData) => {
     if (selectedUrbanPlan.value && !newData.some(p => p.id === selectedUrbanPlan.value?.id)) {
@@ -271,3 +303,9 @@ watch(filteredUrbanPlans, (newData) => {
     }
 }, { deep: true })
 </script>
+
+<style scoped>
+.pagination-btn {
+    @apply px-3 py-1 text-sm font-medium text-gray-300 bg-gray-700 rounded-md hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors;
+}
+</style>

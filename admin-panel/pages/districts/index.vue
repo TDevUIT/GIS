@@ -1,5 +1,5 @@
 <template>
-    <div class="space-y-8"> 
+    <div class="space-y-8">
         <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
                 <h1 class="text-2xl font-bold text-white">Districts Management</h1>
@@ -16,43 +16,57 @@
                 </button>
             </div>
         </header>
+
         <div class="space-y-8">
             <div>
                 <div v-if="pending" class="flex items-center justify-center h-64 text-gray-400">Loading...</div>
                 <div v-else-if="error" class="text-red-400">Failed to load districts: {{ error.message }}</div>
-                <UiDataTable
-                    v-else
-                    :columns="columns"
-                    :data="filteredDistricts"
-                    :selected-id="selectedDistrict?.id"
-                    @row-click="handleRowClick"
-                >
-                    <template #cell-areaKm2="{ value }">
-                        {{ value ? `${value.toFixed(2)} km²` : 'N/A' }}
-                    </template>
-                    <template #cell-updatedAt="{ value }">
-                        {{ new Date(value).toLocaleDateString('en-GB') }}
-                    </template>
-                    <template #actions="{ item }">
-                        <div class="flex items-center justify-end gap-3">
-                            <button
-                                @click.stop="handleEdit(item.id)"
-                                class="text-blue-400 hover:text-blue-300 transition-colors"
-                                title="Edit"
-                            >
-                                <PencilSquareIcon class="h-5 w-5" />
-                            </button>
-                            <button
-                                @click.stop="handleDelete(item.id, item.name)"
-                                class="text-red-400 hover:text-red-300 transition-colors"
-                                title="Delete"
-                            >
-                                <TrashIcon class="h-5 w-5" />
-                            </button>
+                <div v-else>
+                    <UiDataTable
+                        :columns="columns"
+                        :data="paginatedDistricts"
+                        :selected-id="selectedDistrict?.id"
+                        @row-click="handleRowClick"
+                    >
+                        <template #cell-areaKm2="{ value }">
+                            {{ value ? `${value.toFixed(2)} km²` : 'N/A' }}
+                        </template>
+                        <template #cell-updatedAt="{ value }">
+                            {{ new Date(value).toLocaleDateString('en-GB') }}
+                        </template>
+                        <template #actions="{ item }">
+                            <div class="flex items-center justify-end gap-3">
+                                <button
+                                    @click.stop="handleEdit(item.id)"
+                                    class="text-blue-400 hover:text-blue-300 transition-colors"
+                                    title="Edit"
+                                >
+                                    <PencilSquareIcon class="h-5 w-5" />
+                                </button>
+                                <button
+                                    @click.stop="handleDelete(item.id, item.name)"
+                                    class="text-red-400 hover:text-red-300 transition-colors"
+                                    title="Delete"
+                                >
+                                    <TrashIcon class="h-5 w-5" />
+                                </button>
+                            </div>
+                        </template>
+                    </UiDataTable>
+
+                    <div v-if="!pending && totalPages > 1" class="flex items-center justify-between pt-4">
+                        <span class="text-sm text-gray-400">
+                            Showing {{ (currentPage - 1) * itemsPerPage + 1 }} to {{ Math.min(currentPage * itemsPerPage, filteredDistricts.length) }} of {{ filteredDistricts.length }} results
+                        </span>
+                        <div class="flex items-center gap-2">
+                            <button @click="currentPage--" :disabled="currentPage === 1" class="pagination-btn">Previous</button>
+                            <span class="text-sm text-gray-400">Page {{ currentPage }} of {{ totalPages }}</span>
+                            <button @click="currentPage++" :disabled="currentPage === totalPages" class="pagination-btn">Next</button>
                         </div>
-                    </template>
-                </UiDataTable>
+                    </div>
+                </div>
             </div>
+
             <div>
                 <h2 class="text-xl font-semibold text-white mb-4">Districts Map</h2>
                 <ClientOnly>
@@ -98,6 +112,9 @@ const searchQuery = ref('');
 const mapRef = ref();
 const mapCenter = ref<[number, number]>([10.7769, 106.7009]);
 
+const currentPage = ref(1);
+const itemsPerPage = 5;
+
 const { pending, error, refresh: refreshDistricts } = useAsyncData('districts-list', async () => {
     const response = await $api.districts.getAll();
     const data = response.data.data || [];
@@ -118,20 +135,31 @@ const columns: DataTableColumn[] = [
 const filteredDistricts = computed(() => {
     if (!searchQuery.value) return allDistricts.value;
     const lowerCaseQuery = searchQuery.value.toLowerCase();
-    return allDistricts.value.filter((d) => 
-        d.name.toLowerCase().includes(lowerCaseQuery) || 
+    return allDistricts.value.filter((d) =>
+        d.name.toLowerCase().includes(lowerCaseQuery) ||
         d.code.toLowerCase().includes(lowerCaseQuery)
     );
+});
+
+const totalPages = computed(() => {
+    return Math.ceil(filteredDistricts.value.length / itemsPerPage);
+});
+
+const paginatedDistricts = computed(() => {
+    if (!filteredDistricts.value) return [];
+    const start = (currentPage.value - 1) * itemsPerPage;
+    const end = start + itemsPerPage;
+    return filteredDistricts.value.slice(start, end);
 });
 
 const districtsGeoJson = computed<FeatureCollection | null>(() => {
     if (!filteredDistricts.value) return null;
     return {
-        type: "FeatureCollection",
+        type: 'FeatureCollection',
         features: filteredDistricts.value
             .filter(d => d.geom)
             .map(d => ({
-                type: "Feature",
+                type: 'Feature',
                 properties: { ...d },
                 geometry: d.geom as any,
             })),
@@ -196,11 +224,18 @@ async function handleDelete(id: string, name: string) {
                 selectedDistrict.value = null;
             }
             await refreshDistricts();
+            if (paginatedDistricts.value.length === 0 && currentPage.value > 1) {
+                currentPage.value--;
+            }
         } catch (err: any) {
             toastError('Deletion failed', err.data?.message || 'An error occurred.');
         }
     }
 }
+
+watch(searchQuery, () => {
+    currentPage.value = 1;
+});
 
 watch(filteredDistricts, (newDistricts) => {
     if (selectedDistrict.value && !newDistricts.some(d => d.id === selectedDistrict.value?.id)) {
@@ -219,3 +254,9 @@ watch(filteredDistricts, (newDistricts) => {
     }
 }, { deep: true });
 </script>
+
+<style scoped>
+.pagination-btn {
+    @apply px-3 py-1 text-sm font-medium text-gray-300 bg-gray-700 rounded-md hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors;
+}
+</style>
