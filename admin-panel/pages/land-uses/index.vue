@@ -15,39 +15,59 @@
         </header>
 
         <div class="flex-grow grid grid-cols-1 xl:grid-cols-3 gap-8 min-h-0">
-            <div class="xl:col-span-1 flex flex-col gap-4">
+            <div class="xl-col-span-1 flex flex-col gap-4">
                 <div class="flex flex-col sm:flex-row gap-4">
                     <div class="flex-grow">
-                        <label class="block text-xs font-medium text-gray-400 mb-1">Search</label>
-                        <UiSearchInput v-model="searchQuery" placeholder="Search by type..." />
+                        <label class="block text-xs font-medium text-gray-400 mb-1">Search by Type/District</label>
+                        <UiSearchInput v-model="searchQuery" placeholder="Search..." />
+                    </div>
+                    <div class="flex-grow">
+                        <label class="block text-xs font-medium text-gray-400 mb-1">Filter by District</label>
+                        <UiAppDropdown
+                            v-if="districtOptions.length > 0"
+                            v-model="selectedDistrictId"
+                            :options="districtOptions"
+                            placeholder="All Districts"
+                            class="w-full"
+                        />
                     </div>
                 </div>
-                <div class="flex-grow overflow-y-auto">
-                    <UiDataTable
-                        :columns="columns"
-                        :data="filteredLandUses"
-                        :selected-id="selectedLandUse?.id"
-                        @row-click="handleRowClick"
-                    >
-                        <template #cell-type="{ item }">
-                            <FeaturesLandUsesLandUseTypeBadge :type="item.type" />
-                        </template>
-                        <template #cell-areaKm2="{ value }">
-                            {{ value.toFixed(2) }} km²
-                        </template>
-                        <template #actions="{ item }">
-                            <div class="flex items-center justify-end gap-3">
-                                <button @click.stop="handleEdit(item.id)" class="text-blue-400 hover:text-blue-300" title="Edit">
-                                    <PencilSquareIcon class="h-5 w-5" />
-                                </button>
-                                <button @click.stop="handleDelete(item.id, item.type)" class="text-red-400 hover:text-red-300" title="Delete">
-                                    <TrashIcon class="h-5 w-5" />
-                                </button>
-                            </div>
-                        </template>
-                    </UiDataTable>
+                <div class="flex-grow flex flex-col min-h-0">
+                    <div class="flex-grow overflow-y-auto">
+                        <UiDataTable
+                            :columns="columns"
+                            :data="paginatedLandUses"
+                            :selected-id="selectedLandUse?.id"
+                            @row-click="handleRowClick"
+                        >
+                            <template #cell-type="{ item }">
+                                <FeaturesLandUsesLandUseTypeBadge :type="item.type" />
+                            </template>
+                            <template #cell-areaKm2="{ value }">
+                                {{ value.toFixed(2) }} km²
+                            </template>
+                            <template #actions="{ item }">
+                                <div class="flex items-center justify-end gap-3">
+                                    <button @click.stop="handleEdit(item.id)" class="text-blue-400 hover:text-blue-300" title="Edit">
+                                        <PencilSquareIcon class="h-5 w-5" />
+                                    </button>
+                                    <button @click.stop="handleDelete(item.id, item.type)" class="text-red-400 hover:text-red-300" title="Delete">
+                                        <TrashIcon class="h-5 w-5" />
+                                    </button>
+                                </div>
+                            </template>
+                        </UiDataTable>
+                    </div>
+                    <div v-if="totalPages > 1" class="flex-shrink-0 flex items-center justify-between mt-4">
+                        <span class="text-sm text-gray-400">Page {{ currentPage }} of {{ totalPages }}</span>
+                        <div class="flex items-center gap-2">
+                            <button @click="currentPage--" :disabled="currentPage === 1" class="pagination-btn">Previous</button>
+                            <button @click="currentPage++" :disabled="currentPage === totalPages" class="pagination-btn">Next</button>
+                        </div>
+                    </div>
                 </div>
             </div>
+
             <div class="xl:col-span-2 flex flex-col gap-8">
                 <div class="relative h-[40vh] xl:h-auto xl:flex-grow">
                     <ClientOnly>
@@ -72,6 +92,7 @@
                         </template>
                     </ClientOnly>
                 </div>
+
                 <div class="h-[40vh] xl:h-auto xl:flex-grow">
                     <UiDataDetailView title="Land Use Details" :item="selectedLandUse" @close="selectedLandUse = null">
                         <template #default="{ item }">
@@ -113,13 +134,13 @@ import type { FeatureCollection } from 'geojson'
 const { LGeoJson } = await import('@vue-leaflet/vue-leaflet')
 
 interface LandUseListItem {
-    id: string;
-    type: string;
-    areaKm2: number;
-    year: number;
-    districtId: string;
-    districtName: string;
-    geom: string;
+    id: string
+    type: string
+    areaKm2: number
+    year: number
+    districtId: string
+    districtName: string
+    geom: string
 }
 
 useHead({ title: 'Land Use Management' })
@@ -128,7 +149,6 @@ const { $api } = useNuxtApp()
 const router = useRouter()
 const { confirmDelete, toastSuccess, toastError } = useSwal()
 
-// Search and filter state
 const searchQuery = ref('')
 const selectedDistrictId = ref('')
 const districtOptions = ref<{ label: string; value: string }[]>([])
@@ -138,7 +158,9 @@ const highlightedType = ref<string | null>(null)
 const mapRef = ref()
 const mapCenter = ref<[number, number]>([10.7769, 106.7009])
 
-// Load districts for filter dropdown
+const currentPage = ref(1)
+const itemsPerPage = 5
+
 useAsyncData('districts-for-filter', async () => {
     const response = await $api.districts.getAll()
     const districtData = response.data.data
@@ -151,16 +173,14 @@ useAsyncData('districts-for-filter', async () => {
     return districtData
 })
 
-// Load land uses with district filter
 const { refresh: refreshLandUses } = useAsyncData(
     'land-uses-list',
     async () => {
         const params = {
-            districtId: selectedDistrictId.value || undefined,
+            districtId: selectedDistrictId.value || undefined
         }
         const response = await $api.landUses.getAll(params)
         allLandUses.value = response.data.data || []
-        // Reset selected item if it's no longer in the filtered results
         if (
             selectedLandUse.value &&
             !allLandUses.value.some(lu => lu.id === selectedLandUse.value?.id)
@@ -176,19 +196,25 @@ const columns: DataTableColumn[] = [
     { key: 'type', label: 'Type' },
     { key: 'districtName', label: 'District' },
     { key: 'year', label: 'Year' },
-    { key: 'areaKm2', label: 'Area' },
+    { key: 'areaKm2', label: 'Area' }
 ]
 
-// Combined search and filter logic
 const filteredLandUses = computed(() => {
-    if (!searchQuery.value) {
-        return allLandUses.value
-    }
+    if (!searchQuery.value) return allLandUses.value
     const lowerCaseQuery = searchQuery.value.toLowerCase()
-    return allLandUses.value.filter(lu => 
+    return allLandUses.value.filter(lu =>
         lu.type.toLowerCase().includes(lowerCaseQuery) ||
         lu.districtName.toLowerCase().includes(lowerCaseQuery)
     )
+})
+
+const totalPages = computed(() => Math.ceil(filteredLandUses.value.length / itemsPerPage))
+
+const paginatedLandUses = computed(() => {
+    if (!filteredLandUses.value) return []
+    const start = (currentPage.value - 1) * itemsPerPage
+    const end = start + itemsPerPage
+    return filteredLandUses.value.slice(start, end)
 })
 
 const landUseGeoJson = computed<FeatureCollection | null>(() => {
@@ -222,8 +248,8 @@ function handleRowClick(landUse: LandUseListItem) {
 }
 
 function onPolygonClick(event: any) {
-    const properties = event.layer.feature.properties;
-    const landUse = filteredLandUses.value.find(lu => lu.id === properties.id);
+    const properties = event.layer.feature.properties
+    const landUse = filteredLandUses.value.find(lu => lu.id === properties.id)
     if (landUse) {
         handleRowClick(landUse)
     }
@@ -232,7 +258,6 @@ function onPolygonClick(event: any) {
 function viewOnMap(landUse: LandUseListItem) {
     const mapInstance = mapRef.value?.mapObject
     if (!landUse.geom || !mapInstance) return
-
     const geoJsonLayer = L.geoJSON(JSON.parse(landUse.geom) as any)
     const bounds = geoJsonLayer.getBounds()
     if (bounds.isValid()) {
@@ -241,28 +266,34 @@ function viewOnMap(landUse: LandUseListItem) {
 }
 
 function handleAdd() {
-    router.push('/land-uses/create');
+    router.push('/land-uses/create')
 }
 
 function handleEdit(id: string) {
-    router.push(`/land-uses/${id}`);
+    router.push(`/land-uses/${id}`)
 }
 
 async function handleDelete(id: string, type: string) {
-    const result = await confirmDelete(`land use of type "${type}"`);
+    const result = await confirmDelete(`land use of type "${type}"`)
     if (result.isConfirmed) {
         try {
-            await $api.landUses.remove(id);
-            toastSuccess(`Land Use has been deleted.`);
+            await $api.landUses.remove(id)
+            toastSuccess(`Land Use has been deleted.`)
             selectedLandUse.value = null
-            await refreshLandUses();
+            await refreshLandUses()
+            if (paginatedLandUses.value.length === 0 && currentPage.value > 1) {
+                currentPage.value--
+            }
         } catch (err: any) {
-            toastError('Deletion failed', err.data?.message || 'An error occurred.');
+            toastError('Deletion failed', err.data?.message || 'An error occurred.')
         }
     }
 }
 
-// Auto-fit map bounds when filtered data changes
+watch([searchQuery, selectedDistrictId], () => {
+    currentPage.value = 1
+})
+
 watch(filteredLandUses, (newData) => {
     if (newData.length > 0 && landUseGeoJson.value) {
         const mapInstance = mapRef.value?.mapObject
@@ -273,5 +304,11 @@ watch(filteredLandUses, (newData) => {
             mapInstance.flyToBounds(bounds, { padding: [20, 20] })
         }
     }
-}, { deep: true });
+}, { deep: true })
 </script>
+
+<style scoped>
+.pagination-btn {
+    @apply px-3 py-1 text-sm font-medium text-gray-300 bg-gray-700 rounded-md hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors;
+}
+</style>

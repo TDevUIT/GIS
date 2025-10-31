@@ -40,8 +40,8 @@ export class AccidentsProcessor extends WorkerHost {
     switch (job.name) {
       case 'simulate-traffic-volume':
         return this.handleSimulateTrafficVolume(job);
-      case 'simulate-daily-accidents':
-        return this.handleSimulateDailyAccidents(job);
+      case 'simulate-random-accidents':
+        return this.handleSimulateRandomAccidents(job);
       default:
         throw new Error(`Unknown job name: ${job.name}`);
     }
@@ -58,7 +58,8 @@ export class AccidentsProcessor extends WorkerHost {
         return;
       }
       const currentHour = new Date().getHours();
-      let updatedCount = 0;
+      const updatePayloads: { id: string; trafficVolume: number }[] = [];
+
       for (const route of allRoutes) {
         let roadTypeMultiplier = 1.0;
         const roadNameLower = route.roadName.toLowerCase();
@@ -90,21 +91,29 @@ export class AccidentsProcessor extends WorkerHost {
         const adjustedBaseVolume = baseVolume * roadTypeMultiplier;
         const randomFactor = 0.8 + Math.random() * 0.4;
         const newTrafficVolume = Math.round(adjustedBaseVolume * randomFactor);
-        await this.patchToGis(`/traffics/${route.id}`, {
-          trafficVolume: newTrafficVolume,
-        });
-        updatedCount++;
+
+        updatePayloads.push({ id: route.id, trafficVolume: newTrafficVolume });
       }
-      this.logger.log(
-        `--- [${job.name}] Finished Job. Updated ${updatedCount} routes. ---`,
-      );
+
+      if (updatePayloads.length > 0) {
+        await this.patchToGis('/traffics/bulk-update', {
+          updates: updatePayloads,
+        });
+        this.logger.log(
+          `--- [${job.name}] Finished Job. Sent bulk update for ${updatePayloads.length} routes. ---`,
+        );
+      } else {
+        this.logger.log(
+          `--- [${job.name}] Finished Job. No routes to update. ---`,
+        );
+      }
     } catch (error) {
       this.logger.error(`[${job.name}] Failed to run job`, error.stack);
       throw error;
     }
   }
 
-  private async handleSimulateDailyAccidents(job: Job<unknown, any, string>) {
+  private async handleSimulateRandomAccidents(job: Job<unknown, any, string>) {
     this.logger.log(`--- [${job.name}] Starting Job ---`);
     try {
       const allRoutes = await this.fetchFromGis<TrafficRoute[]>('/traffics');
@@ -122,13 +131,18 @@ export class AccidentsProcessor extends WorkerHost {
           if (Math.random() < accidentProbability) {
             const severity = this.getRandomSeverity();
             const casualties = this.getCasualtiesBasedOnSeverity(severity);
+            const uniqueId = Date.now();
+
             const newAccident = {
               trafficId: route.id,
               accidentDate: new Date().toISOString(),
-              severity: severity,
-              casualties: casualties,
+              severity,
+              casualties,
+              sourceUrl: `egis:simulation:accident:${uniqueId}`,
             };
+
             await this.postToGis('/accidents', newAccident);
+
             this.logger.warn(
               `>>> Simulated a ${severity} accident on route: "${route.roadName}" (ID: ${route.id})`,
             );

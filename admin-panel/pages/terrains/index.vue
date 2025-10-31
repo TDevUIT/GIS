@@ -1,6 +1,5 @@
 <template>
     <div class="h-full flex flex-col">
-        <!-- Header -->
         <header class="flex-shrink-0 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
             <div>
                 <h1 class="text-2xl font-bold text-white">Terrain Analysis</h1>
@@ -15,7 +14,6 @@
             </button>
         </header>
 
-        <!-- Top Summary Cards -->
         <div class="flex-shrink-0 grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
             <div class="bg-gray-800/50 p-4 rounded-lg flex flex-col">
                 <h3 class="text-lg font-semibold text-white mb-3 flex-shrink-0">Terrain Summary by District</h3>
@@ -30,16 +28,12 @@
             </div>
         </div>
 
-        <!-- Main Content: Refactored to match Urban Plan layout -->
         <div class="flex-grow grid grid-cols-1 xl:grid-cols-5 gap-6 min-h-0">
-            
-            <!-- Left Column: Data Table -->
             <div class="xl:col-span-2 flex flex-col min-h-0 bg-gray-800/50 p-4 rounded-lg">
                 <div class="flex-shrink-0 flex items-center justify-between mb-4">
                     <h3 class="text-lg font-semibold text-white">All Terrain Areas</h3>
                     <UiSearchInput v-model="searchQuery" placeholder="Search by soil type..." />
                 </div>
-                
                 <div class="flex-grow overflow-y-auto pr-2">
                     <UiDataTable
                         :columns="dataColumns"
@@ -67,7 +61,6 @@
                         </template>
                     </UiDataTable>
                 </div>
-                
                 <div
                     v-if="totalPages > 1"
                     class="flex-shrink-0 flex items-center justify-between pt-4 mt-2 border-t border-gray-700"
@@ -78,7 +71,6 @@
                 </div>
             </div>
 
-            <!-- Right Column: Map and Details -->
             <div class="xl:col-span-3 flex flex-col gap-6 min-h-0">
                 <div class="relative flex-grow rounded-lg overflow-hidden">
                     <ClientOnly>
@@ -297,7 +289,13 @@ async function handleDelete(id: string, districtName: string) {
         try {
             await $api.terrains.remove(id);
             toastSuccess('Terrain area has been deleted.');
+            if (selectedTerrain.value?.id === id) {
+                selectedTerrain.value = null;
+            }
             await refreshAllData();
+            if (paginatedData.value.length === 0 && currentPage.value > 1) {
+                currentPage.value--;
+            }
         } catch (err: any) {
             toastError('Deletion failed', err.data?.message || 'An error occurred.');
         }

@@ -20,6 +20,7 @@ import { CreateTrafficDto } from './dto/create-traffic.dto';
 import { UpdateTrafficDto } from './dto/update-traffic.dto';
 import { FindTrafficsQueryDto, IntersectsWktDto } from './dto/query.dto';
 import { FindByLocationDto } from './dto/find-by-location.dto';
+import { BulkUpdateTrafficDto } from './dto/bulk-update-traffic.dto';
 
 @ApiTags('traffics')
 @Controller('traffics')
@@ -57,6 +58,14 @@ export class TrafficsController {
     return this.trafficsService.findAll(query);
   }
 
+  @ApiOperation({ summary: 'Find nearest traffic route by location' })
+  @ApiResponse({ status: 200, description: 'Nearest traffic route found' })
+  @ApiResponse({ status: 404, description: 'No route found nearby' })
+  @Get('find-by-location')
+  findNearest(@Query() query: FindByLocationDto) {
+    return this.trafficsService.findNearest(query.lng, query.lat);
+  }
+
   @ApiOperation({ summary: 'Get a traffic record by ID' })
   @ApiParam({ name: 'id', description: 'Traffic record ID' })
   @ApiResponse({ status: 200, description: 'Traffic record found' })
@@ -64,6 +73,20 @@ export class TrafficsController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.trafficsService.findOne(id);
+  }
+
+  @ApiOperation({ summary: 'Bulk update traffic volumes for simulation' })
+  @ApiResponse({
+    status: 200,
+    description: 'Traffic volumes updated successfully',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad request due to invalid payload',
+  })
+  @Patch('bulk-update')
+  bulkUpdate(@Body() bulkUpdateTrafficDto: BulkUpdateTrafficDto) {
+    return this.trafficsService.bulkUpdate(bulkUpdateTrafficDto.updates);
   }
 
   @ApiOperation({ summary: 'Update a traffic record' })
@@ -88,13 +111,5 @@ export class TrafficsController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.trafficsService.remove(id);
-  }
-
-  @ApiOperation({ summary: 'Find nearest traffic route by location' })
-  @ApiResponse({ status: 200, description: 'Nearest traffic route found' })
-  @ApiResponse({ status: 404, description: 'No route found nearby' })
-  @Get('find-by-location')
-  findNearest(@Query() query: FindByLocationDto) {
-    return this.trafficsService.findNearest(query.lng, query.lat);
   }
 }

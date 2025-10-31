@@ -31,7 +31,7 @@ export class PublicTransportsScheduler implements OnApplicationBootstrap {
       'simulate-network-expansion',
       {},
       {
-        repeat: { pattern: '*/60 * * * *' },
+        repeat: { pattern: '*/30 * * * *' },
         jobId: 'simulate-network-expansion',
       },
     );

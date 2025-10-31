@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 import {
   Injectable,
@@ -10,6 +12,7 @@ import { UpdateTrafficDto } from './dto/update-traffic.dto';
 import { Prisma } from '@prisma/client';
 import cuid from 'cuid';
 import { FindTrafficsQueryDto } from './dto/query.dto';
+import { UpdateTrafficItemDto } from './dto/update-traffic-item.dto';
 
 @Injectable()
 export class TrafficsService {
@@ -131,5 +134,35 @@ export class TrafficsService {
     throw new NotFoundException(
       `No traffic route found near location (${lng}, ${lat}).`,
     );
+  }
+
+  async bulkUpdate(updates: UpdateTrafficItemDto[]) {
+    if (!updates || updates.length === 0) {
+      throw new BadRequestException('Update data cannot be empty.');
+    }
+
+    const updatePromises = updates.map((item) =>
+      this.prisma.traffic.update({
+        where: { id: item.id },
+        data: { trafficVolume: item.trafficVolume },
+      }),
+    );
+
+    try {
+      const results = await this.prisma.$transaction(updatePromises);
+      return {
+        message: `${results.length} traffic routes updated successfully.`,
+        updatedCount: results.length,
+      };
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2025') {
+          throw new NotFoundException(
+            `One or more traffic IDs provided for update do not exist.`,
+          );
+        }
+      }
+      throw error;
+    }
   }
 }
