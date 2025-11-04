@@ -1,6 +1,6 @@
 import axios, { AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 
-const gisBaseURL = process.env.NEXT_PUBLIC_GIS_SERVER_URL || 'http://localhost:3002/api/v1';
+const gisBaseURL = process.env.NEXT_PUBLIC_GIS_SERVER_URL || 'http://localhost:5000/api/v1';
 
 export const gisApiClient: AxiosInstance = axios.create({
   baseURL: gisBaseURL,
@@ -35,7 +35,20 @@ gisApiClient.interceptors.response.use(
     return response;
   },
   (error) => {
-    console.error('❌ GIS Response Error:', error.response?.status, error.response?.data);
+    // Better error logging
+    if (error.response) {
+      // Server responded with error status
+      console.error('❌ GIS Response Error:', error.response.status, error.response.config.url);
+      console.error('Error data:', error.response.data);
+    } else if (error.request) {
+      // Request was made but no response
+      console.error('❌ GIS Network Error: No response received');
+      console.error('Request:', error.request);
+      console.error('GIS Base URL:', gisBaseURL);
+    } else {
+      // Error in request setup
+      console.error('❌ GIS Request Setup Error:', error.message);
+    }
 
     if (error.response?.status === 401) {
       if (typeof window !== 'undefined') {

@@ -101,8 +101,6 @@ export const queryKeys = {
   analytics: {
     all: ['analytics'] as const,
     summary: () => [...queryKeys.analytics.all, 'summary'] as const,
-    trafficStats: (dateRange?: string) => [...queryKeys.analytics.all, 'traffic', dateRange] as const,
-    airQualityStats: (dateRange?: string) => [...queryKeys.analytics.all, 'airQuality', dateRange] as const,
   },
 
   gis: {

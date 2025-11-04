@@ -21,10 +21,17 @@ const handleError = (error: any): Error => {
 export const apiGet = async <T = any>(endpoint: string): Promise<ApiResponse<T>> => {
   try {
     const response: AxiosResponse<any> = await apiClient.get(endpoint);
+    
+    console.log('📦 Raw API response for', endpoint, ':', response.data);
+    console.log('📦 Has nested data?', !!response.data?.data);
+    
     // Check if server returns nested structure: { data: { data: [...] } }
     if (response.data?.data && typeof response.data.data === 'object') {
+      console.log('📦 Returning nested data:', response.data.data);
       return response.data.data;
     }
+    
+    console.log('📦 Returning response.data:', response.data);
     return response.data;
   } catch (error) {
     throw handleError(error);
