@@ -74,15 +74,6 @@ export const FEATURE_CATEGORIES: FeatureCategory[] = [
         service: 'findIntersectingTraffics',
       },
       {
-        id: 'traffic-stats',
-        name: 'Traffic Statistics',
-        description: 'View traffic analytics and trends',
-        icon: TrendingUp,
-        color: 'blue',
-        badge: 'Analytics',
-        service: 'getTrafficStats',
-      },
-      {
         id: 'traffic-risk',
         name: 'Risk Assessment',
         description: 'Analyze traffic risk areas',

@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { GeoJSON, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { useDistricts } from '@/hooks/api/useDistrictsQuery';
-import { useGisDistricts } from '@/hooks/api/useGisDistrictsQuery';
 import { DistrictGeoJSON } from '@/types';
 import { convertDistrictToGeoJSON } from '@/utils/geoHelpers';
 import { Loader2, AlertCircle } from 'lucide-react';
@@ -25,41 +24,38 @@ export default function DistrictMap({
   const [geoJsonData, setGeoJsonData] = useState<DistrictGeoJSON[]>([]);
 
   const { data: districtsData, isLoading: districtsLoading, error: districtsError } = useDistricts();
-  const { data: gisDistrictsData, isLoading: gisLoading, error: gisError } = useGisDistricts();
 
   useEffect(() => {
-    if (gisDistrictsData?.data && districtsData?.data) {
+    const payload = (districtsData as any)?.data ?? districtsData;
+    if (payload) {
       try {
-        const gisDistricts = Array.isArray(gisDistrictsData.data) ? gisDistrictsData.data : [gisDistrictsData.data];
-        const districts = Array.isArray(districtsData.data) ? districtsData.data : [districtsData.data];
+        console.log('📍 Districts raw data:', payload);
+        
+        const districts = Array.isArray(payload) ? payload : [payload];
+        console.log('📍 Districts array:', districts);
 
-        const geoJson: DistrictGeoJSON[] = gisDistricts
-          .filter((gisDistrict: any) => gisDistrict && (gisDistrict.geom || gisDistrict.geometry))
-          .map((gisDistrict: any) => {
-            const districtInfo = districts.find((d: any) => d.code === gisDistrict.code);
-            return convertDistrictToGeoJSON({ ...gisDistrict, ...districtInfo });
+        const geoJson: DistrictGeoJSON[] = districts
+          .filter((district: any) => {
+            const hasGeom = district && (district.geom || district.geometry);
+            if (!hasGeom) {
+              console.warn('⚠️ District without geom:', district?.name);
+            }
+            return hasGeom;
+          })
+          .map((district: any) => {
+            const converted = convertDistrictToGeoJSON(district);
+            console.log('✅ Converted district:', district.name, converted);
+            return converted;
           });
 
+        console.log('📍 Total GeoJSON features:', geoJson.length);
         setGeoJsonData(geoJson);
       } catch (error) {
-        console.error('Error converting district data:', error);
-        setGeoJsonData([]);
-      }
-    } else if (gisDistrictsData?.data) {
-      try {
-        const gisDistricts = Array.isArray(gisDistrictsData.data) ? gisDistrictsData.data : [gisDistrictsData.data];
-
-        const geoJson = gisDistricts
-          .filter((gisDistrict: any) => gisDistrict && (gisDistrict.geom || gisDistrict.geometry))
-          .map(convertDistrictToGeoJSON);
-        
-        setGeoJsonData(geoJson);
-      } catch (error) {
-        console.error('Error converting district data:', error);
+        console.error('❌ Error converting district data:', error);
         setGeoJsonData([]);
       }
     }
-  }, [districtsData, gisDistrictsData]);
+  }, [districtsData]);
 
   useEffect(() => {
     if (geoJsonData.length > 0 && map) {
@@ -134,9 +130,7 @@ export default function DistrictMap({
     }
   };
 
-  const isLoading = districtsLoading || gisLoading;
-
-  if (isLoading) {
+  if (districtsLoading) {
     return (
       <div className="absolute top-20 left-1/2 -translate-x-1/2 z-[1000] bg-white/95 backdrop-blur-md px-6 py-3 rounded-lg shadow-lg border border-blue-200">
         <div className="flex items-center gap-3 text-blue-600">
@@ -147,7 +141,7 @@ export default function DistrictMap({
     );
   }
 
-  if (districtsError || gisError) {
+  if (districtsError) {
     return (
       <div className="absolute top-20 left-1/2 -translate-x-1/2 z-[1000] bg-white/95 backdrop-blur-md px-6 py-4 rounded-lg shadow-lg border border-red-200 max-w-md">
         <div className="flex items-start gap-3">
@@ -155,13 +149,15 @@ export default function DistrictMap({
           <div>
             <h3 className="font-semibold text-red-700 mb-1">Lỗi tải dữ liệu</h3>
             <p className="text-sm text-red-600">
-              {districtsError?.message || gisError?.message || 'Không thể tải dữ liệu quận/huyện từ server'}
+              {(districtsError as any)?.message || 'Không thể tải dữ liệu quận/huyện từ server'}
             </p>
           </div>
         </div>
       </div>
     );
   }
+
+  console.log('📍 Rendering', geoJsonData.length, 'districts on map');
 
   return (
     <>

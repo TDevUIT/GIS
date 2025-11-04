@@ -117,15 +117,3 @@ export const getFloodProneAreas = async (elevationThreshold?: number): Promise<A
 export const getSoilTypeDistribution = async (): Promise<ApiResponse> => {
   return apiGet('/analytics/soil-type-distribution');
 };
-
-// GET traffic stats
-export const getTrafficStats = async (dateRange?: string): Promise<ApiResponse> => {
-  const params = dateRange ? `?dateRange=${dateRange}` : '';
-  return apiGet(`/analytics/traffic-stats${params}`);
-};
-
-// GET air quality stats
-export const getAirQualityStats = async (dateRange?: string): Promise<ApiResponse> => {
-  const params = dateRange ? `?dateRange=${dateRange}` : '';
-  return apiGet(`/analytics/air-quality-stats${params}`);
-};

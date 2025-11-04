@@ -4,8 +4,13 @@ export function convertDistrictToGeoJSON(district: any): DistrictGeoJSON {
   // Handle different possible geometry field names
   let geometry = district.geometry || district.geom || district.boundaries;
   
-  // If no valid geometry, return a placeholder
-  if (!geometry || !geometry.type || !geometry.coordinates) {
+  console.log('🔄 Converting district:', district.name, 'geom type:', typeof geometry, geometry);
+  
+  // If geometry is already an object with type and coordinates, use it
+  if (geometry && typeof geometry === 'object' && geometry.type && geometry.coordinates) {
+    console.log('✅ Geometry is valid GeoJSON');
+  } else {
+    console.error('❌ Invalid geometry for district:', district.name);
     geometry = {
       type: 'Polygon',
       coordinates: [[]],
