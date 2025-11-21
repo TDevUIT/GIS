@@ -29,28 +29,26 @@ export const useAuthStore = create<AuthState>()(
       isAuthenticated: false,
 
       login: (user: User, token: string) => {
-        console.log('🔐 Auth Store: User logged in', user.email);
         set({
           user,
           token,
           isAuthenticated: true,
           isLoading: false,
         });
-        
+
         if (typeof window !== 'undefined') {
           localStorage.setItem('access_token', token);
         }
       },
 
       logout: () => {
-        console.log('🚪 Auth Store: User logged out');
         set({
           user: null,
           token: null,
           isAuthenticated: false,
           isLoading: false,
         });
-        
+
         if (typeof window !== 'undefined') {
           localStorage.removeItem('access_token');
         }
@@ -63,7 +61,6 @@ export const useAuthStore = create<AuthState>()(
       updateUser: (userData: Partial<User>) => {
         const currentUser = get().user;
         if (currentUser) {
-          console.log('👤 Auth Store: User updated', userData);
           set({
             user: { ...currentUser, ...userData }
           });
