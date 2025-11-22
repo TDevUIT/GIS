@@ -45,9 +45,7 @@ export const useUIStore = create<UIState>((set, get) => ({
   addNotification: (notification) => {
     const id = Math.random().toString(36).substr(2, 9);
     const newNotification = { ...notification, id };
-    
-    console.log('🔔 UI Store: Notification added', newNotification.type, newNotification.title);
-    
+
     set((state) => ({
       notifications: [...state.notifications, newNotification]
     }));
@@ -59,24 +57,20 @@ export const useUIStore = create<UIState>((set, get) => ({
   },
 
   removeNotification: (id) => {
-    console.log('🗑️ UI Store: Notification removed', id);
     set((state) => ({
       notifications: state.notifications.filter(n => n.id !== id)
     }));
   },
 
   clearNotifications: () => {
-    console.log('🧹 UI Store: All notifications cleared');
     set({ notifications: [] });
   },
 
   setGlobalLoading: (loading) => {
-    console.log('⏳ UI Store: Global loading set to', loading);
     set({ globalLoading: loading });
   },
 
   setLoading: (key, loading) => {
-    console.log(`⏳ UI Store: Loading state for ${key} set to`, loading);
     set((state) => ({
       loadingStates: {
         ...state.loadingStates,
@@ -86,7 +80,6 @@ export const useUIStore = create<UIState>((set, get) => ({
   },
 
   openModal: (modalId) => {
-    console.log('🪟 UI Store: Modal opened', modalId);
     set((state) => ({
       modals: {
         ...state.modals,
@@ -96,7 +89,6 @@ export const useUIStore = create<UIState>((set, get) => ({
   },
 
   closeModal: (modalId) => {
-    console.log('❌ UI Store: Modal closed', modalId);
     set((state) => ({
       modals: {
         ...state.modals,
@@ -107,7 +99,6 @@ export const useUIStore = create<UIState>((set, get) => ({
 
   toggleModal: (modalId) => {
     const isOpen = get().modals[modalId];
-    console.log('🔄 UI Store: Modal toggled', modalId, !isOpen);
     set((state) => ({
       modals: {
         ...state.modals,
@@ -117,13 +108,11 @@ export const useUIStore = create<UIState>((set, get) => ({
   },
 
   setTheme: (theme) => {
-    console.log('🎨 UI Store: Theme changed to', theme);
     set({ theme });
   },
 
   toggleSidebar: () => {
     const collapsed = get().sidebarCollapsed;
-    console.log('📋 UI Store: Sidebar toggled to', !collapsed ? 'collapsed' : 'expanded');
     set({ sidebarCollapsed: !collapsed });
   },
 }));

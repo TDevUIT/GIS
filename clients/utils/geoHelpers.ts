@@ -3,20 +3,17 @@ import { DistrictGeoJSON, WardGeoJSON } from '@/types';
 export function convertDistrictToGeoJSON(district: any): DistrictGeoJSON {
   // Handle different possible geometry field names
   let geometry = district.geometry || district.geom || district.boundaries;
-  
-  console.log('🔄 Converting district:', district.name, 'geom type:', typeof geometry, geometry);
-  
+
   // If geometry is already an object with type and coordinates, use it
   if (geometry && typeof geometry === 'object' && geometry.type && geometry.coordinates) {
-    console.log('✅ Geometry is valid GeoJSON');
+    // Geometry is valid
   } else {
-    console.error('❌ Invalid geometry for district:', district.name);
     geometry = {
       type: 'Polygon',
       coordinates: [[]],
     };
   }
-  
+
   return {
     type: 'Feature',
     id: district.id || district.districtId,
@@ -35,7 +32,7 @@ export function convertDistrictToGeoJSON(district: any): DistrictGeoJSON {
 export function convertWardToGeoJSON(ward: any): WardGeoJSON {
   // Handle different possible geometry field names
   let geometry = ward.geometry || ward.geom || ward.boundaries;
-  
+
   // If no valid geometry, return a placeholder
   if (!geometry || !geometry.type || !geometry.coordinates) {
     geometry = {
@@ -43,7 +40,7 @@ export function convertWardToGeoJSON(ward: any): WardGeoJSON {
       coordinates: [[]],
     };
   }
-  
+
   return {
     type: 'Feature',
     id: ward.id || ward.wardId,
