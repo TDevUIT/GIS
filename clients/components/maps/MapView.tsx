@@ -53,7 +53,6 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 })
 
-// Custom icon for current location
 const currentLocationIcon = new L.Icon({
   iconUrl: 'data:image/svg+xml;base64,' + btoa(`
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="32" height="32">
@@ -66,7 +65,6 @@ const currentLocationIcon = new L.Icon({
   popupAnchor: [0, -16],
 })
 
-// Custom icon for search result
 const searchResultIcon = new L.Icon({
   iconUrl: 'data:image/svg+xml;base64,' + btoa(`
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="36" height="36">
@@ -246,11 +244,11 @@ export default function MapView() {
           />
         )}
 
-        {showAccidentsLayer && (
+        {/* {showAccidentsLayer && (
           <AccidentMap
             onAccidentClick={handleAccidentClick}
           />
-        )}
+        )} */}
 
         {showTrafficLayer && (
           <TrafficMap
@@ -308,7 +306,6 @@ export default function MapView() {
           />
         )}
 
-        {/* Current Location Marker */}
         {currentLocation && (
           <Marker
             position={currentLocation}
@@ -324,7 +321,6 @@ export default function MapView() {
           </Marker>
         )}
 
-        {/* Search Result Marker */}
         {searchMarker && searchResult && (
           <Marker position={searchMarker} icon={searchResultIcon}>
             <Popup>
@@ -364,8 +360,7 @@ export default function MapView() {
       <BackButton />
       <MapToolbar />
 
-      {/* Search Bar */}
-      <div 
+      <div
         className="absolute top-6 left-1/2 -translate-x-1/2 w-full max-w-2xl px-6"
         style={{ zIndex: Z_INDEX.SEARCH_BAR }}
       >
@@ -411,7 +406,7 @@ export default function MapView() {
           <MapPin className="w-4 h-4" />
         </button>
 
-        <button
+        {/* <button
           onClick={() => setShowAccidentsLayer(!showAccidentsLayer)}
           className={`pointer-events-auto p-2.5 rounded-lg shadow-md transition-all hover:shadow-lg border ${
             showAccidentsLayer
@@ -421,7 +416,7 @@ export default function MapView() {
           title="Accident Layer"
         >
           <AlertTriangle className="w-4 h-4" />
-        </button>
+        </button> */}
 
         <button
           onClick={() => setShowTrafficLayer(!showTrafficLayer)}
