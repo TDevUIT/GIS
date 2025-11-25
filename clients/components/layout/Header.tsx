@@ -11,7 +11,8 @@ const Header = () => {
     const NavItems = [
         {name: "Trang Chủ", href: ROUTES.HOME, icon: Home},
         {name: "Bản Đồ", href: ROUTES.MAPS.INDEX, icon: Map},
-        {name: "Báo cáo", href: ROUTES.REPORTS.INDEX, icon: BarChart3},
+        {name: "Quận", href: ROUTES.DISTRICTS, icon: Map},
+        {name: "Thống Kê", href: ROUTES.REPORTS.INDEX, icon: BarChart3},
         {name: "Về Chúng Tôi", href: "/about", icon: Info},
     ]
 

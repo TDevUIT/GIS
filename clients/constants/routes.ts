@@ -10,8 +10,9 @@ export const ROUTES = {
     VIEWER: '/maps/viewer',
     ANALYSIS: '/maps/analysis',
     LAYERS: '/maps/layers',
-  },
 
+  },
+  DISTRICTS: '/districts',
   // Incidents Management
   INCIDENTS: {
     INDEX: '/incidents',

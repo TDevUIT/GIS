@@ -23,7 +23,6 @@ export default function DistrictList({
   const [sortBy, setSortBy] = useState<'name' | 'area' | 'density'>('name');
 
   const { data, isLoading, error, refetch } = useDistricts();
-
   const districts = useMemo(() => {
     if (!data?.data) return [];
     return Array.isArray(data.data) ? data.data : [data.data];
