@@ -1,34 +1,16 @@
-// Base API clients
-export * from './common/api';
+// API client
+export * from './common';
 
-// Web Server services
-export * from './airQualityService';
-export * from './trafficService';
-export * from './gisService';
-export * from './reportService';
-export * from './accidentsService';
-export * from './analyticsService';
-export * from './waterQualityService';
-export * from './districtsService';
-export * from './wardsService';
-export * from './infrastructuresService';
-export * from './populationsService';
-export * from './publicTransportsService';
-export * from './terrainsService';
-export * from './landUsesService';
-export * from './urbanPlansService';
+// Domain services
+export * from './environmental';
+export * from './geographic';
+export * from './infrastructure';
+export * from './planning';
+export * from './demographic';
+export * from './terrain';
+export * from './safety';
+export * from './analytics';
 
-// GIS Server services
-export * from './gisAccidentsService';
-export * from './gisAirQualitiesService';
-export * from './gisWaterQualitiesService';
-export * from './gisAnalyticsService';
-export * from './gisDistrictsService';
-export * from './gisWardsService';
-export * from './gisInfrastructuresService';
-export * from './gisPopulationsService';
-export * from './gisPublicTransportsService';
-export * from './gisTerrainsService';
-export * from './gisLandUsesService';
-export * from './gisUrbanPlansService';
-export * from './gisTrafficsService';
+// External & Utility services
+export * from './external';
+export * from './utils';
