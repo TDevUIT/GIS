@@ -5,12 +5,11 @@ import { useMap } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet-draw/dist/leaflet.draw.css'
 import 'leaflet-draw'
-import { 
-  Pencil, 
-  Square, 
-  Circle, 
-  MapPin, 
-  Trash2, 
+import {
+  Square,
+  Circle,
+  MapPin,
+  Trash2,
   Triangle,
   Minus,
   Download,
@@ -80,7 +79,9 @@ export default function DrawingToolbar() {
   const [activeTool, setActiveTool] = useState<string | null>(null)
   const map = useMap()
   const drawnItemsRef = useRef<L.FeatureGroup | null>(null)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const drawControlRef = useRef<any>(null)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const currentDrawHandlerRef = useRef<any>(null)
 
   useEffect(() => {
@@ -92,7 +93,8 @@ export default function DrawingToolbar() {
     drawnItemsRef.current = drawnItems
 
     // Add draw control (hidden by default, we'll use custom toolbar)
-    const drawControl = new L.Control.Draw({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const drawControl = new (L.Control as any).Draw({
       edit: {
         featureGroup: drawnItems,
       },
@@ -108,6 +110,7 @@ export default function DrawingToolbar() {
     drawControlRef.current = drawControl
 
     // Listen for created shapes
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     map.on(L.Draw.Event.CREATED, (e: any) => {
       const layer = e.layer
       drawnItems.addLayer(layer)
@@ -156,10 +159,12 @@ export default function DrawingToolbar() {
       const input = document.createElement('input')
       input.type = 'file'
       input.accept = '.geojson,.json'
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       input.onchange = (e: any) => {
         const file = e.target.files[0]
         if (file) {
           const reader = new FileReader()
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           reader.onload = (event: any) => {
             try {
               const geojson = JSON.parse(event.target.result)
@@ -188,11 +193,13 @@ export default function DrawingToolbar() {
     setActiveTool(tool.id)
 
     // Create new draw handler based on tool type
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let drawHandler: any
 
     switch (tool.type) {
       case 'marker':
-        drawHandler = new L.Draw.Marker(map as any, {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        drawHandler = new (L.Draw as any).Marker(map as any, {
           icon: L.icon({
             iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
             iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
@@ -203,7 +210,8 @@ export default function DrawingToolbar() {
         })
         break
       case 'polyline':
-        drawHandler = new L.Draw.Polyline(map as any, {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        drawHandler = new (L.Draw as any).Polyline(map as any, {
           shapeOptions: {
             color: '#3b82f6',
             weight: 4,
@@ -211,7 +219,8 @@ export default function DrawingToolbar() {
         })
         break
       case 'polygon':
-        drawHandler = new L.Draw.Polygon(map as any, {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        drawHandler = new (L.Draw as any).Polygon(map as any, {
           shapeOptions: {
             color: '#10b981',
             fillOpacity: 0.3,
@@ -219,7 +228,8 @@ export default function DrawingToolbar() {
         })
         break
       case 'rectangle':
-        drawHandler = new L.Draw.Rectangle(map as any, {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        drawHandler = new (L.Draw as any).Rectangle(map as any, {
           shapeOptions: {
             color: '#f59e0b',
             fillOpacity: 0.3,
@@ -227,7 +237,8 @@ export default function DrawingToolbar() {
         })
         break
       case 'circle':
-        drawHandler = new L.Draw.Circle(map as any, {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        drawHandler = new (L.Draw as any).Circle(map as any, {
           shapeOptions: {
             color: '#ef4444',
             fillOpacity: 0.3,
@@ -235,7 +246,8 @@ export default function DrawingToolbar() {
         })
         break
       case 'circlemarker':
-        drawHandler = new L.Draw.CircleMarker(map as any)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        drawHandler = new (L.Draw as any).CircleMarker(map as any)
         break
     }
 
@@ -246,7 +258,7 @@ export default function DrawingToolbar() {
   }
 
   return (
-    <div 
+    <div
       className="absolute bottom-6 left-1/2 transform -translate-x-1/2 pointer-events-none"
       style={{ zIndex: Z_INDEX.DRAWING_TOOLBAR }}
     >
@@ -259,8 +271,8 @@ export default function DrawingToolbar() {
               className={`
                 relative p-3 rounded-xl transition-all duration-200
                 hover:bg-blue-50 hover:shadow-md
-                ${activeTool === tool.id 
-                  ? 'bg-blue-500 text-white shadow-md' 
+                ${activeTool === tool.id
+                  ? 'bg-blue-500 text-white shadow-md'
                   : 'text-gray-700'
                 }
                 ${tool.type === 'delete' ? 'text-red-500 hover:bg-red-50' : ''}
@@ -273,7 +285,7 @@ export default function DrawingToolbar() {
           ))}
         </div>
       </div>
-      
+
       {activeTool && (
         <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 bg-gray-900/90 text-white px-4 py-2 rounded-lg text-sm whitespace-nowrap">
           {drawingTools.find(t => t.id === activeTool)?.label}

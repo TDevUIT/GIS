@@ -13,7 +13,6 @@ import {
   Fuel,
   Loader2,
   Navigation2,
-  Clock,
   Ruler,
 } from 'lucide-react'
 import { geocodingService, GeocodingResult } from '@/services'
@@ -96,6 +95,7 @@ export default function NearestPointSearch({
     if (selectedCategory && currentLocation) {
       searchNearestPoints()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedCategory, currentLocation, searchRadius])
 
   // Cleanup markers on unmount
@@ -114,7 +114,7 @@ export default function NearestPointSearch({
 
     try {
       const [lat, lon] = currentLocation
-      
+
       // Calculate search bounds (rough approximation: 1 degree â‰ˆ 111 km)
       const radiusInDegrees = searchRadius / 111
       const viewbox: [number, number, number, number] = [

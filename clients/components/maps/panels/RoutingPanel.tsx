@@ -143,7 +143,7 @@ export default function RoutingPanel({
       const startMarker = L.marker([startPoint.lat, startPoint.lon], { icon: startIcon })
         .addTo(mapInstance)
         .bindPopup(`<b>Äiá»ƒm báº¯t Ä‘áº§u</b><br>${startPoint.name || 'Äiá»ƒm A'}`)
-      
+
       setMarkers(prev => ({ ...prev, start: startMarker }))
     }
 
@@ -151,7 +151,7 @@ export default function RoutingPanel({
       const endMarker = L.marker([endPoint.lat, endPoint.lon], { icon: endIcon })
         .addTo(mapInstance)
         .bindPopup(`<b>Äiá»ƒm káº¿t thÃºc</b><br>${endPoint.name || 'Äiá»ƒm B'}`)
-      
+
       setMarkers(prev => ({ ...prev, end: endMarker }))
     }
 
@@ -159,7 +159,7 @@ export default function RoutingPanel({
     mapInstance.fitBounds(polyline.getBounds(), { padding: [50, 50] })
   }
 
-  const getRouteColor = (mode: TransportMode): string => {
+  const getRouteColor = (_mode: TransportMode): string => {
     // ÄÆ¡n giáº£n hÃ³a - dÃ¹ng 1 mÃ u cho táº¥t cáº£ phÆ°Æ¡ng tiá»‡n
     return '#1f2937' // gray-800
   }

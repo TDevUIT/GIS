@@ -4,8 +4,7 @@ import { useState } from 'react'
 import { X, Menu, Search } from 'lucide-react'
 import { FEATURE_CATEGORIES, FeatureAction } from '@/constants/featureCategories'
 import { Z_INDEX } from '@/constants/zIndex'
-import FeaturePanel from './FeaturePanel'
-import { cn } from '@/lib/utils'
+import FeaturePanel from '../panels/FeaturePanel'
 
 interface FeatureToolbarProps {
   onFeatureSelect?: (action: FeatureAction) => void
@@ -19,22 +18,22 @@ export default function FeatureToolbar({ onFeatureSelect }: FeatureToolbarProps)
   const handleActionClick = (action: FeatureAction) => {
     setActiveActionId(action.id)
     onFeatureSelect?.(action)
-    
+
     // Show notification (demo purpose)
     console.log('Feature selected:', action.name, '→', action.service)
   }
 
   const filteredCategories = FEATURE_CATEGORIES.filter(category => {
     if (!searchQuery) return true
-    
+
     const matchesCategory = category.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            category.description.toLowerCase().includes(searchQuery.toLowerCase())
-    
+
     const matchesAction = category.actions.some(action =>
       action.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       action.description.toLowerCase().includes(searchQuery.toLowerCase())
     )
-    
+
     return matchesCategory || matchesAction
   })
 
@@ -72,7 +71,7 @@ export default function FeatureToolbar({ onFeatureSelect }: FeatureToolbarProps)
           />
 
           {/* Panel */}
-          <div 
+          <div
             className="fixed right-0 top-0 bottom-0 w-full sm:w-[480px] lg:w-[560px] bg-white shadow-2xl overflow-hidden flex flex-col"
             style={{ zIndex: Z_INDEX.FEATURE_SIDEBAR }}
           >

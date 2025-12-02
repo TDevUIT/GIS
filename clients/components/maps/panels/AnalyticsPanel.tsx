@@ -8,7 +8,7 @@ import {
   useAnalyticsSummary
 } from '@/hooks/api';
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { X, BarChart3, TrendingUp } from 'lucide-react';
+import { X, BarChart3 } from 'lucide-react';
 
 interface AnalyticsPanelProps {
   onClose: () => void;
@@ -69,7 +69,7 @@ export default function AnalyticsPanel({ onClose }: AnalyticsPanelProps) {
         ].map((tab) => (
           <button
             key={tab.id}
-            onClick={() => setActiveChart(tab.id as any)}
+            onClick={() => setActiveChart(tab.id as 'infrastructure' | 'accidents' | 'transport')}
             className={`flex-1 py-2 px-3 text-sm font-medium transition-colors ${
               activeChart === tab.id
                 ? 'bg-white text-gray-900 border-b-2 border-gray-900'

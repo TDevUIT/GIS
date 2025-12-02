@@ -1,9 +1,9 @@
 ﻿'use client';
 
 import { X } from 'lucide-react';
-import { 
-  useAnalyticsSummary, 
-  useInfrastructureByCategory, 
+import {
+  useAnalyticsSummary,
+  useInfrastructureByCategory,
   usePublicTransportSummary,
   useAccidentSummaryBySeverity,
   useAirQualityRanking,
@@ -52,25 +52,26 @@ export default function InfoPanel({ type, onClose }: InfoPanelProps) {
       case 'community':
         return (
           <div className="space-y-3">
-            <InfoItem 
-              label="Tá»•ng sá»‘ quáº­n/huyá»‡n" 
-              value={summary?.totalDistricts || 'N/A'} 
+            <InfoItem
+              label="Tá»•ng sá»‘ quáº­n/huyá»‡n"
+              value={summary?.totalDistricts || 'N/A'}
             />
-            <InfoItem 
-              label="Tá»•ng dÃ¢n sá»‘" 
-              value={summary?.latestPopulationData?.total?.toLocaleString() || 'N/A'} 
+            <InfoItem
+              label="Tá»•ng dÃ¢n sá»‘"
+              value={summary?.latestPopulationData?.total?.toLocaleString() || 'N/A'}
             />
-            <InfoItem 
-              label="NÄƒm thá»‘ng kÃª" 
-              value={summary?.latestPopulationData?.year || 'N/A'} 
+            <InfoItem
+              label="NÄƒm thá»‘ng kÃª"
+              value={summary?.latestPopulationData?.year || 'N/A'}
             />
             <div className="pt-3 border-t border-gray-200">
               <h4 className="font-semibold text-gray-900 mb-2">CÆ¡ sá»Ÿ háº¡ táº§ng cá»™ng Ä‘á»“ng</h4>
+              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
               {infrastructure && Array.isArray(infrastructure) && infrastructure.map((item: any, index: number) => (
-                <InfoItem 
+                <InfoItem
                   key={index}
-                  label={item.category} 
-                  value={item.count} 
+                  label={item.category}
+                  value={item.count}
                 />
               ))}
             </div>
@@ -78,18 +79,19 @@ export default function InfoPanel({ type, onClose }: InfoPanelProps) {
         );
 
       case 'religious':
-        const religiousInfra = infrastructure?.find((item: any) => 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const religiousInfra = infrastructure?.find((item: any) =>
           item.category === 'RELIGIOUS' || item.category === 'TEMPLE' || item.category === 'CHURCH'
         );
         return (
           <div className="space-y-3">
-            <InfoItem 
-              label="CÆ¡ sá»Ÿ tÃ´n giÃ¡o" 
-              value={religiousInfra?.count || 'N/A'} 
+            <InfoItem
+              label="CÆ¡ sá»Ÿ tÃ´n giÃ¡o"
+              value={religiousInfra?.count || 'N/A'}
             />
-            <InfoItem 
-              label="PhÃ¢n bá»‘ theo quáº­n" 
-              value="Xem báº£n Ä‘á»“" 
+            <InfoItem
+              label="PhÃ¢n bá»‘ theo quáº­n"
+              value="Xem báº£n Ä‘á»“"
             />
           </div>
         );
@@ -97,48 +99,50 @@ export default function InfoPanel({ type, onClose }: InfoPanelProps) {
       case 'personal':
         return (
           <div className="space-y-3">
-            <InfoItem 
-              label="Tá»•ng há»™ dÃ¢n" 
-              value="N/A" 
+            <InfoItem
+              label="Tá»•ng há»™ dÃ¢n"
+              value="N/A"
             />
-            <InfoItem 
-              label="Trung bÃ¬nh sá»‘ ngÆ°á»i/há»™" 
-              value="N/A" 
+            <InfoItem
+              label="Trung bÃ¬nh sá»‘ ngÆ°á»i/há»™"
+              value="N/A"
             />
-            <InfoItem 
-              label="CÃ¡ nhÃ¢n kinh doanh" 
-              value="N/A" 
+            <InfoItem
+              label="CÃ¡ nhÃ¢n kinh doanh"
+              value="N/A"
             />
-            <InfoItem 
-              label="CÆ¡ sá»Ÿ dá»‹ch vá»¥ cÃ¡ nhÃ¢n" 
-              value="N/A" 
+            <InfoItem
+              label="CÆ¡ sá»Ÿ dá»‹ch vá»¥ cÃ¡ nhÃ¢n"
+              value="N/A"
             />
           </div>
         );
 
       case 'buildings':
-        const buildingTypes = infrastructure?.filter((item: any) => 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const buildingTypes = infrastructure?.filter((item: any) =>
           ['HOSPITAL', 'SCHOOL', 'MARKET', 'PARK'].includes(item.category)
         );
         return (
           <div className="space-y-3">
-            <InfoItem 
-              label="Tá»•ng cÆ¡ sá»Ÿ háº¡ táº§ng" 
-              value={summary?.totalInfrastructures || 'N/A'} 
+            <InfoItem
+              label="Tá»•ng cÆ¡ sá»Ÿ háº¡ táº§ng"
+              value={summary?.totalInfrastructures || 'N/A'}
             />
             <div className="pt-3 border-t border-gray-200">
               <h4 className="font-semibold text-gray-900 mb-2">PhÃ¢n loáº¡i</h4>
+              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
               {buildingTypes && buildingTypes.map((item: any, index: number) => (
-                <InfoItem 
+                <InfoItem
                   key={index}
-                  label={item.category} 
-                  value={item.count} 
+                  label={item.category}
+                  value={item.count}
                 />
               ))}
             </div>
-            <InfoItem 
-              label="Tá»•ng diá»‡n tÃ­ch xÃ¢y dá»±ng" 
-              value="N/A mÂ²" 
+            <InfoItem
+              label="Tá»•ng diá»‡n tÃ­ch xÃ¢y dá»±ng"
+              value="N/A mÂ²"
             />
           </div>
         );
@@ -146,21 +150,21 @@ export default function InfoPanel({ type, onClose }: InfoPanelProps) {
       case 'business':
         return (
           <div className="space-y-3">
-            <InfoItem 
-              label="Tá»•ng sá»‘ doanh nghiá»‡p Ä‘Äƒng kÃ½" 
-              value="N/A" 
+            <InfoItem
+              label="Tá»•ng sá»‘ doanh nghiá»‡p Ä‘Äƒng kÃ½"
+              value="N/A"
             />
-            <InfoItem 
-              label="Doanh nghiá»‡p hoáº¡t Ä‘á»™ng cÃ´ng nghiá»‡p" 
-              value="N/A" 
+            <InfoItem
+              label="Doanh nghiá»‡p hoáº¡t Ä‘á»™ng cÃ´ng nghiá»‡p"
+              value="N/A"
             />
-            <InfoItem 
-              label="Doanh nghiá»‡p váº­n táº£i & kho bÃ£i" 
-              value="N/A" 
+            <InfoItem
+              label="Doanh nghiá»‡p váº­n táº£i & kho bÃ£i"
+              value="N/A"
             />
-            <InfoItem 
-              label="Doanh nghiá»‡p dá»‹ch vá»¥ lÆ°u trÃº" 
-              value="N/A" 
+            <InfoItem
+              label="Doanh nghiá»‡p dá»‹ch vá»¥ lÆ°u trÃº"
+              value="N/A"
             />
             <div className="pt-3 border-t border-gray-200">
               <h4 className="font-semibold text-gray-900 mb-2">Quy mÃ´ nhÃ¢n sá»±</h4>
