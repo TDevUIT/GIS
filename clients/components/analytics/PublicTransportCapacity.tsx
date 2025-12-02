@@ -1,8 +1,24 @@
 'use client';
 
 import { usePublicTransportCapacity, useMostFrequentRoutes } from '@/hooks/api';
-import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Bus, TrendingUp, Users, Clock, Loader2 } from 'lucide-react';
+
+interface CapacityItem {
+  mode: string;
+  capacity: number;
+  currentLoad: number;
+  routeCount: number;
+  utilizationRate: string;
+}
+
+interface RouteItem {
+  routeNumber: string;
+  routeName: string;
+  frequency: number;
+  averagePassengers: number;
+  peakHours: string;
+}
 
 export default function PublicTransportCapacity() {
   const { data: capacityResponse, isLoading: loadingCapacity } = usePublicTransportCapacity();
@@ -20,7 +36,8 @@ export default function PublicTransportCapacity() {
   }
 
   // Transform capacity data
-  const transformedCapacity = Array.isArray(capacityData) ? capacityData.map((item: any) => ({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const transformedCapacity: CapacityItem[] = Array.isArray(capacityData) ? capacityData.map((item: any) => ({
     ...item,
     utilizationRate: ((item.currentLoad / item.capacity) * 100).toFixed(1)
   })) : [
@@ -30,7 +47,7 @@ export default function PublicTransportCapacity() {
     { mode: 'Taxi', capacity: 2000, currentLoad: 1600, routeCount: 0, utilizationRate: '80.0' },
   ];
 
-  const transformedRoutes = Array.isArray(frequentRoutes) && frequentRoutes.length > 0 ? frequentRoutes : [
+  const transformedRoutes: RouteItem[] = Array.isArray(frequentRoutes) && frequentRoutes.length > 0 ? frequentRoutes : [
     { routeNumber: '01', routeName: 'Bến Thành - Chợ Lớn', frequency: 120, averagePassengers: 850, peakHours: '7-9, 17-19' },
     { routeNumber: '03', routeName: 'Sài Gòn - Thủ Đức', frequency: 90, averagePassengers: 720, peakHours: '6-8, 17-19' },
     { routeNumber: '05', routeName: 'Quận 1 - Bình Thạnh', frequency: 80, averagePassengers: 680, peakHours: '7-9, 18-20' },
@@ -39,8 +56,8 @@ export default function PublicTransportCapacity() {
   ];
 
   // Calculate totals
-  const totalCapacity = transformedCapacity.reduce((sum: number, item: any) => sum + (item.capacity || 0), 0);
-  const totalCurrentLoad = transformedCapacity.reduce((sum: number, item: any) => sum + (item.currentLoad || 0), 0);
+  const totalCapacity = transformedCapacity.reduce((sum: number, item: CapacityItem) => sum + (item.capacity || 0), 0);
+  const totalCurrentLoad = transformedCapacity.reduce((sum: number, item: CapacityItem) => sum + (item.currentLoad || 0), 0);
   const overallUtilization = ((totalCurrentLoad / totalCapacity) * 100).toFixed(1);
 
   return (
@@ -167,7 +184,7 @@ export default function PublicTransportCapacity() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {transformedCapacity.map((item: any, index: number) => (
+              {transformedCapacity.map((item: CapacityItem, index: number) => (
                 <tr key={index} className="hover:bg-gray-50">
                   <td className="px-4 py-2 text-gray-900">{item.mode}</td>
                   <td className="px-4 py-2 text-right font-medium text-gray-900">
@@ -207,7 +224,7 @@ export default function PublicTransportCapacity() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {transformedRoutes.map((item: any, index: number) => (
+                {transformedRoutes.map((item: RouteItem, index: number) => (
                   <tr key={index} className="hover:bg-gray-50">
                     <td className="px-4 py-2 font-medium text-gray-900">{item.routeNumber}</td>
                     <td className="px-4 py-2 text-gray-700">{item.routeName}</td>
@@ -229,7 +246,7 @@ export default function PublicTransportCapacity() {
       <div className="bg-white rounded-lg p-6 border border-gray-200">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Giờ Cao điểm theo Tuyến</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {transformedRoutes.slice(0, 6).map((route: any, index: number) => (
+          {transformedRoutes.slice(0, 6).map((route: RouteItem, index: number) => (
             <div key={index} className="p-4 bg-gray-50 rounded-lg">
               <div className="flex items-center gap-2 mb-2">
                 <div className="w-8 h-8 bg-gray-900 text-white rounded flex items-center justify-center font-bold text-sm">
