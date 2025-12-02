@@ -24,19 +24,19 @@ export default function EnvironmentHistory() {
   }
 
   // Transform data for charts
-  const transformedAirData = Array.isArray(airQualityData) ? airQualityData.map((item: any) => ({
+  const transformedAirData = Array.isArray(airQualityData) ? airQualityData.map((item: { measuredAt?: string; date?: string; pm25?: number }) => ({
     ...item,
-    date: new Date(item.measuredAt || item.date).toLocaleDateString('vi-VN', { 
-      month: 'short', 
-      day: 'numeric' 
+    date: new Date(item.measuredAt || item.date || '').toLocaleDateString('vi-VN', {
+      month: 'short',
+      day: 'numeric'
     })
   })) : [];
 
-  const transformedWaterData = Array.isArray(waterQualityData) ? waterQualityData.map((item: any) => ({
+  const transformedWaterData = Array.isArray(waterQualityData) ? waterQualityData.map((item: { measuredAt?: string; date?: string; contaminationIndex?: number }) => ({
     ...item,
-    date: new Date(item.measuredAt || item.date).toLocaleDateString('vi-VN', { 
-      month: 'short', 
-      day: 'numeric' 
+    date: new Date(item.measuredAt || item.date || '').toLocaleDateString('vi-VN', {
+      month: 'short',
+      day: 'numeric'
     })
   })) : [];
 
@@ -115,7 +115,7 @@ export default function EnvironmentHistory() {
             ].map((option) => (
               <button
                 key={option.value}
-                onClick={() => setTimeRange(option.value as any)}
+                onClick={() => setTimeRange(option.value as 'week' | 'month' | 'year')}
                 className={`px-3 py-1 rounded transition-colors ${
                   timeRange === option.value
                     ? 'bg-gray-900 text-white'
@@ -198,10 +198,10 @@ export default function EnvironmentHistory() {
               <YAxis tick={{ fontSize: 11 }} />
               <Tooltip />
               <Legend />
-              <Area 
-                type="monotone" 
-                dataKey="pm25" 
-                stroke="#6b7280" 
+              <Area
+                type="monotone"
+                dataKey="pm25"
+                stroke="#6b7280"
                 strokeWidth={2}
                 fillOpacity={1}
                 fill="url(#colorPm25)"
@@ -226,10 +226,10 @@ export default function EnvironmentHistory() {
               <YAxis tick={{ fontSize: 11 }} />
               <Tooltip />
               <Legend />
-              <Line 
-                type="monotone" 
-                dataKey="contaminationIndex" 
-                stroke="#374151" 
+              <Line
+                type="monotone"
+                dataKey="contaminationIndex"
+                stroke="#374151"
                 strokeWidth={2}
                 name="Chỉ số ô nhiễm"
                 dot={{ fill: '#374151', r: 4 }}
@@ -256,7 +256,7 @@ export default function EnvironmentHistory() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
-                  {transformedAirData.slice(-10).reverse().map((item: any, index: number) => (
+                  {transformedAirData.slice(-10).reverse().map((item: { date: string; pm25?: number }, index: number) => (
                     <tr key={index} className="hover:bg-gray-50">
                       <td className="px-4 py-2 text-gray-900">{item.date}</td>
                       <td className="px-4 py-2 text-right font-medium text-gray-900">
@@ -285,7 +285,7 @@ export default function EnvironmentHistory() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
-                  {transformedWaterData.slice(-10).reverse().map((item: any, index: number) => (
+                  {transformedWaterData.slice(-10).reverse().map((item: { date: string; contaminationIndex?: number }, index: number) => (
                     <tr key={index} className="hover:bg-gray-50">
                       <td className="px-4 py-2 text-gray-900">{item.date}</td>
                       <td className="px-4 py-2 text-right font-medium text-gray-900">

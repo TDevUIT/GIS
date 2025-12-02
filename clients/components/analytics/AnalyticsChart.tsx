@@ -1,6 +1,6 @@
 interface AnalyticsChartProps {
   title: string;
-  data?: any[];
+  data?: Record<string, unknown>[];
   height?: number;
 }
 
@@ -9,7 +9,7 @@ export default function AnalyticsChart({ title, data, height = 300 }: AnalyticsC
     <div className="bg-white p-6 rounded-lg shadow">
       <h3 className="text-lg font-semibold mb-4">ANALYTICS CHART</h3>
       <h4 className="font-medium mb-4">{title}</h4>
-      <div 
+      <div
         className="bg-gray-100 rounded flex items-center justify-center"
         style={{ height: `${height}px` }}
       >

@@ -1,13 +1,11 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useState } from 'react';
-import { Polyline, Popup, useMap } from 'react-leaflet';
-import L from 'leaflet';
-import { useGisTraffics } from '@/hooks/api/useGisTrafficsQuery';
+import { Polyline, Popup } from 'react-leaflet';
+import { useTraffics } from '@/hooks/api';
 import { TrafficLine } from '@/types';
 import {
   convertTrafficToLine,
-  getCongestionColor,
   getCongestionLabel,
 } from '@/utils/trafficHelpers';
 import { Loader2, AlertCircle } from 'lucide-react';
@@ -23,12 +21,10 @@ export default function TrafficMap({
   autoRefresh = true,
   refreshInterval = 30000,
 }: TrafficMapProps) {
-  const map = useMap();
   const [trafficData, setTrafficData] = useState<TrafficLine[]>([]);
-  const [selectedRoad, setSelectedRoad] = useState<TrafficLine | null>(null);
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
 
-  const { data: gisTrafficData, isLoading, error, refetch } = useGisTraffics();
+  const { data: gisTrafficData, isLoading, error, refetch } = useTraffics();
 
   useEffect(() => {
     if (gisTrafficData?.data) {
@@ -36,22 +32,22 @@ export default function TrafficMap({
         const traffics = Array.isArray(gisTrafficData.data)
           ? gisTrafficData.data
           : [gisTrafficData.data];
-        
+
         const lines = traffics
           .map(convertTrafficToLine)
           .filter((line) => {
             // Only include traffic with valid coordinates
-            return line.coordinates && 
-                   Array.isArray(line.coordinates) && 
+            return line.coordinates &&
+                   Array.isArray(line.coordinates) &&
                    line.coordinates.length > 0;
           });
-        
+
         if (lines.length === 0 && traffics.length > 0) {
-          console.warn('⚠️ No traffic data has valid coordinates. Check geom field parsing.');
+          console.warn('âš ï¸ No traffic data has valid coordinates. Check geom field parsing.');
         } else {
-          console.log(`✅ Loaded ${lines.length} traffic lines`);
+          console.log(`âœ… Loaded ${lines.length} traffic lines`);
         }
-        
+
         setTrafficData(lines);
         setLastUpdate(new Date());
       } catch (error) {
@@ -66,14 +62,13 @@ export default function TrafficMap({
 
     const interval = setInterval(() => {
       refetch();
-      console.log('🔄 Traffic data refreshed');
+      console.log('ðŸ”„ Traffic data refreshed');
     }, refreshInterval);
 
     return () => clearInterval(interval);
   }, [autoRefresh, refreshInterval, refetch]);
 
   const handleRoadClick = (traffic: TrafficLine) => {
-    setSelectedRoad(traffic);
     if (onRoadClick) {
       onRoadClick(traffic);
     }
@@ -84,7 +79,7 @@ export default function TrafficMap({
       <div className="absolute top-20 left-1/2 -translate-x-1/2 z-[1000] bg-white/95 backdrop-blur-md px-6 py-3 rounded-lg shadow-lg border border-blue-200">
         <div className="flex items-center gap-3 text-blue-600">
           <Loader2 className="w-5 h-5 animate-spin" />
-          <span className="font-medium">Đang tải dữ liệu giao thông...</span>
+          <span className="font-medium">Äang táº£i dá»¯ liá»‡u giao thÃ´ng...</span>
         </div>
       </div>
     );
@@ -96,9 +91,9 @@ export default function TrafficMap({
         <div className="flex items-start gap-3">
           <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
           <div>
-            <h3 className="font-semibold text-red-700 mb-1">Lỗi tải dữ liệu</h3>
+            <h3 className="font-semibold text-red-700 mb-1">Lá»—i táº£i dá»¯ liá»‡u</h3>
             <p className="text-sm text-red-600">
-              {(error as any)?.message || 'Không thể tải dữ liệu giao thông từ server'}
+              {(error as Error)?.message || 'KhÃ´ng thá»ƒ táº£i dá»¯ liá»‡u giao thÃ´ng tá»« server'}
             </p>
           </div>
         </div>
@@ -120,10 +115,10 @@ export default function TrafficMap({
           <div className="flex items-start gap-3">
             <AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
             <div>
-              <h3 className="font-semibold text-yellow-800 mb-1">Không có dữ liệu geometry</h3>
+              <h3 className="font-semibold text-yellow-800 mb-1">KhÃ´ng cÃ³ dá»¯ liá»‡u geometry</h3>
               <p className="text-sm text-yellow-700">
-                API trả về dữ liệu giao thông nhưng không parse được tọa độ từ trường 'geom'. 
-                Kiểm tra console để xem chi tiết.
+                API tráº£ vá» dá»¯ liá»‡u giao thÃ´ng nhÆ°ng khÃ´ng parse Ä‘Æ°á»£c tá»a Ä‘á»™ tá»« trÆ°á»ng 'geom'.
+                Kiá»ƒm tra console Ä‘á»ƒ xem chi tiáº¿t.
               </p>
             </div>
           </div>
@@ -131,13 +126,13 @@ export default function TrafficMap({
       )}
 
       {/* Legend and live indicator */}
-      <div 
+      <div
         className="absolute bottom-44 right-6 bg-white/95 backdrop-blur-md p-3 rounded-lg shadow-lg border border-blue-200"
         style={{ zIndex: 1000 }}
       >
         <div className="space-y-2">
           <div className="flex items-center justify-between gap-4">
-            <span className="text-sm font-semibold text-blue-800">Giao thông</span>
+            <span className="text-sm font-semibold text-blue-800">Giao thÃ´ng</span>
             <div className="flex items-center gap-1">
               <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
               <span className="text-xs text-blue-600 font-medium">Live</span>
@@ -147,24 +142,24 @@ export default function TrafficMap({
           <div className="space-y-1 text-xs">
             <div className="flex items-center gap-2">
               <div className="w-4 h-1 bg-green-500 rounded"></div>
-              <span className="text-gray-700">Thông thoáng</span>
+              <span className="text-gray-700">ThÃ´ng thoÃ¡ng</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-4 h-1 bg-amber-500 rounded"></div>
-              <span className="text-gray-700">Trung bình</span>
+              <span className="text-gray-700">Trung bÃ¬nh</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-4 h-1 bg-orange-600 rounded"></div>
-              <span className="text-gray-700">Đông đúc</span>
+              <span className="text-gray-700">ÄÃ´ng Ä‘Ãºc</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-4 h-1 bg-red-600 rounded"></div>
-              <span className="text-gray-700">Tắc nghẽn</span>
+              <span className="text-gray-700">Táº¯c ngháº½n</span>
             </div>
           </div>
 
           <div className="pt-2 border-t text-xs text-gray-500">
-            Cập nhật: {lastUpdate.toLocaleTimeString('vi-VN')}
+            Cáº­p nháº­t: {lastUpdate.toLocaleTimeString('vi-VN')}
           </div>
         </div>
       </div>
@@ -206,7 +201,7 @@ export default function TrafficMap({
               </h3>
               <div className="space-y-1.5 text-sm">
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Trạng thái:</span>
+                  <span className="text-gray-600">Tráº¡ng thÃ¡i:</span>
                   <span
                     className="font-semibold px-2 py-0.5 rounded text-white text-xs"
                     style={{ backgroundColor: traffic.color }}
@@ -215,13 +210,13 @@ export default function TrafficMap({
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Lưu lượng:</span>
+                  <span className="text-gray-600">LÆ°u lÆ°á»£ng:</span>
                   <span className="font-semibold text-gray-800">
-                    {traffic.trafficVolume.toLocaleString()} xe/ngày
+                    {traffic.trafficVolume.toLocaleString()} xe/ngÃ y
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Tốc độ TB:</span>
+                  <span className="text-gray-600">Tá»‘c Ä‘á»™ TB:</span>
                   <span className="font-semibold text-gray-800">{traffic.averageSpeed} km/h</span>
                 </div>
               </div>

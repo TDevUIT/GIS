@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { MapContainer, Marker, Popup } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
@@ -44,7 +44,7 @@ import { FeatureAction } from '@/constants/featureCategories'
 import { Z_INDEX } from '@/constants/zIndex'
 import { Layers, AlertTriangle, Activity, Wind, Droplets, Building2, Map as MapIcon, Users, Bus, Mountain, FileText, BarChart3, MapPin } from 'lucide-react'
 import { getCongestionLabel } from '@/utils/trafficHelpers'
-import { GeocodingResult } from '@/services/geocodingService'
+import { GeocodingResult } from '@/services'
 
 delete (L.Icon.Default.prototype as any)._getIconUrl
 L.Icon.Default.mergeOptions({
@@ -207,11 +207,11 @@ export default function MapView() {
         },
         (error) => {
           console.error('Error getting location:', error)
-          alert('Không thể lấy vị trí hiện tại')
+          alert('KhÃ´ng thá»ƒ láº¥y vá»‹ trÃ­ hiá»‡n táº¡i')
         }
       )
     } else {
-      alert('Trình duyệt không hỗ trợ geolocation')
+      alert('TrÃ¬nh duyá»‡t khÃ´ng há»— trá»£ geolocation')
     }
   }
 
@@ -313,7 +313,7 @@ export default function MapView() {
           >
             <Popup>
               <div className="text-sm">
-                <h3 className="font-bold text-base mb-1">📍 Vị trí của bạn</h3>
+                <h3 className="font-bold text-base mb-1">ðŸ“ Vá»‹ trÃ­ cá»§a báº¡n</h3>
                 <p className="text-gray-600 mb-1">Lat: {currentLocation[0].toFixed(6)}</p>
                 <p className="text-gray-600">Lng: {currentLocation[1].toFixed(6)}</p>
               </div>
@@ -325,7 +325,7 @@ export default function MapView() {
           <Marker position={searchMarker} icon={searchResultIcon}>
             <Popup>
               <div className="text-sm">
-                <h3 className="font-bold text-base mb-1">🔍 {searchResult.display_name.split(',')[0]}</h3>
+                <h3 className="font-bold text-base mb-1">ðŸ” {searchResult.display_name.split(',')[0]}</h3>
                 <p className="text-gray-600 mb-1">{searchResult.display_name}</p>
                 <p className="text-gray-500 text-xs">
                   {searchResult.lat.toFixed(6)}, {searchResult.lon.toFixed(6)}
@@ -552,8 +552,8 @@ export default function MapView() {
             }}
             className="bg-white/95 backdrop-blur-md hover:bg-white px-4 py-2 rounded-lg shadow-md transition-all hover:shadow-lg border border-gray-200 flex items-center gap-2"
           >
-            <span>←</span>
-            <span className="font-medium text-gray-700">Về danh sách quận</span>
+            <span>â†</span>
+            <span className="font-medium text-gray-700">Vá» danh sÃ¡ch quáº­n</span>
           </button>
         </div>
       )}
@@ -567,39 +567,39 @@ export default function MapView() {
             onClick={() => setSelectedDistrict(null)}
             className="absolute top-2 right-2 text-gray-400 hover:text-gray-600 transition-colors"
           >
-            ✕
+            âœ•
           </button>
           <h3 className="font-bold text-lg text-gray-800 mb-3 pr-6">
             {selectedDistrict.properties.name}
           </h3>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between items-center py-1 border-b">
-              <span className="text-gray-600">Mã quận</span>
+              <span className="text-gray-600">MÃ£ quáº­n</span>
               <span className="font-semibold text-gray-800">
                 {selectedDistrict.properties.code}
               </span>
             </div>
             {selectedDistrict.properties.areaKm2 && (
               <div className="flex justify-between items-center py-1 border-b">
-                <span className="text-gray-600">Diện tích</span>
+                <span className="text-gray-600">Diá»‡n tÃ­ch</span>
                 <span className="font-semibold text-gray-800">
-                  {selectedDistrict.properties.areaKm2.toFixed(2)} km²
+                  {selectedDistrict.properties.areaKm2.toFixed(2)} kmÂ²
                 </span>
               </div>
             )}
             {selectedDistrict.properties.densityPerKm2 && (
               <div className="flex justify-between items-center py-1 border-b">
-                <span className="text-gray-600">Mật độ</span>
+                <span className="text-gray-600">Máº­t Ä‘á»™</span>
                 <span className="font-semibold text-gray-800">
-                  {selectedDistrict.properties.densityPerKm2.toLocaleString()} người/km²
+                  {selectedDistrict.properties.densityPerKm2.toLocaleString()} ngÆ°á»i/kmÂ²
                 </span>
               </div>
             )}
             {selectedDistrict.properties.population && (
               <div className="flex justify-between items-center py-1">
-                <span className="text-gray-600">Dân số</span>
+                <span className="text-gray-600">DÃ¢n sá»‘</span>
                 <span className="font-semibold text-blue-600">
-                  {selectedDistrict.properties.population.toLocaleString()} người
+                  {selectedDistrict.properties.population.toLocaleString()} ngÆ°á»i
                 </span>
               </div>
             )}
@@ -608,7 +608,7 @@ export default function MapView() {
             onClick={() => setShowWardsLayer(true)}
             className="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg font-medium transition-colors"
           >
-            Xem phường/xã →
+            Xem phÆ°á»ng/xÃ£ â†’
           </button>
         </div>
       )}
@@ -622,21 +622,21 @@ export default function MapView() {
             onClick={() => setSelectedWard(null)}
             className="absolute top-2 right-2 text-gray-400 hover:text-gray-600 transition-colors"
           >
-            ✕
+            âœ•
           </button>
           <h3 className="font-bold text-lg text-purple-800 mb-3 pr-6">
             {selectedWard.properties.name}
           </h3>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between items-center py-1 border-b">
-              <span className="text-gray-600">Mã phường</span>
+              <span className="text-gray-600">MÃ£ phÆ°á»ng</span>
               <span className="font-semibold text-gray-800">
                 {selectedWard.properties.code}
               </span>
             </div>
             {selectedWard.properties.districtName && (
               <div className="flex justify-between items-center py-1 border-b">
-                <span className="text-gray-600">Thuộc quận</span>
+                <span className="text-gray-600">Thuá»™c quáº­n</span>
                 <span className="font-semibold text-purple-600">
                   {selectedWard.properties.districtName}
                 </span>
@@ -655,32 +655,32 @@ export default function MapView() {
             onClick={() => setSelectedAccident(null)}
             className="absolute top-2 right-2 text-gray-400 hover:text-gray-600 transition-colors"
           >
-            ✕
+            âœ•
           </button>
           <h3 className="font-bold text-lg text-red-800 mb-3 pr-6">
-            Tai nạn giao thông
+            Tai náº¡n giao thÃ´ng
           </h3>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between items-center py-1 border-b">
-              <span className="text-gray-600">Đường:</span>
+              <span className="text-gray-600">ÄÆ°á»ng:</span>
               <span className="font-semibold text-gray-800">
                 {selectedAccident.roadName}
               </span>
             </div>
             <div className="flex justify-between items-center py-1 border-b">
-              <span className="text-gray-600">Mức độ:</span>
+              <span className="text-gray-600">Má»©c Ä‘á»™:</span>
               <span className="font-semibold text-red-600">
                 {selectedAccident.severity}
               </span>
             </div>
             <div className="flex justify-between items-center py-1 border-b">
-              <span className="text-gray-600">Thương vong:</span>
+              <span className="text-gray-600">ThÆ°Æ¡ng vong:</span>
               <span className="font-semibold text-red-600">
-                {selectedAccident.casualties} người
+                {selectedAccident.casualties} ngÆ°á»i
               </span>
             </div>
             <div className="flex justify-between items-center py-1">
-              <span className="text-gray-600">Ngày xảy ra:</span>
+              <span className="text-gray-600">NgÃ y xáº£y ra:</span>
               <span className="font-semibold text-gray-800">
                 {new Date(selectedAccident.accidentDate).toLocaleDateString('vi-VN')}
               </span>
@@ -698,14 +698,14 @@ export default function MapView() {
             onClick={() => setSelectedRoad(null)}
             className="absolute top-2 right-2 text-gray-400 hover:text-gray-600 transition-colors"
           >
-            ✕
+            âœ•
           </button>
           <h3 className="font-bold text-lg text-blue-800 mb-3 pr-6">
             {selectedRoad.roadName}
           </h3>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between items-center py-1 border-b">
-              <span className="text-gray-600">Trạng thái:</span>
+              <span className="text-gray-600">Tráº¡ng thÃ¡i:</span>
               <span
                 className="font-semibold px-2 py-0.5 rounded text-white text-xs"
                 style={{ backgroundColor: selectedRoad.color }}
@@ -714,13 +714,13 @@ export default function MapView() {
               </span>
             </div>
             <div className="flex justify-between items-center py-1 border-b">
-              <span className="text-gray-600">Lưu lượng:</span>
+              <span className="text-gray-600">LÆ°u lÆ°á»£ng:</span>
               <span className="font-semibold text-gray-800">
-                {selectedRoad.trafficVolume.toLocaleString()} xe/ngày
+                {selectedRoad.trafficVolume.toLocaleString()} xe/ngÃ y
               </span>
             </div>
             <div className="flex justify-between items-center py-1">
-              <span className="text-gray-600">Tốc độ TB:</span>
+              <span className="text-gray-600">Tá»‘c Ä‘á»™ TB:</span>
               <span className="font-semibold text-blue-600">
                 {selectedRoad.averageSpeed} km/h
               </span>

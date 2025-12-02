@@ -1,9 +1,9 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useState } from 'react';
 import { GeoJSON, useMap } from 'react-leaflet';
 import L from 'leaflet';
-import { useGisLandUses } from '@/hooks/api/useGisLandUsesQuery';
+import { useLandUses } from '@/hooks/api';
 import {
   convertLandUseToPolygon,
   getLandUseColor,
@@ -22,14 +22,14 @@ export default function LandUseMap({ onPolygonClick }: LandUseMapProps) {
   const [landUseData, setLandUseData] = useState<LandUsePolygon[]>([]);
   const [selectedPolygon, setSelectedPolygon] = useState<LandUsePolygon | null>(null);
 
-  const { data: gisLandUseData, isLoading, error } = useGisLandUses();
+  const { data: landUseResponse, isLoading, error } = useLandUses();
 
   useEffect(() => {
-    if (gisLandUseData?.data) {
+    if (landUseResponse?.data) {
       try {
-        const landUses = Array.isArray(gisLandUseData.data)
-          ? gisLandUseData.data
-          : [gisLandUseData.data];
+        const landUses = Array.isArray(landUseResponse.data)
+          ? landUseResponse.data
+          : [landUseResponse.data];
 
         const polygons = landUses
           .map(convertLandUseToPolygon)
@@ -47,14 +47,14 @@ export default function LandUseMap({ onPolygonClick }: LandUseMapProps) {
         setLandUseData([]);
       }
     }
-  }, [gisLandUseData]);
+  }, [landUseResponse]);
 
   if (isLoading) {
     return (
       <div className="absolute top-20 left-1/2 -translate-x-1/2 z-[1000] bg-white/95 backdrop-blur-md px-6 py-3 rounded-lg shadow-lg border border-amber-200">
         <div className="flex items-center gap-3 text-amber-600">
           <Loader2 className="w-5 h-5 animate-spin" />
-          <span className="font-medium">Đang tải dữ liệu sử dụng đất...</span>
+          <span className="font-medium">Äang táº£i dá»¯ liá»‡u sá»­ dá»¥ng Ä‘áº¥t...</span>
         </div>
       </div>
     );
@@ -66,9 +66,9 @@ export default function LandUseMap({ onPolygonClick }: LandUseMapProps) {
         <div className="flex items-start gap-3">
           <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
           <div>
-            <h3 className="font-semibold text-red-700 mb-1">Lỗi tải dữ liệu</h3>
+            <h3 className="font-semibold text-red-700 mb-1">Lá»—i táº£i dá»¯ liá»‡u</h3>
             <p className="text-sm text-red-600">
-              {(error as any)?.message || 'Không thể tải dữ liệu sử dụng đất'}
+              {(error as any)?.message || 'KhÃ´ng thá»ƒ táº£i dá»¯ liá»‡u sá»­ dá»¥ng Ä‘áº¥t'}
             </p>
           </div>
         </div>
@@ -77,8 +77,8 @@ export default function LandUseMap({ onPolygonClick }: LandUseMapProps) {
   }
 
   const hasValidData = landUseData.length > 0;
-  const hasRawData = gisLandUseData?.data && (
-    Array.isArray(gisLandUseData.data) ? gisLandUseData.data.length > 0 : true
+  const hasRawData = landUseResponse?.data && (
+    Array.isArray(landUseResponse.data) ? landUseResponse.data.length > 0 : true
   );
 
   return (
@@ -88,9 +88,9 @@ export default function LandUseMap({ onPolygonClick }: LandUseMapProps) {
           <div className="flex items-start gap-3">
             <AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
             <div>
-              <h3 className="font-semibold text-yellow-800 mb-1">Không có dữ liệu hình học</h3>
+              <h3 className="font-semibold text-yellow-800 mb-1">KhÃ´ng cÃ³ dá»¯ liá»‡u hÃ¬nh há»c</h3>
               <p className="text-sm text-yellow-700">
-                Dữ liệu sử dụng đất không có thông tin hình học (geometry).
+                Dá»¯ liá»‡u sá»­ dá»¥ng Ä‘áº¥t khÃ´ng cÃ³ thÃ´ng tin hÃ¬nh há»c (geometry).
               </p>
             </div>
           </div>
@@ -103,39 +103,39 @@ export default function LandUseMap({ onPolygonClick }: LandUseMapProps) {
       >
         <div className="space-y-2">
           <div className="flex items-center justify-between gap-4">
-            <span className="text-sm font-semibold text-amber-800">Sử dụng đất</span>
+            <span className="text-sm font-semibold text-amber-800">Sá»­ dá»¥ng Ä‘áº¥t</span>
             <Map className="w-4 h-4 text-amber-600" />
           </div>
 
           <div className="space-y-1 text-xs">
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 rounded" style={{ backgroundColor: '#fbbf24' }}></div>
-              <span className="text-gray-700">Khu dân cư</span>
+              <span className="text-gray-700">Khu dÃ¢n cÆ°</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 rounded" style={{ backgroundColor: '#ec4899' }}></div>
-              <span className="text-gray-700">Thương mại</span>
+              <span className="text-gray-700">ThÆ°Æ¡ng máº¡i</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 rounded" style={{ backgroundColor: '#8b5cf6' }}></div>
-              <span className="text-gray-700">Công nghiệp</span>
+              <span className="text-gray-700">CÃ´ng nghiá»‡p</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 rounded" style={{ backgroundColor: '#84cc16' }}></div>
-              <span className="text-gray-700">Nông nghiệp</span>
+              <span className="text-gray-700">NÃ´ng nghiá»‡p</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 rounded" style={{ backgroundColor: '#10b981' }}></div>
-              <span className="text-gray-700">Rừng</span>
+              <span className="text-gray-700">Rá»«ng</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 rounded" style={{ backgroundColor: '#06b6d4' }}></div>
-              <span className="text-gray-700">Mặt nước</span>
+              <span className="text-gray-700">Máº·t nÆ°á»›c</span>
             </div>
           </div>
 
           <div className="pt-2 border-t text-xs text-gray-500">
-            <strong>{landUseData.length}</strong> khu vực
+            <strong>{landUseData.length}</strong> khu vá»±c
           </div>
         </div>
       </div>
@@ -171,26 +171,26 @@ export default function LandUseMap({ onPolygonClick }: LandUseMapProps) {
                   <h3 class="font-bold text-base mb-2">${getLandUseLabel(polygon.type)}</h3>
                   <div class="space-y-1.5 text-sm">
                     <div class="flex justify-between items-center">
-                      <span class="text-gray-600">Loại:</span>
+                      <span class="text-gray-600">Loáº¡i:</span>
                       <span class="font-semibold px-2 py-0.5 rounded text-white text-xs" style="background-color: ${color};">
                         ${getLandUseLabel(polygon.type)}
                       </span>
                     </div>
                     <div class="flex justify-between items-center">
-                      <span class="text-gray-600">Diện tích:</span>
+                      <span class="text-gray-600">Diá»‡n tÃ­ch:</span>
                       <span class="font-semibold text-gray-800">
-                        ${polygon.area.toLocaleString()} m²
+                        ${polygon.area.toLocaleString()} mÂ²
                       </span>
                     </div>
                     <div class="flex justify-between items-center">
-                      <span class="text-gray-600">Quận/Huyện:</span>
+                      <span class="text-gray-600">Quáº­n/Huyá»‡n:</span>
                       <span class="font-semibold text-gray-800">
                         ${polygon.districtName}
                       </span>
                     </div>
                     ${polygon.zoning ? `
                       <div class="flex justify-between items-center">
-                        <span class="text-gray-600">Quy hoạch:</span>
+                        <span class="text-gray-600">Quy hoáº¡ch:</span>
                         <span class="text-xs text-gray-600">${polygon.zoning}</span>
                       </div>
                     ` : ''}

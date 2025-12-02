@@ -1,8 +1,8 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useState } from 'react';
 import { GeoJSON, useMap } from 'react-leaflet';
-import { useGisPublicTransports } from '@/hooks/api/useGisPublicTransportsQuery';
+import { usePublicTransports } from '@/hooks/api';
 import {
   convertPublicTransportToRoute,
   getTransportModeColor,
@@ -22,14 +22,14 @@ export default function PublicTransportMap({ onRouteClick }: PublicTransportMapP
   const [transportData, setTransportData] = useState<PublicTransportRoute[]>([]);
   const [selectedRoute, setSelectedRoute] = useState<PublicTransportRoute | null>(null);
 
-  const { data: gisTransportData, isLoading, error } = useGisPublicTransports();
+  const { data: transportResponse, isLoading, error } = usePublicTransports();
 
   useEffect(() => {
-    if (gisTransportData?.data) {
+    if (transportResponse?.data) {
       try {
-        const transports = Array.isArray(gisTransportData.data)
-          ? gisTransportData.data
-          : [gisTransportData.data];
+        const transports = Array.isArray(transportResponse.data)
+          ? transportResponse.data
+          : [transportResponse.data];
 
         const routes = transports
           .map(convertPublicTransportToRoute)
@@ -47,14 +47,14 @@ export default function PublicTransportMap({ onRouteClick }: PublicTransportMapP
         setTransportData([]);
       }
     }
-  }, [gisTransportData]);
+  }, [transportResponse]);
 
   if (isLoading) {
     return (
       <div className="absolute top-20 left-1/2 -translate-x-1/2 z-[1000] bg-white/95 backdrop-blur-md px-6 py-3 rounded-lg shadow-lg border border-blue-200">
         <div className="flex items-center gap-3 text-blue-600">
           <Loader2 className="w-5 h-5 animate-spin" />
-          <span className="font-medium">Đang tải dữ liệu giao thông công cộng...</span>
+          <span className="font-medium">Äang táº£i dá»¯ liá»‡u giao thÃ´ng cÃ´ng cá»™ng...</span>
         </div>
       </div>
     );
@@ -66,9 +66,9 @@ export default function PublicTransportMap({ onRouteClick }: PublicTransportMapP
         <div className="flex items-start gap-3">
           <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
           <div>
-            <h3 className="font-semibold text-red-700 mb-1">Lỗi tải dữ liệu</h3>
+            <h3 className="font-semibold text-red-700 mb-1">Lá»—i táº£i dá»¯ liá»‡u</h3>
             <p className="text-sm text-red-600">
-              {(error as any)?.message || 'Không thể tải dữ liệu giao thông công cộng'}
+              {(error as any)?.message || 'KhÃ´ng thá»ƒ táº£i dá»¯ liá»‡u giao thÃ´ng cÃ´ng cá»™ng'}
             </p>
           </div>
         </div>
@@ -77,8 +77,8 @@ export default function PublicTransportMap({ onRouteClick }: PublicTransportMapP
   }
 
   const hasValidData = transportData.length > 0;
-  const hasRawData = gisTransportData?.data && (
-    Array.isArray(gisTransportData.data) ? gisTransportData.data.length > 0 : true
+  const hasRawData = transportResponse?.data && (
+    Array.isArray(transportResponse.data) ? transportResponse.data.length > 0 : true
   );
 
   return (
@@ -88,9 +88,9 @@ export default function PublicTransportMap({ onRouteClick }: PublicTransportMapP
           <div className="flex items-start gap-3">
             <AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
             <div>
-              <h3 className="font-semibold text-yellow-800 mb-1">Không có dữ liệu hình học</h3>
+              <h3 className="font-semibold text-yellow-800 mb-1">KhÃ´ng cÃ³ dá»¯ liá»‡u hÃ¬nh há»c</h3>
               <p className="text-sm text-yellow-700">
-                Dữ liệu giao thông công cộng không có thông tin hình học (geometry).
+                Dá»¯ liá»‡u giao thÃ´ng cÃ´ng cá»™ng khÃ´ng cÃ³ thÃ´ng tin hÃ¬nh há»c (geometry).
               </p>
             </div>
           </div>
@@ -103,14 +103,14 @@ export default function PublicTransportMap({ onRouteClick }: PublicTransportMapP
       >
         <div className="space-y-2">
           <div className="flex items-center justify-between gap-4">
-            <span className="text-sm font-semibold text-blue-800">Giao thông công cộng</span>
+            <span className="text-sm font-semibold text-blue-800">Giao thÃ´ng cÃ´ng cá»™ng</span>
             <Bus className="w-4 h-4 text-blue-600" />
           </div>
 
           <div className="space-y-1 text-xs">
             <div className="flex items-center gap-2">
               <div className="w-4 h-1 rounded" style={{ backgroundColor: '#3b82f6' }}></div>
-              <span className="text-gray-700">Xe buýt</span>
+              <span className="text-gray-700">Xe buÃ½t</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-4 h-1 rounded" style={{ backgroundColor: '#ef4444' }}></div>
@@ -122,12 +122,12 @@ export default function PublicTransportMap({ onRouteClick }: PublicTransportMapP
             </div>
             <div className="flex items-center gap-2">
               <div className="w-4 h-1 rounded" style={{ backgroundColor: '#06b6d4' }}></div>
-              <span className="text-gray-700">Đường thủy</span>
+              <span className="text-gray-700">ÄÆ°á»ng thá»§y</span>
             </div>
           </div>
 
           <div className="pt-2 border-t text-xs text-gray-500">
-            <strong>{transportData.length}</strong> tuyến
+            <strong>{transportData.length}</strong> tuyáº¿n
           </div>
         </div>
       </div>
@@ -167,27 +167,27 @@ export default function PublicTransportMap({ onRouteClick }: PublicTransportMapP
                   <h3 class="font-bold text-base mb-2">${route.routeName}</h3>
                   <div class="space-y-1.5 text-sm">
                     <div class="flex justify-between items-center">
-                      <span class="text-gray-600">Số hiệu:</span>
+                      <span class="text-gray-600">Sá»‘ hiá»‡u:</span>
                       <span class="font-semibold text-gray-800">
                         ${route.routeNumber}
                       </span>
                     </div>
                     <div class="flex justify-between items-center">
-                      <span class="text-gray-600">Loại:</span>
+                      <span class="text-gray-600">Loáº¡i:</span>
                       <span class="font-semibold px-2 py-0.5 rounded text-white text-xs" style="background-color: ${color};">
                         ${getTransportModeLabel(route.mode)}
                       </span>
                     </div>
                     ${route.operator ? `
                       <div class="flex justify-between items-center">
-                        <span class="text-gray-600">Đơn vị:</span>
+                        <span class="text-gray-600">ÄÆ¡n vá»‹:</span>
                         <span class="text-xs text-gray-600">${route.operator}</span>
                       </div>
                     ` : ''}
                     ${route.frequency ? `
                       <div class="flex justify-between items-center">
-                        <span class="text-gray-600">Tần suất:</span>
-                        <span class="text-xs text-gray-600">${route.frequency} phút/chuyến</span>
+                        <span class="text-gray-600">Táº§n suáº¥t:</span>
+                        <span class="text-xs text-gray-600">${route.frequency} phÃºt/chuyáº¿n</span>
                       </div>
                     ` : ''}
                   </div>

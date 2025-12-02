@@ -1,10 +1,10 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useState, useMemo } from 'react';
 import { Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
-import { useGisAccidents } from '@/hooks/api/useGisAccidentsQuery';
-import { useGisTraffics } from '@/hooks/api/useGisTrafficsQuery';
+import { useAccidents } from '@/hooks/api';
+import { useTraffics } from '@/hooks/api';
 import { AccidentPoint } from '@/types';
 import {
   convertAccidentToPoint,
@@ -30,45 +30,45 @@ export default function AccidentMap({
     dateRange: 30,
   });
 
-  const { data: gisAccidentsData, isLoading, error } = useGisAccidents();
-  const { data: gisTrafficData } = useGisTraffics();
+  const { data: accidentsResponse, isLoading, error } = useAccidents() as any;
+  const { data: trafficResponse } = useTraffics() as any;
 
 
   useEffect(() => {
-    if (gisAccidentsData?.data) {
+    if (accidentsResponse?.data) {
       try {
-        const accidents = Array.isArray(gisAccidentsData.data)
-          ? gisAccidentsData.data
-          : [gisAccidentsData.data];
-        
+        const accidents = Array.isArray(accidentsResponse.data)
+          ? accidentsResponse.data
+          : [accidentsResponse.data];
+
         // Get traffic data array for coordinate extraction
-        const trafficDataArray = gisTrafficData?.data 
-          ? (Array.isArray(gisTrafficData.data) ? gisTrafficData.data : [gisTrafficData.data])
+        const trafficDataArray = trafficResponse?.data
+          ? (Array.isArray(trafficResponse.data) ? trafficResponse.data : [trafficResponse.data])
           : [];
-        
+
         const points = accidents
-          .map((accident) => convertAccidentToPoint(accident, trafficDataArray))
-          .filter((point) => {
+          .map((accident: any) => convertAccidentToPoint(accident, trafficDataArray))
+          .filter((point: any) => {
             // Only include accidents with valid coordinates
-            return point.lat !== undefined && 
-                   point.lng !== undefined && 
-                   !isNaN(point.lat) && 
+            return point.lat !== undefined &&
+                   point.lng !== undefined &&
+                   !isNaN(point.lat) &&
                    !isNaN(point.lng);
           });
-        
+
         if (points.length === 0 && accidents.length > 0) {
           console.warn('⚠️ No accidents have valid coordinates. Waiting for traffic data or location info.');
         } else {
           console.log(`✅ Loaded ${points.length} accidents with coordinates`);
         }
-        
+
         setAccidentsData(points);
       } catch (error) {
         console.error('Error converting accident data:', error);
         setAccidentsData([]);
       }
     }
-  }, [gisAccidentsData, gisTrafficData]);
+  }, [accidentsResponse, trafficResponse]);
 
   const filteredAccidents = useMemo(() => {
     return accidentsData.filter((accident) => {
@@ -101,7 +101,7 @@ export default function AccidentMap({
       <div className="absolute top-20 left-1/2 -translate-x-1/2 z-[1000] bg-white/95 backdrop-blur-md px-6 py-3 rounded-lg shadow-lg border border-red-200">
         <div className="flex items-center gap-3 text-red-600">
           <Loader2 className="w-5 h-5 animate-spin" />
-          <span className="font-medium">Đang tải dữ liệu tai nạn...</span>
+          <span className="font-medium">Äang táº£i dá»¯ liá»‡u tai náº¡n...</span>
         </div>
       </div>
     );
@@ -113,9 +113,9 @@ export default function AccidentMap({
         <div className="flex items-start gap-3">
           <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
           <div>
-            <h3 className="font-semibold text-red-700 mb-1">Lỗi tải dữ liệu</h3>
+            <h3 className="font-semibold text-red-700 mb-1">Lá»—i táº£i dá»¯ liá»‡u</h3>
             <p className="text-sm text-red-600">
-              {(error as any)?.message || 'Không thể tải dữ liệu tai nạn từ server'}
+              {(error as any)?.message || 'KhÃ´ng thá»ƒ táº£i dá»¯ liá»‡u tai náº¡n tá»« server'}
             </p>
           </div>
         </div>
@@ -125,8 +125,8 @@ export default function AccidentMap({
 
   // Show warning if no accidents have valid coordinates
   const hasValidData = filteredAccidents.length > 0;
-  const hasRawData = gisAccidentsData?.data && (
-    Array.isArray(gisAccidentsData.data) ? gisAccidentsData.data.length > 0 : true
+  const hasRawData = accidentsResponse?.data && (
+    Array.isArray(accidentsResponse.data) ? accidentsResponse.data.length > 0 : true
   );
 
   return (
@@ -137,10 +137,10 @@ export default function AccidentMap({
           <div className="flex items-start gap-3">
             <AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
             <div>
-              <h3 className="font-semibold text-yellow-800 mb-1">Không hiển thị được tai nạn</h3>
+              <h3 className="font-semibold text-yellow-800 mb-1">KhÃ´ng hiá»ƒn thá»‹ Ä‘Æ°á»£c tai náº¡n</h3>
               <p className="text-sm text-yellow-700">
-                Accidents được liên kết với traffic qua trafficId, nhưng không thể lấy tọa độ từ traffic lines. 
-                Đảm bảo traffic data có trường 'geom' hợp lệ.
+                Accidents Ä‘Æ°á»£c liÃªn káº¿t vá»›i traffic qua trafficId, nhÆ°ng khÃ´ng thá»ƒ láº¥y tá»a Ä‘á»™ tá»« traffic lines.
+                Äáº£m báº£o traffic data cÃ³ trÆ°á»ng 'geom' há»£p lá»‡.
               </p>
             </div>
           </div>
@@ -160,7 +160,7 @@ export default function AccidentMap({
         {showFilters && (
           <div className="bg-white/95 backdrop-blur-md p-4 rounded-lg shadow-xl border border-gray-200 w-64">
             <div className="flex justify-between items-center mb-3">
-              <h3 className="font-semibold text-gray-800">Bộ lọc</h3>
+              <h3 className="font-semibold text-gray-800">Bá»™ lá»c</h3>
               <button onClick={() => setShowFilters(false)} className="text-gray-400 hover:text-gray-600">
                 <X className="w-4 h-4" />
               </button>
@@ -168,7 +168,7 @@ export default function AccidentMap({
 
             <div className="space-y-3">
               <div>
-                <label className="text-sm font-medium text-gray-700 mb-2 block">Mức độ nghiêm trọng</label>
+                <label className="text-sm font-medium text-gray-700 mb-2 block">Má»©c Ä‘á»™ nghiÃªm trá»ng</label>
                 <div className="space-y-2">
                   {['CRITICAL', 'HIGH', 'MEDIUM', 'LOW'].map((severity) => (
                     <label key={severity} className="flex items-center gap-2 cursor-pointer">
@@ -190,7 +190,7 @@ export default function AccidentMap({
 
               <div>
                 <label className="text-sm font-medium text-gray-700 mb-2 block">
-                  Khoảng thời gian: {filters.dateRange} ngày
+                  Khoáº£ng thá»i gian: {filters.dateRange} ngÃ y
                 </label>
                 <input
                   type="range"
@@ -205,7 +205,7 @@ export default function AccidentMap({
 
               <div className="pt-2 border-t">
                 <div className="text-xs text-gray-600">
-                  Hiển thị: <strong>{filteredAccidents.length}</strong> / {accidentsData.length} tai nạn
+                  Hiá»ƒn thá»‹: <strong>{filteredAccidents.length}</strong> / {accidentsData.length} tai náº¡n
                 </div>
               </div>
             </div>
@@ -255,14 +255,14 @@ export default function AccidentMap({
                   <h3 className="font-bold text-base mb-2">{accident.roadName}</h3>
                   <div className="space-y-1 text-sm">
                     <div>
-                      <strong>Mức độ:</strong>{' '}
+                      <strong>Má»©c Ä‘á»™:</strong>{' '}
                       <span style={{ color }}>{getSeverityLabel(accident.severity)}</span>
                     </div>
                     <div>
-                      <strong>Thương vong:</strong> {accident.casualties} người
+                      <strong>ThÆ°Æ¡ng vong:</strong> {accident.casualties} ngÆ°á»i
                     </div>
                     <div>
-                      <strong>Ngày:</strong> {new Date(accident.accidentDate).toLocaleDateString('vi-VN')}
+                      <strong>NgÃ y:</strong> {new Date(accident.accidentDate).toLocaleDateString('vi-VN')}
                     </div>
                   </div>
                 </div>

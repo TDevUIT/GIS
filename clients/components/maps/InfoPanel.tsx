@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { X } from 'lucide-react';
 import { 
@@ -8,7 +8,7 @@ import {
   useAccidentSummaryBySeverity,
   useAirQualityRanking,
   useWaterQualityRanking
-} from '@/hooks/api/useAnalyticsQuery';
+} from '@/hooks/api';
 
 interface InfoPanelProps {
   type: string;
@@ -33,17 +33,17 @@ export default function InfoPanel({ type, onClose }: InfoPanelProps) {
   const getTitle = () => {
     switch (type) {
       case 'community':
-        return 'Thông tin Cộng đồng';
+        return 'ThÃ´ng tin Cá»™ng Ä‘á»“ng';
       case 'religious':
-        return 'Thông tin Tôn giáo';
+        return 'ThÃ´ng tin TÃ´n giÃ¡o';
       case 'personal':
-        return 'Thông tin Cá nhân';
+        return 'ThÃ´ng tin CÃ¡ nhÃ¢n';
       case 'buildings':
-        return 'Thông tin Tòa nhà';
+        return 'ThÃ´ng tin TÃ²a nhÃ ';
       case 'business':
-        return 'Thông tin Doanh nghiệp';
+        return 'ThÃ´ng tin Doanh nghiá»‡p';
       default:
-        return 'Thông tin';
+        return 'ThÃ´ng tin';
     }
   };
 
@@ -53,19 +53,19 @@ export default function InfoPanel({ type, onClose }: InfoPanelProps) {
         return (
           <div className="space-y-3">
             <InfoItem 
-              label="Tổng số quận/huyện" 
+              label="Tá»•ng sá»‘ quáº­n/huyá»‡n" 
               value={summary?.totalDistricts || 'N/A'} 
             />
             <InfoItem 
-              label="Tổng dân số" 
+              label="Tá»•ng dÃ¢n sá»‘" 
               value={summary?.latestPopulationData?.total?.toLocaleString() || 'N/A'} 
             />
             <InfoItem 
-              label="Năm thống kê" 
+              label="NÄƒm thá»‘ng kÃª" 
               value={summary?.latestPopulationData?.year || 'N/A'} 
             />
             <div className="pt-3 border-t border-gray-200">
-              <h4 className="font-semibold text-gray-900 mb-2">Cơ sở hạ tầng cộng đồng</h4>
+              <h4 className="font-semibold text-gray-900 mb-2">CÆ¡ sá»Ÿ háº¡ táº§ng cá»™ng Ä‘á»“ng</h4>
               {infrastructure && Array.isArray(infrastructure) && infrastructure.map((item: any, index: number) => (
                 <InfoItem 
                   key={index}
@@ -84,12 +84,12 @@ export default function InfoPanel({ type, onClose }: InfoPanelProps) {
         return (
           <div className="space-y-3">
             <InfoItem 
-              label="Cơ sở tôn giáo" 
+              label="CÆ¡ sá»Ÿ tÃ´n giÃ¡o" 
               value={religiousInfra?.count || 'N/A'} 
             />
             <InfoItem 
-              label="Phân bố theo quận" 
-              value="Xem bản đồ" 
+              label="PhÃ¢n bá»‘ theo quáº­n" 
+              value="Xem báº£n Ä‘á»“" 
             />
           </div>
         );
@@ -98,19 +98,19 @@ export default function InfoPanel({ type, onClose }: InfoPanelProps) {
         return (
           <div className="space-y-3">
             <InfoItem 
-              label="Tổng hộ dân" 
+              label="Tá»•ng há»™ dÃ¢n" 
               value="N/A" 
             />
             <InfoItem 
-              label="Trung bình số người/hộ" 
+              label="Trung bÃ¬nh sá»‘ ngÆ°á»i/há»™" 
               value="N/A" 
             />
             <InfoItem 
-              label="Cá nhân kinh doanh" 
+              label="CÃ¡ nhÃ¢n kinh doanh" 
               value="N/A" 
             />
             <InfoItem 
-              label="Cơ sở dịch vụ cá nhân" 
+              label="CÆ¡ sá»Ÿ dá»‹ch vá»¥ cÃ¡ nhÃ¢n" 
               value="N/A" 
             />
           </div>
@@ -123,11 +123,11 @@ export default function InfoPanel({ type, onClose }: InfoPanelProps) {
         return (
           <div className="space-y-3">
             <InfoItem 
-              label="Tổng cơ sở hạ tầng" 
+              label="Tá»•ng cÆ¡ sá»Ÿ háº¡ táº§ng" 
               value={summary?.totalInfrastructures || 'N/A'} 
             />
             <div className="pt-3 border-t border-gray-200">
-              <h4 className="font-semibold text-gray-900 mb-2">Phân loại</h4>
+              <h4 className="font-semibold text-gray-900 mb-2">PhÃ¢n loáº¡i</h4>
               {buildingTypes && buildingTypes.map((item: any, index: number) => (
                 <InfoItem 
                   key={index}
@@ -137,8 +137,8 @@ export default function InfoPanel({ type, onClose }: InfoPanelProps) {
               ))}
             </div>
             <InfoItem 
-              label="Tổng diện tích xây dựng" 
-              value="N/A m²" 
+              label="Tá»•ng diá»‡n tÃ­ch xÃ¢y dá»±ng" 
+              value="N/A mÂ²" 
             />
           </div>
         );
@@ -147,41 +147,41 @@ export default function InfoPanel({ type, onClose }: InfoPanelProps) {
         return (
           <div className="space-y-3">
             <InfoItem 
-              label="Tổng số doanh nghiệp đăng ký" 
+              label="Tá»•ng sá»‘ doanh nghiá»‡p Ä‘Äƒng kÃ½" 
               value="N/A" 
             />
             <InfoItem 
-              label="Doanh nghiệp hoạt động công nghiệp" 
+              label="Doanh nghiá»‡p hoáº¡t Ä‘á»™ng cÃ´ng nghiá»‡p" 
               value="N/A" 
             />
             <InfoItem 
-              label="Doanh nghiệp vận tải & kho bãi" 
+              label="Doanh nghiá»‡p váº­n táº£i & kho bÃ£i" 
               value="N/A" 
             />
             <InfoItem 
-              label="Doanh nghiệp dịch vụ lưu trú" 
+              label="Doanh nghiá»‡p dá»‹ch vá»¥ lÆ°u trÃº" 
               value="N/A" 
             />
             <div className="pt-3 border-t border-gray-200">
-              <h4 className="font-semibold text-gray-900 mb-2">Quy mô nhân sự</h4>
-              <InfoItem label="Dưới 2 nhân viên" value="N/A" />
-              <InfoItem label="2-5 nhân viên" value="N/A" />
-              <InfoItem label="5-10 nhân viên" value="N/A" />
-              <InfoItem label="10-20 nhân viên" value="N/A" />
-              <InfoItem label="20+ nhân viên" value="N/A" />
+              <h4 className="font-semibold text-gray-900 mb-2">Quy mÃ´ nhÃ¢n sá»±</h4>
+              <InfoItem label="DÆ°á»›i 2 nhÃ¢n viÃªn" value="N/A" />
+              <InfoItem label="2-5 nhÃ¢n viÃªn" value="N/A" />
+              <InfoItem label="5-10 nhÃ¢n viÃªn" value="N/A" />
+              <InfoItem label="10-20 nhÃ¢n viÃªn" value="N/A" />
+              <InfoItem label="20+ nhÃ¢n viÃªn" value="N/A" />
             </div>
             <div className="pt-3 border-t border-gray-200">
-              <h4 className="font-semibold text-gray-900 mb-2">Thông tin tài chính</h4>
-              <InfoItem label="Tổng doanh thu" value="N/A" />
+              <h4 className="font-semibold text-gray-900 mb-2">ThÃ´ng tin tÃ i chÃ­nh</h4>
+              <InfoItem label="Tá»•ng doanh thu" value="N/A" />
               <InfoItem label="Doanh thu TB/DN" value="N/A" />
-              <InfoItem label="Tổng vốn đầu tư" value="N/A" />
-              <InfoItem label="Tổng tài sản" value="N/A" />
+              <InfoItem label="Tá»•ng vá»‘n Ä‘áº§u tÆ°" value="N/A" />
+              <InfoItem label="Tá»•ng tÃ i sáº£n" value="N/A" />
             </div>
           </div>
         );
 
       default:
-        return <div>Chọn một mục để xem thông tin</div>;
+        return <div>Chá»n má»™t má»¥c Ä‘á»ƒ xem thÃ´ng tin</div>;
     }
   };
 

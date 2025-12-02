@@ -1,9 +1,9 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useState } from 'react';
 import { GeoJSON, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
-import { useDistricts } from '@/hooks/api/useDistrictsQuery';
+import { useDistricts } from '@/hooks/api';
 import { DistrictGeoJSON } from '@/types';
 import { convertDistrictToGeoJSON } from '@/utils/geoHelpers';
 import { Loader2, AlertCircle } from 'lucide-react';
@@ -29,29 +29,29 @@ export default function DistrictMap({
     const payload = (districtsData as any)?.data ?? districtsData;
     if (payload) {
       try {
-        console.log('📍 Districts raw data:', payload);
+        console.log('ðŸ“ Districts raw data:', payload);
         
         const districts = Array.isArray(payload) ? payload : [payload];
-        console.log('📍 Districts array:', districts);
+        console.log('ðŸ“ Districts array:', districts);
 
         const geoJson: DistrictGeoJSON[] = districts
           .filter((district: any) => {
             const hasGeom = district && (district.geom || district.geometry);
             if (!hasGeom) {
-              console.warn('⚠️ District without geom:', district?.name);
+              console.warn('âš ï¸ District without geom:', district?.name);
             }
             return hasGeom;
           })
           .map((district: any) => {
             const converted = convertDistrictToGeoJSON(district);
-            console.log('✅ Converted district:', district.name, converted);
+            console.log('âœ… Converted district:', district.name, converted);
             return converted;
           });
 
-        console.log('📍 Total GeoJSON features:', geoJson.length);
+        console.log('ðŸ“ Total GeoJSON features:', geoJson.length);
         setGeoJsonData(geoJson);
       } catch (error) {
-        console.error('❌ Error converting district data:', error);
+        console.error('âŒ Error converting district data:', error);
         setGeoJsonData([]);
       }
     }
@@ -135,7 +135,7 @@ export default function DistrictMap({
       <div className="absolute top-20 left-1/2 -translate-x-1/2 z-[1000] bg-white/95 backdrop-blur-md px-6 py-3 rounded-lg shadow-lg border border-blue-200">
         <div className="flex items-center gap-3 text-blue-600">
           <Loader2 className="w-5 h-5 animate-spin" />
-          <span className="font-medium">Đang tải dữ liệu quận/huyện...</span>
+          <span className="font-medium">Äang táº£i dá»¯ liá»‡u quáº­n/huyá»‡n...</span>
         </div>
       </div>
     );
@@ -147,9 +147,9 @@ export default function DistrictMap({
         <div className="flex items-start gap-3">
           <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
           <div>
-            <h3 className="font-semibold text-red-700 mb-1">Lỗi tải dữ liệu</h3>
+            <h3 className="font-semibold text-red-700 mb-1">Lá»—i táº£i dá»¯ liá»‡u</h3>
             <p className="text-sm text-red-600">
-              {(districtsError as any)?.message || 'Không thể tải dữ liệu quận/huyện từ server'}
+              {(districtsError as any)?.message || 'KhÃ´ng thá»ƒ táº£i dá»¯ liá»‡u quáº­n/huyá»‡n tá»« server'}
             </p>
           </div>
         </div>
@@ -157,7 +157,7 @@ export default function DistrictMap({
     );
   }
 
-  console.log('📍 Rendering', geoJsonData.length, 'districts on map');
+  console.log('ðŸ“ Rendering', geoJsonData.length, 'districts on map');
 
   return (
     <>
@@ -175,30 +175,30 @@ export default function DistrictMap({
               </h3>
               <div className="space-y-1.5 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Mã:</span>
+                  <span className="text-gray-600">MÃ£:</span>
                   <span className="font-semibold text-gray-800">{district.properties.code}</span>
                 </div>
                 {district.properties.areaKm2 && (
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Diện tích:</span>
+                    <span className="text-gray-600">Diá»‡n tÃ­ch:</span>
                     <span className="font-semibold text-gray-800">
-                      {district.properties.areaKm2.toFixed(2)} km²
+                      {district.properties.areaKm2.toFixed(2)} kmÂ²
                     </span>
                   </div>
                 )}
                 {district.properties.densityPerKm2 && (
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Mật độ:</span>
+                    <span className="text-gray-600">Máº­t Ä‘á»™:</span>
                     <span className="font-semibold text-gray-800">
-                      {district.properties.densityPerKm2.toLocaleString()} người/km²
+                      {district.properties.densityPerKm2.toLocaleString()} ngÆ°á»i/kmÂ²
                     </span>
                   </div>
                 )}
                 {district.properties.population && (
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Dân số:</span>
+                    <span className="text-gray-600">DÃ¢n sá»‘:</span>
                     <span className="font-semibold text-gray-800">
-                      {district.properties.population.toLocaleString()} người
+                      {district.properties.population.toLocaleString()} ngÆ°á»i
                     </span>
                   </div>
                 )}

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import L from 'leaflet'
@@ -16,8 +16,8 @@ import {
   Ruler,
   RotateCcw,
 } from 'lucide-react'
-import { routingService, RoutePoint, RouteResult, TransportMode } from '@/services/routingService'
-import { geocodingService, GeocodingResult } from '@/services/geocodingService'
+import { routingService, RoutePoint, RouteResult, TransportMode } from '@/services'
+import { geocodingService, GeocodingResult } from '@/services'
 import { Z_INDEX } from '@/constants/zIndex'
 
 interface RoutingPanelProps {
@@ -51,10 +51,10 @@ export default function RoutingPanel({
 
   // Transport mode options
   const transportModes: { mode: TransportMode; icon: React.ReactNode; label: string }[] = [
-    { mode: 'driving', icon: <Car className="w-5 h-5" />, label: 'Ô tô' },
-    { mode: 'motorcycle', icon: <Car className="w-5 h-5" />, label: 'Xe máy' },
-    { mode: 'cycling', icon: <Bike className="w-5 h-5" />, label: 'Xe đạp' },
-    { mode: 'walking', icon: <Footprints className="w-5 h-5" />, label: 'Đi bộ' },
+    { mode: 'driving', icon: <Car className="w-5 h-5" />, label: 'Ã” tÃ´' },
+    { mode: 'motorcycle', icon: <Car className="w-5 h-5" />, label: 'Xe mÃ¡y' },
+    { mode: 'cycling', icon: <Bike className="w-5 h-5" />, label: 'Xe Ä‘áº¡p' },
+    { mode: 'walking', icon: <Footprints className="w-5 h-5" />, label: 'Äi bá»™' },
   ]
 
   // Custom icons
@@ -107,7 +107,7 @@ export default function RoutingPanel({
       setRoute(result)
       displayRoute(result)
     } catch (err) {
-      setError('Không thể tính toán lộ trình. Vui lòng thử lại.')
+      setError('KhÃ´ng thá»ƒ tÃ­nh toÃ¡n lá»™ trÃ¬nh. Vui lÃ²ng thá»­ láº¡i.')
       console.error('Route calculation error:', err)
     } finally {
       setIsCalculating(false)
@@ -142,7 +142,7 @@ export default function RoutingPanel({
     if (startPoint) {
       const startMarker = L.marker([startPoint.lat, startPoint.lon], { icon: startIcon })
         .addTo(mapInstance)
-        .bindPopup(`<b>Điểm bắt đầu</b><br>${startPoint.name || 'Điểm A'}`)
+        .bindPopup(`<b>Äiá»ƒm báº¯t Ä‘áº§u</b><br>${startPoint.name || 'Äiá»ƒm A'}`)
       
       setMarkers(prev => ({ ...prev, start: startMarker }))
     }
@@ -150,7 +150,7 @@ export default function RoutingPanel({
     if (endPoint) {
       const endMarker = L.marker([endPoint.lat, endPoint.lon], { icon: endIcon })
         .addTo(mapInstance)
-        .bindPopup(`<b>Điểm kết thúc</b><br>${endPoint.name || 'Điểm B'}`)
+        .bindPopup(`<b>Äiá»ƒm káº¿t thÃºc</b><br>${endPoint.name || 'Äiá»ƒm B'}`)
       
       setMarkers(prev => ({ ...prev, end: endMarker }))
     }
@@ -160,7 +160,7 @@ export default function RoutingPanel({
   }
 
   const getRouteColor = (mode: TransportMode): string => {
-    // Đơn giản hóa - dùng 1 màu cho tất cả phương tiện
+    // ÄÆ¡n giáº£n hÃ³a - dÃ¹ng 1 mÃ u cho táº¥t cáº£ phÆ°Æ¡ng tiá»‡n
     return '#1f2937' // gray-800
   }
 
@@ -212,7 +212,7 @@ export default function RoutingPanel({
       <div className="p-4 bg-gray-800 text-white flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Navigation className="w-5 h-5" />
-          <h3 className="font-bold text-lg">Chỉ đường</h3>
+          <h3 className="font-bold text-lg">Chá»‰ Ä‘Æ°á»ng</h3>
         </div>
         <button
           onClick={onClose}
@@ -251,12 +251,12 @@ export default function RoutingPanel({
             type="text"
             value={startQuery}
             onChange={(e) => setStartQuery(e.target.value)}
-            placeholder="Điểm bắt đầu..."
+            placeholder="Äiá»ƒm báº¯t Ä‘áº§u..."
             className="w-full pl-11 pr-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-gray-800 transition-colors"
           />
           {startPoint && (
             <div className="mt-1 px-3 py-1 bg-gray-100 text-gray-700 text-xs rounded">
-              ✓ {startPoint.name || `${startPoint.lat.toFixed(4)}, ${startPoint.lon.toFixed(4)}`}
+              âœ“ {startPoint.name || `${startPoint.lat.toFixed(4)}, ${startPoint.lon.toFixed(4)}`}
             </div>
           )}
         </div>
@@ -267,7 +267,7 @@ export default function RoutingPanel({
             onClick={handleSwap}
             disabled={!startPoint || !endPoint}
             className="p-2 hover:bg-gray-100 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            title="Đổi điểm"
+            title="Äá»•i Ä‘iá»ƒm"
           >
             <RotateCcw className="w-5 h-5 text-gray-600" />
           </button>
@@ -282,12 +282,12 @@ export default function RoutingPanel({
             type="text"
             value={endQuery}
             onChange={(e) => setEndQuery(e.target.value)}
-            placeholder="Điểm kết thúc..."
+            placeholder="Äiá»ƒm káº¿t thÃºc..."
             className="w-full pl-11 pr-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-gray-800 transition-colors"
           />
           {endPoint && (
             <div className="mt-1 px-3 py-1 bg-gray-100 text-gray-700 text-xs rounded">
-              ✓ {endPoint.name || `${endPoint.lat.toFixed(4)}, ${endPoint.lon.toFixed(4)}`}
+              âœ“ {endPoint.name || `${endPoint.lat.toFixed(4)}, ${endPoint.lon.toFixed(4)}`}
             </div>
           )}
         </div>
@@ -314,7 +314,7 @@ export default function RoutingPanel({
                 <div className="flex items-center gap-2">
                   <Ruler className="w-4 h-4 text-gray-700" />
                   <div>
-                    <div className="text-xs text-gray-600">Khoảng cách</div>
+                    <div className="text-xs text-gray-600">Khoáº£ng cÃ¡ch</div>
                     <div className="font-bold text-gray-800">
                       {routingService.formatDistance(route.distance)}
                     </div>
@@ -323,7 +323,7 @@ export default function RoutingPanel({
                 <div className="flex items-center gap-2">
                   <Clock className="w-4 h-4 text-gray-700" />
                   <div>
-                    <div className="text-xs text-gray-600">Thời gian</div>
+                    <div className="text-xs text-gray-600">Thá»i gian</div>
                     <div className="font-bold text-gray-800">
                       {routingService.formatDuration(route.duration)}
                     </div>
@@ -337,7 +337,7 @@ export default function RoutingPanel({
               <div>
                 <h4 className="font-semibold text-gray-700 mb-2 flex items-center gap-2">
                   <ArrowRight className="w-4 h-4" />
-                  Hướng dẫn chi tiết
+                  HÆ°á»›ng dáº«n chi tiáº¿t
                 </h4>
                 <div className="space-y-2 max-h-64 overflow-y-auto">
                   {route.instructions.map((instruction, index) => (
@@ -353,7 +353,7 @@ export default function RoutingPanel({
                           <div className="text-gray-700">{instruction.text}</div>
                           <div className="text-xs text-gray-500 mt-1">
                             {routingService.formatDistance(instruction.distance)}
-                            {' • '}
+                            {' â€¢ '}
                             {routingService.formatDuration(instruction.time)}
                           </div>
                         </div>
@@ -372,14 +372,14 @@ export default function RoutingPanel({
             onClick={handleReset}
             className="flex-1 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition-colors"
           >
-            Đặt lại
+            Äáº·t láº¡i
           </button>
           <button
             onClick={() => startPoint && endPoint && calculateRoute()}
             disabled={!startPoint || !endPoint || isCalculating}
             className="flex-1 px-4 py-2 bg-gray-800 hover:bg-gray-900 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Tính toán lộ trình
+            TÃ­nh toÃ¡n lá»™ trÃ¬nh
           </button>
         </div>
       </div>

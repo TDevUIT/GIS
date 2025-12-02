@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import L from 'leaflet'
@@ -16,8 +16,8 @@ import {
   Clock,
   Ruler,
 } from 'lucide-react'
-import { geocodingService, GeocodingResult } from '@/services/geocodingService'
-import { routingService } from '@/services/routingService'
+import { geocodingService, GeocodingResult } from '@/services'
+import { routingService } from '@/services'
 import { Z_INDEX } from '@/constants/zIndex'
 
 interface NearestPointSearchProps {
@@ -44,35 +44,35 @@ interface NearestResult {
 const POI_CATEGORIES: POICategory[] = [
   {
     id: 'hospital',
-    name: 'Bệnh viện',
+    name: 'Bá»‡nh viá»‡n',
     icon: <Hospital className="w-5 h-5" />,
     query: 'hospital',
     color: 'bg-red-500',
   },
   {
     id: 'school',
-    name: 'Trường học',
+    name: 'TrÆ°á»ng há»c',
     icon: <GraduationCap className="w-5 h-5" />,
     query: 'school',
     color: 'bg-blue-500',
   },
   {
     id: 'supermarket',
-    name: 'Siêu thị',
+    name: 'SiÃªu thá»‹',
     icon: <Store className="w-5 h-5" />,
     query: 'supermarket',
     color: 'bg-green-500',
   },
   {
     id: 'cafe',
-    name: 'Quán cà phê',
+    name: 'QuÃ¡n cÃ  phÃª',
     icon: <Coffee className="w-5 h-5" />,
     query: 'cafe',
     color: 'bg-amber-500',
   },
   {
     id: 'gas_station',
-    name: 'Trạm xăng',
+    name: 'Tráº¡m xÄƒng',
     icon: <Fuel className="w-5 h-5" />,
     query: 'gas station',
     color: 'bg-purple-500',
@@ -115,7 +115,7 @@ export default function NearestPointSearch({
     try {
       const [lat, lon] = currentLocation
       
-      // Calculate search bounds (rough approximation: 1 degree ≈ 111 km)
+      // Calculate search bounds (rough approximation: 1 degree â‰ˆ 111 km)
       const radiusInDegrees = searchRadius / 111
       const viewbox: [number, number, number, number] = [
         lon - radiusInDegrees,
@@ -173,7 +173,7 @@ export default function NearestPointSearch({
           <div class="p-2">
             <div class="font-bold text-sm mb-1">${geocodingService.formatAddress(item.result)}</div>
             <div class="text-xs text-gray-600">
-              📍 ${routingService.formatDistance(item.distance)}
+              ðŸ“ ${routingService.formatDistance(item.distance)}
             </div>
           </div>
         `)
@@ -224,7 +224,7 @@ export default function NearestPointSearch({
       <div className="p-4 bg-gray-800 text-white flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Search className="w-5 h-5" />
-          <h3 className="font-bold text-lg">Tìm điểm gần nhất</h3>
+          <h3 className="font-bold text-lg">TÃ¬m Ä‘iá»ƒm gáº§n nháº¥t</h3>
         </div>
         <button
           onClick={onClose}
@@ -241,7 +241,7 @@ export default function NearestPointSearch({
           <div className="p-3 bg-gray-50 border border-gray-200 rounded-lg text-sm">
             <div className="flex items-center gap-2 text-gray-700">
               <MapPin className="w-4 h-4" />
-              <span className="font-medium">Vị trí hiện tại:</span>
+              <span className="font-medium">Vá»‹ trÃ­ hiá»‡n táº¡i:</span>
             </div>
             <div className="text-gray-600 text-xs mt-1">
               {currentLocation[0].toFixed(6)}, {currentLocation[1].toFixed(6)}
@@ -249,14 +249,14 @@ export default function NearestPointSearch({
           </div>
         ) : (
           <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-yellow-700">
-            ⚠️ Vui lòng bật vị trí hiện tại để sử dụng tính năng này
+            âš ï¸ Vui lÃ²ng báº­t vá»‹ trÃ­ hiá»‡n táº¡i Ä‘á»ƒ sá»­ dá»¥ng tÃ­nh nÄƒng nÃ y
           </div>
         )}
 
         {/* Search Radius */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Bán kính tìm kiếm: {searchRadius} km
+            BÃ¡n kÃ­nh tÃ¬m kiáº¿m: {searchRadius} km
           </label>
           <input
             type="range"
@@ -275,7 +275,7 @@ export default function NearestPointSearch({
         {/* Category Selection */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Chọn loại địa điểm
+            Chá»n loáº¡i Ä‘á»‹a Ä‘iá»ƒm
           </label>
           <div className="grid grid-cols-2 gap-2">
             {POI_CATEGORIES.map((category) => (
@@ -302,7 +302,7 @@ export default function NearestPointSearch({
             onClick={handleClearSelection}
             className="w-full px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition-colors text-sm"
           >
-            Xóa lựa chọn
+            XÃ³a lá»±a chá»n
           </button>
         )}
 
@@ -317,7 +317,7 @@ export default function NearestPointSearch({
         {!isSearching && results.length > 0 && (
           <div>
             <h4 className="font-semibold text-gray-700 mb-2">
-              Tìm thấy {results.length} kết quả
+              TÃ¬m tháº¥y {results.length} káº¿t quáº£
             </h4>
             <div className="space-y-2 max-h-96 overflow-y-auto">
               {results.map((item, index) => (
@@ -354,7 +354,7 @@ export default function NearestPointSearch({
                           className="flex items-center gap-1 text-gray-700 hover:text-gray-900 font-medium"
                         >
                           <Navigation2 className="w-3 h-3" />
-                          <span>Chỉ đường</span>
+                          <span>Chá»‰ Ä‘Æ°á»ng</span>
                         </button>
                       </div>
                     </div>
@@ -369,8 +369,8 @@ export default function NearestPointSearch({
         {!isSearching && selectedCategory && results.length === 0 && (
           <div className="text-center py-8 text-gray-500">
             <Search className="w-12 h-12 mx-auto mb-2 text-gray-300" />
-            <p className="font-medium">Không tìm thấy kết quả</p>
-            <p className="text-sm mt-1">Thử tăng bán kính tìm kiếm</p>
+            <p className="font-medium">KhÃ´ng tÃ¬m tháº¥y káº¿t quáº£</p>
+            <p className="text-sm mt-1">Thá»­ tÄƒng bÃ¡n kÃ­nh tÃ¬m kiáº¿m</p>
           </div>
         )}
       </div>

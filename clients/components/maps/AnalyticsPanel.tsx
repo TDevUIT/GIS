@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import {
@@ -6,7 +6,7 @@ import {
   useAccidentSummaryBySeverity,
   usePublicTransportSummary,
   useAnalyticsSummary
-} from '@/hooks/api/useAnalyticsQuery';
+} from '@/hooks/api';
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { X, BarChart3, TrendingUp } from 'lucide-react';
 
@@ -34,7 +34,7 @@ export default function AnalyticsPanel({ onClose }: AnalyticsPanelProps) {
       <div className="p-4 border-b border-gray-200 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <BarChart3 className="w-5 h-5 text-gray-700" />
-          <h3 className="font-semibold text-gray-900">Thống kê</h3>
+          <h3 className="font-semibold text-gray-900">Thá»‘ng kÃª</h3>
         </div>
         <button
           className="p-1 hover:bg-gray-100 rounded transition-colors"
@@ -46,13 +46,13 @@ export default function AnalyticsPanel({ onClose }: AnalyticsPanelProps) {
       <div className="p-4 bg-gray-50 border-b border-gray-200">
         <div className="grid grid-cols-2 gap-3">
           <div className="bg-white p-3 rounded border border-gray-200">
-            <div className="text-xs text-gray-500 mb-1">Quận/Huyện</div>
+            <div className="text-xs text-gray-500 mb-1">Quáº­n/Huyá»‡n</div>
             <div className="text-xl font-bold text-gray-900">
               {summary?.totalDistricts || 0}
             </div>
           </div>
           <div className="bg-white p-3 rounded border border-gray-200">
-            <div className="text-xs text-gray-500 mb-1">Cơ sở hạ tầng</div>
+            <div className="text-xs text-gray-500 mb-1">CÆ¡ sá»Ÿ háº¡ táº§ng</div>
             <div className="text-xl font-bold text-gray-900">
               {summary?.totalInfrastructures || 0}
             </div>
@@ -63,9 +63,9 @@ export default function AnalyticsPanel({ onClose }: AnalyticsPanelProps) {
       {/* Chart Tabs */}
       <div className="flex border-b border-gray-200 bg-gray-50">
         {[
-          { id: 'infrastructure', label: 'Hạ tầng' },
-          { id: 'accidents', label: 'Tai nạn' },
-          { id: 'transport', label: 'GT công cộng' },
+          { id: 'infrastructure', label: 'Háº¡ táº§ng' },
+          { id: 'accidents', label: 'Tai náº¡n' },
+          { id: 'transport', label: 'GT cÃ´ng cá»™ng' },
         ].map((tab) => (
           <button
             key={tab.id}
@@ -85,7 +85,7 @@ export default function AnalyticsPanel({ onClose }: AnalyticsPanelProps) {
       <div className="flex-1 overflow-y-auto p-4">
         {activeChart === 'infrastructure' && infrastructure && Array.isArray(infrastructure) && (
           <div>
-            <h4 className="text-sm font-semibold text-gray-900 mb-3">Phân bố cơ sở hạ tầng</h4>
+            <h4 className="text-sm font-semibold text-gray-900 mb-3">PhÃ¢n bá»‘ cÆ¡ sá»Ÿ háº¡ táº§ng</h4>
             <ResponsiveContainer width="100%" height={250}>
               <BarChart data={infrastructure}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
@@ -100,7 +100,7 @@ export default function AnalyticsPanel({ onClose }: AnalyticsPanelProps) {
 
         {activeChart === 'accidents' && accidents && Array.isArray(accidents) && (
           <div>
-            <h4 className="text-sm font-semibold text-gray-900 mb-3">Tai nạn theo mức độ</h4>
+            <h4 className="text-sm font-semibold text-gray-900 mb-3">Tai náº¡n theo má»©c Ä‘á»™</h4>
             <ResponsiveContainer width="100%" height={250}>
               <PieChart>
                 <Pie
@@ -125,7 +125,7 @@ export default function AnalyticsPanel({ onClose }: AnalyticsPanelProps) {
 
         {activeChart === 'transport' && publicTransport && Array.isArray(publicTransport) && (
           <div>
-            <h4 className="text-sm font-semibold text-gray-900 mb-3">Giao thông công cộng</h4>
+            <h4 className="text-sm font-semibold text-gray-900 mb-3">Giao thÃ´ng cÃ´ng cá»™ng</h4>
             <ResponsiveContainer width="100%" height={250}>
               <BarChart data={publicTransport}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />

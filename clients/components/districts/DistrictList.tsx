@@ -1,8 +1,8 @@
-'use client';
+﻿'use client';
 
 import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { useDistricts } from '@/hooks/api/useDistrictsQuery';
+import { useDistricts } from '@/hooks/api';
 import { District } from '@/types';
 import DistrictCard from './DistrictCard';
 import DistrictListSkeleton from './DistrictListSkeleton';
@@ -95,15 +95,15 @@ export default function DistrictList({
         <div className="flex items-start gap-3">
           <AlertCircle className="w-6 h-6 text-red-500 flex-shrink-0 mt-0.5" />
           <div className="flex-1">
-            <h3 className="font-semibold text-red-700 mb-1">Lỗi tải dữ liệu</h3>
+            <h3 className="font-semibold text-red-700 mb-1">Lá»—i táº£i dá»¯ liá»‡u</h3>
             <p className="text-sm text-red-600 mb-3">
-              {(error as any)?.message || 'Không thể tải danh sách quận/huyện'}
+              {(error as any)?.message || 'KhÃ´ng thá»ƒ táº£i danh sÃ¡ch quáº­n/huyá»‡n'}
             </p>
             <button
               onClick={() => refetch()}
               className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium"
             >
-              Thử lại
+              Thá»­ láº¡i
             </button>
           </div>
         </div>
@@ -116,11 +116,11 @@ export default function DistrictList({
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">
-            Danh sách Quận/Huyện
+            Danh sÃ¡ch Quáº­n/Huyá»‡n
           </h2>
           <p className="text-sm text-gray-600 mt-1">
-            {filteredDistricts.length} quận/huyện
-            {searchQuery && ` (từ "${searchQuery}")`}
+            {filteredDistricts.length} quáº­n/huyá»‡n
+            {searchQuery && ` (tá»« "${searchQuery}")`}
           </p>
         </div>
 
@@ -131,7 +131,7 @@ export default function DistrictList({
               type="text"
               value={searchQuery}
               onChange={(e) => handleSearch(e.target.value)}
-              placeholder="Tìm kiếm quận/huyện..."
+              placeholder="TÃ¬m kiáº¿m quáº­n/huyá»‡n..."
               className="pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent w-64"
             />
             {searchQuery && (
@@ -149,9 +149,9 @@ export default function DistrictList({
             onChange={(e) => handleSort(e.target.value as any)}
             className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
           >
-            <option value="name">Tên A-Z</option>
-            <option value="area">Diện tích</option>
-            <option value="density">Mật độ dân số</option>
+            <option value="name">TÃªn A-Z</option>
+            <option value="area">Diá»‡n tÃ­ch</option>
+            <option value="density">Máº­t Ä‘á»™ dÃ¢n sá»‘</option>
           </select>
         </div>
       </div>
@@ -162,16 +162,16 @@ export default function DistrictList({
             <Search className="w-8 h-8 text-gray-400" />
           </div>
           <h3 className="text-lg font-semibold text-gray-900 mb-2">
-            Không tìm thấy kết quả
+            KhÃ´ng tÃ¬m tháº¥y káº¿t quáº£
           </h3>
           <p className="text-gray-600 mb-4">
-            Không có quận/huyện nào phù hợp với từ khóa "{searchQuery}"
+            KhÃ´ng cÃ³ quáº­n/huyá»‡n nÃ o phÃ¹ há»£p vá»›i tá»« khÃ³a "{searchQuery}"
           </p>
           <button
             onClick={() => handleSearch('')}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
-            Xóa bộ lọc
+            XÃ³a bá»™ lá»c
           </button>
         </div>
       ) : (

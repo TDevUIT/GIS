@@ -1,8 +1,8 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, useRef } from 'react'
 import { Search, X, MapPin, Navigation, Loader2, Target } from 'lucide-react'
-import { geocodingService, GeocodingResult } from '@/services/geocodingService'
+import { geocodingService, GeocodingResult } from '@/services'
 import { Z_INDEX } from '@/constants/zIndex'
 
 interface MapSearchBarProps {
@@ -14,7 +14,7 @@ interface MapSearchBarProps {
 export default function MapSearchBar({
   onLocationSelect,
   onCurrentLocationClick,
-  placeholder = 'Tìm kiếm địa điểm, địa chỉ...',
+  placeholder = 'TÃ¬m kiáº¿m Ä‘á»‹a Ä‘iá»ƒm, Ä‘á»‹a chá»‰...',
 }: MapSearchBarProps) {
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<GeocodingResult[]>([])
@@ -111,22 +111,22 @@ export default function MapSearchBar({
     if (!type) return <MapPin className="w-3.5 h-3.5 text-gray-600" />
     
     if (type.includes('school') || type.includes('university')) {
-      return <span className="text-base">🏫</span>
+      return <span className="text-base">ðŸ«</span>
     }
     if (type.includes('hospital') || type.includes('clinic')) {
-      return <span className="text-base">🏥</span>
+      return <span className="text-base">ðŸ¥</span>
     }
     if (type.includes('restaurant') || type.includes('cafe')) {
-      return <span className="text-base">🍽️</span>
+      return <span className="text-base">ðŸ½ï¸</span>
     }
     if (type.includes('hotel') || type.includes('accommodation')) {
-      return <span className="text-base">🏨</span>
+      return <span className="text-base">ðŸ¨</span>
     }
     if (type.includes('park') || type.includes('garden')) {
-      return <span className="text-base">🌳</span>
+      return <span className="text-base">ðŸŒ³</span>
     }
     if (type.includes('shop') || type.includes('mall')) {
-      return <span className="text-base">🛍️</span>
+      return <span className="text-base">ðŸ›ï¸</span>
     }
     
     return <MapPin className="w-3.5 h-3.5 text-gray-600" />
@@ -174,7 +174,7 @@ export default function MapSearchBar({
           <button
             onClick={onCurrentLocationClick}
             className="p-2.5 bg-white/95 backdrop-blur-sm border border-gray-200 rounded-lg shadow-md hover:bg-gray-50 hover:border-gray-300 transition-all group"
-            title="Vị trí hiện tại"
+            title="Vá»‹ trÃ­ hiá»‡n táº¡i"
           >
             <Target className="w-4 h-4 text-gray-600 group-hover:text-gray-800" />
           </button>
@@ -221,8 +221,8 @@ export default function MapSearchBar({
         <div className="absolute top-full left-0 right-0 mt-1.5 bg-white/98 backdrop-blur-sm border border-gray-200 rounded-lg shadow-xl z-[1250]">
           <div className="px-4 py-6 text-center text-gray-500">
             <MapPin className="w-10 h-10 mx-auto mb-2 text-gray-300" />
-            <p className="font-medium text-sm">Không tìm thấy kết quả</p>
-            <p className="text-xs mt-1">Thử tìm kiếm với từ khóa khác</p>
+            <p className="font-medium text-sm">KhÃ´ng tÃ¬m tháº¥y káº¿t quáº£</p>
+            <p className="text-xs mt-1">Thá»­ tÃ¬m kiáº¿m vá»›i tá»« khÃ³a khÃ¡c</p>
           </div>
         </div>
       )}
