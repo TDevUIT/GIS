@@ -9,17 +9,17 @@ export const config = {
 };
 
 export const logger = {
-  info: (message: string, data?: any) => {
+  info: (message: string, data?: unknown) => {
     if (config.isDevelopment) {
       console.log(`[INFO] ${message}`, data || '');
     }
   },
-  error: (message: string, error?: any) => {
+  error: (message: string, error?: unknown) => {
     if (config.isDevelopment) {
       console.error(`[ERROR] ${message}`, error || '');
     }
   },
-  warn: (message: string, data?: any) => {
+  warn: (message: string, data?: unknown) => {
     if (config.isDevelopment) {
       console.warn(`[WARN] ${message}`, data || '');
     }

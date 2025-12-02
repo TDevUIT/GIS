@@ -72,9 +72,11 @@ export interface UrbanPlanPolygon {
   status: string;
   approvalDate: string | null;
   description: string | null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   geometry: any;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function convertUrbanPlanToPolygon(urbanPlan: any): UrbanPlanPolygon {
   return {
     id: urbanPlan.id,
@@ -87,6 +89,7 @@ export function convertUrbanPlanToPolygon(urbanPlan: any): UrbanPlanPolygon {
   };
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function parseGeoJSON(geom: any): any {
   try {
     if (typeof geom === 'string') {

@@ -48,6 +48,7 @@ export interface WaterQualityPoint {
   measuredAt: string;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function convertWaterQualityToPoint(waterQuality: any): WaterQualityPoint {
   let lat = waterQuality.latitude || waterQuality.lat;
   let lng = waterQuality.longitude || waterQuality.lng;
