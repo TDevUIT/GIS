@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { DistrictList } from '@/components/districts';
-import ErrorBoundary from '@/components/common/ErrorBoundary';
+import ErrorBoundary from '@/components/common/feedback/ErrorBoundary';
 import { District } from '@/types';
 
 export default function DistrictsPage() {

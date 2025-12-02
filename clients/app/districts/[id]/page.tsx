@@ -2,7 +2,7 @@
 
 import { useParams, useRouter } from 'next/navigation';
 import { DistrictDetail } from '@/components/districts';
-import ErrorBoundary from '@/components/common/ErrorBoundary';
+import ErrorBoundary from '@/components/common/feedback/ErrorBoundary';
 
 export default function DistrictDetailPage() {
   const params = useParams();
@@ -39,8 +39,8 @@ export default function DistrictDetailPage() {
     >
       <div className="min-h-screen bg-gray-50 py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <DistrictDetail 
-            id={id} 
+          <DistrictDetail
+            id={id}
             onBack={handleBack}
           />
         </div>
