@@ -2,7 +2,7 @@
 
 import { Users, Church, User, Building2, Briefcase } from 'lucide-react'
 import { useState } from 'react'
-import InfoPanel from './InfoPanel'
+import InfoPanel from '../panels/InfoPanel'
 
 interface ToolbarItem {
   id: string
@@ -75,9 +75,9 @@ export default function MapToolbar() {
       </div>
 
       {activeItem && (
-        <InfoPanel 
-          type={activeItem} 
-          onClose={() => setActiveItem(null)} 
+        <InfoPanel
+          type={activeItem}
+          onClose={() => setActiveItem(null)}
         />
       )}
     </>
