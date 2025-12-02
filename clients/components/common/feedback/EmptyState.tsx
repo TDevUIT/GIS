@@ -1,6 +1,6 @@
 'use client'
 
-import { LucideIcon, SearchX, Inbox, FileX, Frown } from 'lucide-react'
+import { LucideIcon, SearchX, Inbox, Frown } from 'lucide-react'
 
 interface EmptyStateProps {
   icon?: LucideIcon
@@ -20,14 +20,14 @@ export default function EmptyState({
   action,
   variant = 'default'
 }: EmptyStateProps) {
-  
+
   // Default icons based on variant
-  const DefaultIcon = variant === 'search' ? SearchX 
-    : variant === 'error' ? Frown 
+  const DefaultIcon = variant === 'search' ? SearchX
+    : variant === 'error' ? Frown
     : Inbox
-  
+
   const FinalIcon = Icon || DefaultIcon
-  
+
   if (variant === 'minimal') {
     return (
       <div className="text-center py-8">
@@ -46,7 +46,7 @@ export default function EmptyState({
       </div>
     )
   }
-  
+
   return (
     <div className="flex items-center justify-center min-h-[300px] p-8">
       <div className="text-center max-w-sm">
@@ -54,19 +54,19 @@ export default function EmptyState({
         <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
           <FinalIcon className="w-8 h-8 text-gray-400" />
         </div>
-        
+
         {/* Title */}
         <h3 className="text-base font-semibold text-gray-900 mb-1">
           {title}
         </h3>
-        
+
         {/* Description */}
         {description && (
           <p className="text-sm text-gray-500 mb-4">
             {description}
           </p>
         )}
-        
+
         {/* Action Button */}
         {action && (
           <button

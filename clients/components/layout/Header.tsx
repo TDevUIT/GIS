@@ -2,7 +2,7 @@
 import Link from "next/link"
 import React, { useEffect, useState } from "react"
 import { Button } from "../ui/button"
-import { Menu, X, Home, Map, BarChart3, Info } from "lucide-react"
+import { Menu, Home, Map, BarChart3, Info } from "lucide-react"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "../ui/sheet"
 import Image from "next/image"
 import { ROUTES } from "@/constants/routes"
