@@ -9,44 +9,44 @@ interface TeamMember {
 
 const teamMembers: TeamMember[] = [
   {
-    name: "JEFF CHRIS",
-    role: "CIVIL ENGINEER",
-    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop",
+    name: "Lê Thanh Tài – 22521276",
+    role: "Web Developer",
+    image: "https://res.cloudinary.com/dq2z27agv/image/upload/q_auto,f_webp,w_1200/v1764683955/impznddlcnftslzmbfn9.jpg",
   },
   {
-    name: "MOOSA",
-    role: "QUALITY ENGINEER",
-    image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop",
+    name: "Nguyễn Trần Hương Giang – 22520359",
+    role: "Web Developer",
+    image: "https://res.cloudinary.com/dq2z27agv/image/upload/q_auto,f_webp,w_1200/v1764684151/ug21yyd53ilkr4ihbvil.jpg",
   },
   {
-    name: "AMINA",
-    role: "SENIOR ENGINEER",
-    image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop",
+    name: "Bùi Quốc Lâm – 22520733",
+    role: "Web Developer",
+    image: "https://res.cloudinary.com/dq2z27agv/image/upload/q_auto,f_webp,w_1200/v1764684014/y94aywztbbaqpcovbz5f.jpg",
   },
   {
-    name: "USAMA KHAN",
-    role: "MECHANICAL ENGINEER",
-    image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400&h=400&fit=crop",
+    name: "Châu Trần Vỹ Linh – 22520755",
+    role: "Web Developer",
+    image: "https://res.cloudinary.com/dq2z27agv/image/upload/q_auto,f_webp,w_1200/v1764684000/ckntz04w0aayxygwsk1o.jpg",
   },
   {
-    name: "SARAH WILSON",
-    role: "PROJECT MANAGER",
-    image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop",
+    name: "Nguyễn Văn Quyền – 22521223",
+    role: "Web Developer",
+    image: "https://res.cloudinary.com/dq2z27agv/image/upload/q_auto,f_webp,w_1200/v1764684173/zz74sn91inogao6v6ezi.jpg",
   },
   {
-    name: "DAVID CHEN",
-    role: "DATA ANALYST",
-    image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop",
+    name: "Võ Nhật Tân – 22521313",
+    role: "Web Developer",
+    image: "https://res.cloudinary.com/dq2z27agv/image/upload/q_auto,f_webp,w_1200/v1764683970/k1sdvnzoz6x80ydbhq4u.jpg",
   },
   {
-    name: "LINDA NGUYEN",
-    role: "GIS SPECIALIST",
-    image: "https://images.unsplash.com/photo-1489424731084-a5d8b219a5bb?w=400&h=400&fit=crop",
+    name: "Nguyễn Công Thắng – 22521330",
+    role: "Web Developer",
+    image: "https://res.cloudinary.com/dq2z27agv/image/upload/q_auto,f_webp,w_1200/v1764683985/hnj9hdmvxgscexrsyufi.png",
   },
   {
-    name: "MICHAEL BROWN",
-    role: "URBAN PLANNER",
-    image: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400&h=400&fit=crop",
+    name: "Tạ Văn Thái – 22521377",
+    role: "Web Developer",
+    image: "https://res.cloudinary.com/dq2z27agv/image/upload/q_auto,f_webp,w_1200/v1764684047/le7pkqp2fjcf9tvucqtl.jpg",
   },
 ];
 
@@ -72,7 +72,7 @@ const TeamList = () => {
               />
 
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-              
+
               <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
                 <h3 className="text-lg font-bold tracking-wide">
                   {member.name}

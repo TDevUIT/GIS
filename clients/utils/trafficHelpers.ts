@@ -34,17 +34,18 @@ export function getCongestionLabel(level: string): string {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function convertTrafficToLine(traffic: any): TrafficLine {
   const congestionLevel = (traffic.congestionLevel || traffic.congestion_level || 'MODERATE').toUpperCase();
-  
+
   // Parse geom if it's a string
   let coordinates: [number, number][] = [];
-  
+
   try {
     if (traffic.geom) {
       // If geom is a string, parse it
       const geom = typeof traffic.geom === 'string' ? JSON.parse(traffic.geom) : traffic.geom;
-      
+
       if (geom.type === 'LineString' && Array.isArray(geom.coordinates)) {
         // GeoJSON uses [lng, lat], Leaflet uses [lat, lng], so we need to swap
         coordinates = geom.coordinates.map((coord: number[]) => [coord[1], coord[0]]);
@@ -63,7 +64,7 @@ export function convertTrafficToLine(traffic: any): TrafficLine {
     console.warn('Failed to parse traffic geometry:', error, traffic);
     coordinates = [];
   }
-  
+
   // Calculate congestion level from traffic volume if not provided
   let finalCongestionLevel = congestionLevel;
   if (!traffic.congestionLevel && !traffic.congestion_level && traffic.trafficVolume) {
@@ -73,7 +74,7 @@ export function convertTrafficToLine(traffic: any): TrafficLine {
     else if (volume > 10000) finalCongestionLevel = 'LIGHT';
     else finalCongestionLevel = 'CLEAR';
   }
-  
+
   return {
     id: traffic.id || traffic.trafficId,
     roadName: traffic.roadName || traffic.road_name || 'Chưa xác định',

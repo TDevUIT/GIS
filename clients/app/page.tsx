@@ -1,7 +1,7 @@
-import Hero from "@/components/layout/Hero";
-import Districts from "@/components/layout/Districts";
-import Features from "@/components/layout/Features";
-import MapSection from "@/components/layout/MapSection";
+import Hero from "@/components/home/Hero";
+import Districts from "@/components/home/Districts";
+import Features from "@/components/home/Features";
+import MapSection from "@/components/home/MapSection";
 
 export default function Home() {
   return (

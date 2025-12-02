@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useCreateDistrict, useUpdateDistrict } from '@/hooks/api/useDistrictsQuery';
+import { useCreateDistrict, useUpdateDistrict } from '@/hooks/api';
 import { District } from '@/types';
 import { Save, X, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
 
@@ -197,7 +197,7 @@ export default function DistrictForm({ district, onSuccess, onCancel }: District
           <div>
             <h4 className="font-semibold text-red-800">Lỗi {isEditMode ? 'cập nhật' : 'tạo mới'}</h4>
             <p className="text-sm text-red-700 mt-1">
-              {(error as any)?.message || 'Đã xảy ra lỗi. Vui lòng thử lại.'}
+              {(error as Error)?.message || 'Đã xảy ra lỗi. Vui lòng thử lại.'}
             </p>
           </div>
         </div>

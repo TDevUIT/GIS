@@ -34,13 +34,13 @@ export default function AccidentTimeAnalysis() {
     'SUNDAY': 'Chủ nhật',
   };
 
-  const transformedDayData = Array.isArray(dayOfWeekData) ? dayOfWeekData.map((item: any) => ({
+  const transformedDayData = Array.isArray(dayOfWeekData) ? dayOfWeekData.map((item: { dayOfWeek: string; count: number }) => ({
     ...item,
     dayName: dayMap[item.dayOfWeek] || item.dayOfWeek
-  })) : [];
+  })): [];
 
   // Transform time of day data
-  const transformedTimeData = Array.isArray(timeOfDayData) ? timeOfDayData.map((item: any) => ({
+  const transformedTimeData = Array.isArray(timeOfDayData) ? timeOfDayData.map((item: { hour: number; count: number }) => ({
     ...item,
     timeLabel: `${item.hour}:00`
   })) : [];
@@ -64,8 +64,8 @@ export default function AccidentTimeAnalysis() {
             <h3 className="text-sm font-medium text-gray-600">Tổng tai nạn</h3>
           </div>
           <p className="text-3xl font-bold text-gray-900">
-            {Array.isArray(timeOfDayData) 
-              ? timeOfDayData.reduce((sum: number, item: any) => sum + (item.count || 0), 0)
+            {Array.isArray(timeOfDayData)
+              ? timeOfDayData.reduce((sum: number, item: { count?: number }) => sum + (item.count || 0), 0)
               : 0}
           </p>
         </div>
@@ -77,8 +77,8 @@ export default function AccidentTimeAnalysis() {
           </div>
           <p className="text-3xl font-bold text-gray-900">
             {Array.isArray(timeOfDayData) && timeOfDayData.length > 0
-              ? `${timeOfDayData.reduce((max: any, item: any) => 
-                  (item.count > (max.count || 0) ? item : max), timeOfDayData[0]).hour}:00`
+              ? `${timeOfDayData.reduce((max: { hour: number; count?: number }, item: { hour: number; count?: number }) =>
+                  (item.count! > (max.count || 0) ? item : max), timeOfDayData[0]).hour}:00`
               : 'N/A'}
           </p>
         </div>
@@ -90,8 +90,8 @@ export default function AccidentTimeAnalysis() {
           </div>
           <p className="text-xl font-bold text-gray-900">
             {Array.isArray(transformedDayData) && transformedDayData.length > 0
-              ? transformedDayData.reduce((max: any, item: any) => 
-                  (item.count > (max.count || 0) ? item : max), transformedDayData[0]).dayName
+              ? transformedDayData.reduce((max: { dayName: string; count?: number }, item: { dayName: string; count?: number }) =>
+                  (item.count! > (max.count || 0) ? item : max), transformedDayData[0]).dayName
               : 'N/A'}
           </p>
         </div>
@@ -113,10 +113,10 @@ export default function AccidentTimeAnalysis() {
                 <YAxis tick={{ fontSize: 11 }} />
                 <Tooltip />
                 <Legend />
-                <Line 
-                  type="monotone" 
-                  dataKey="count" 
-                  stroke="#374151" 
+                <Line
+                  type="monotone"
+                  dataKey="count"
+                  stroke="#374151"
                   strokeWidth={2}
                   name="Số tai nạn"
                   dot={{ fill: '#374151', r: 4 }}
@@ -165,7 +165,7 @@ export default function AccidentTimeAnalysis() {
                   outerRadius={100}
                   label
                 >
-                  {riskData.map((entry: any, index: number) => (
+                  {riskData.map((entry: { riskLevel: string; count: number }, index: number) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
@@ -176,11 +176,11 @@ export default function AccidentTimeAnalysis() {
 
             <div className="space-y-3">
               <h4 className="font-semibold text-gray-900">Phân loại theo mức độ rủi ro</h4>
-              {riskData.map((item: any, index: number) => (
+              {riskData.map((item: { riskLevel: string; count: number }, index: number) => (
                 <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded">
                   <div className="flex items-center gap-3">
-                    <div 
-                      className="w-4 h-4 rounded" 
+                    <div
+                      className="w-4 h-4 rounded"
                       style={{ backgroundColor: COLORS[index % COLORS.length] }}
                     />
                     <span className="font-medium text-gray-900">{item.riskLevel}</span>

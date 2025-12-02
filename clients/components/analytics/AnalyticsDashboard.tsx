@@ -1,41 +1,35 @@
-'use client';
+﻿'use client';
 
 import {
   useAnalyticsSummary,
   useInfrastructureByCategory,
-  useAccidentSummaryBySeverity,
   usePublicTransportSummary,
   useAirQualityRanking,
   useWaterQualityRanking
-} from '@/hooks/api/useAnalyticsQuery';
+} from '@/hooks/api';
 import {
   BarChart3,
   Building2,
-  AlertTriangle,
   Bus,
   Wind,
   Droplets,
   Activity,
   Loader2
 } from 'lucide-react';
-import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 export default function AnalyticsDashboard() {
   const { data: summaryResponse, isLoading: loadingSummary } = useAnalyticsSummary();
   const { data: infrastructureResponse } = useInfrastructureByCategory();
-  const { data: accidentsResponse } = useAccidentSummaryBySeverity();
   const { data: publicTransportResponse } = usePublicTransportSummary();
   const { data: airQualityResponse } = useAirQualityRanking();
   const { data: waterQualityResponse } = useWaterQualityRanking();
 
   const summary = summaryResponse?.data?.data || summaryResponse?.data;
   const infrastructure = infrastructureResponse?.data?.data || infrastructureResponse?.data;
-  const accidents = accidentsResponse?.data?.data || accidentsResponse?.data;
   const publicTransport = publicTransportResponse?.data?.data || publicTransportResponse?.data;
   const airQuality = airQualityResponse?.data?.data || airQualityResponse?.data;
   const waterQuality = waterQualityResponse?.data?.data || waterQualityResponse?.data;
-
-  const COLORS = ['#374151', '#6b7280', '#9ca3af', '#d1d5db'];
 
   if (loadingSummary) {
     return (
@@ -53,34 +47,34 @@ export default function AnalyticsDashboard() {
           <BarChart3 className="w-6 h-6 text-gray-700" />
           Analytics Dashboard
         </h2>
-        <p className="text-gray-500 mt-1">Phân tích dữ liệu hệ thống GIS</p>
+        <p className="text-gray-500 mt-1">PhÃ¢n tÃ­ch dá»¯ liá»‡u há»‡ thá»‘ng GIS</p>
       </div>
 
       {/* Overview Section */}
       <div className="space-y-6">
         <div className="flex items-center gap-2">
           <Activity className="w-5 h-5 text-gray-700" />
-          <h3 className="text-xl font-bold text-gray-900">Tổng quan hệ thống</h3>
+          <h3 className="text-xl font-bold text-gray-900">Tá»•ng quan há»‡ thá»‘ng</h3>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard
-            title="Quận/Huyện"
+            title="Quáº­n/Huyá»‡n"
             value={summary?.totalDistricts?.toLocaleString() || 'N/A'}
             icon={Building2}
           />
           <StatCard
-            title="Cơ sở hạ tầng"
+            title="CÆ¡ sá»Ÿ háº¡ táº§ng"
             value={summary?.totalInfrastructures?.toLocaleString() || 'N/A'}
             icon={Building2}
           />
           <StatCard
-            title="Tuyến giao thông"
+            title="Tuyáº¿n giao thÃ´ng"
             value={summary?.totalTrafficRoutes?.toLocaleString() || 'N/A'}
             icon={Bus}
           />
           <StatCard
-            title="Quy hoạch đô thị"
+            title="Quy hoáº¡ch Ä‘Ã´ thá»‹"
             value={summary?.totalUrbanPlans?.toLocaleString() || 'N/A'}
             icon={Activity}
           />
@@ -89,7 +83,7 @@ export default function AnalyticsDashboard() {
         {infrastructure && Array.isArray(infrastructure) && infrastructure.length > 0 && (
           <div className="bg-gray-50 rounded-lg p-6 border border-gray-200">
             <h4 className="text-lg font-semibold text-gray-900 mb-4">
-              Phân bố cơ sở hạ tầng
+              PhÃ¢n bá»‘ cÆ¡ sá»Ÿ háº¡ táº§ng
             </h4>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={infrastructure}>
@@ -108,7 +102,7 @@ export default function AnalyticsDashboard() {
       <div className="space-y-6">
         <div className="flex items-center gap-2">
           <Wind className="w-5 h-5 text-gray-700" />
-          <h3 className="text-xl font-bold text-gray-900">Chất lượng môi trường</h3>
+          <h3 className="text-xl font-bold text-gray-900">Cháº¥t lÆ°á»£ng mÃ´i trÆ°á»ng</h3>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -116,7 +110,7 @@ export default function AnalyticsDashboard() {
             <div className="bg-gray-50 rounded-lg p-6 border border-gray-200">
               <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                 <Wind className="w-5 h-5 text-gray-700" />
-                Chất lượng không khí (PM2.5)
+                Cháº¥t lÆ°á»£ng khÃ´ng khÃ­ (PM2.5)
               </h4>
               <ResponsiveContainer width="100%" height={250}>
                 <BarChart data={airQuality.slice(0, 5)} layout="vertical">
@@ -134,7 +128,7 @@ export default function AnalyticsDashboard() {
             <div className="bg-gray-50 rounded-lg p-6 border border-gray-200">
               <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                 <Droplets className="w-5 h-5 text-gray-700" />
-                Chất lượng nước (CI)
+                Cháº¥t lÆ°á»£ng nÆ°á»›c (CI)
               </h4>
               <ResponsiveContainer width="100%" height={250}>
                 <BarChart data={waterQuality.slice(0, 5)} layout="vertical">
@@ -154,13 +148,13 @@ export default function AnalyticsDashboard() {
       <div className="space-y-6">
         <div className="flex items-center gap-2">
           <Bus className="w-5 h-5 text-gray-700" />
-          <h3 className="text-xl font-bold text-gray-900">Giao thông công cộng</h3>
+          <h3 className="text-xl font-bold text-gray-900">Giao thÃ´ng cÃ´ng cá»™ng</h3>
         </div>
 
         {publicTransport && Array.isArray(publicTransport) && publicTransport.length > 0 && (
           <div className="bg-gray-50 rounded-lg p-6 border border-gray-200">
             <h4 className="text-lg font-semibold text-gray-900 mb-4">
-              Phân bố tuyến giao thông công cộng
+              PhÃ¢n bá»‘ tuyáº¿n giao thÃ´ng cÃ´ng cá»™ng
             </h4>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={publicTransport}>
@@ -181,7 +175,7 @@ export default function AnalyticsDashboard() {
 interface StatCardProps {
   title: string;
   value: string;
-  icon: any;
+  icon: React.ComponentType<{ className?: string }>;
 }
 
 function StatCard({ title, value, icon: Icon }: StatCardProps) {

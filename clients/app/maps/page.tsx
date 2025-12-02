@@ -2,7 +2,7 @@
 
 import dynamic from 'next/dynamic'
 
-const MapView = dynamic(() => import('@/components/maps/MapView'), {
+const MapView = dynamic(() => import('@/components/maps/core/MapView'), {
   ssr: false,
   loading: () => (
     <div className="relative h-screen w-full overflow-hidden bg-gradient-to-br from-blue-50 to-gray-100 flex items-center justify-center">

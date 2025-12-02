@@ -1,7 +1,7 @@
 'use client';
 
 import { useAnalyticsSummary } from '@/hooks/api';
-import { FileText, Loader2, Building2, Bus, Users, Activity, TrendingUp, BarChart } from 'lucide-react';
+import { Loader2, Building2, Bus, Activity } from 'lucide-react';
 
 export default function ReportDashboard() {
   const { data: summaryResponse, isLoading } = useAnalyticsSummary();
@@ -55,7 +55,7 @@ export default function ReportDashboard() {
 interface StatCardProps {
   title: string;
   value: string;
-  icon: any;
+  icon: React.ElementType;
   color: string;
 }
 
@@ -70,29 +70,5 @@ function StatCard({ title, value, icon: Icon, color }: StatCardProps) {
       <h3 className="text-sm font-medium text-gray-600 mb-1">{title}</h3>
       <p className="text-3xl font-bold text-gray-900">{value}</p>
     </div>
-  );
-}
-
-interface QuickLinkCardProps {
-  title: string;
-  description: string;
-  icon: any;
-  onClick: () => void;
-}
-
-function QuickLinkCard({ title, description, icon: Icon, onClick }: QuickLinkCardProps) {
-  return (
-    <button
-      onClick={onClick}
-      className="bg-white rounded-lg p-6 border border-gray-200 hover:border-gray-900 hover:shadow-md transition-all text-left group"
-    >
-      <div className="flex items-start gap-4">
-        <Icon className="w-6 h-6 text-gray-600 group-hover:text-gray-900 flex-shrink-0" />
-        <div>
-          <h3 className="font-semibold text-gray-900 mb-1">{title}</h3>
-          <p className="text-sm text-gray-600">{description}</p>
-        </div>
-      </div>
-    </button>
   );
 }

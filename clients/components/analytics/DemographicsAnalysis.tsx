@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useDemographicsSummary, useHouseholdsSummary } from '@/hooks/api';
-import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Users, Home, Baby, User, Users2, Loader2 } from 'lucide-react';
 
 const COLORS = ['#374151', '#6b7280', '#9ca3af', '#d1d5db', '#e5e7eb'];
@@ -148,7 +148,7 @@ export default function DemographicsAnalysis() {
                 outerRadius={100}
                 label={(entry) => `${entry.name}: ${entry.percentage}%`}
               >
-                {genderData.map((entry: any, index: number) => (
+                {genderData.map((entry: { name: string; value: number; percentage: number }, index: number) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>
@@ -220,7 +220,7 @@ export default function DemographicsAnalysis() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {ageGroups.map((item: any, index: number) => (
+              {ageGroups.map((item: { ageRange: string; count: number; percentage: number }, index: number) => (
                 <tr key={index} className="hover:bg-gray-50">
                   <td className="px-4 py-2 text-gray-900">{item.ageRange}</td>
                   <td className="px-4 py-2 text-right font-medium text-gray-900">

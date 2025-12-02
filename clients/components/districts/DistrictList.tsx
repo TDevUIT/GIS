@@ -1,8 +1,8 @@
-'use client';
+﻿'use client';
 
 import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { useDistricts } from '@/hooks/api/useDistrictsQuery';
+import { useDistricts } from '@/hooks/api';
 import { District } from '@/types';
 import DistrictCard from './DistrictCard';
 import DistrictListSkeleton from './DistrictListSkeleton';
@@ -95,9 +95,9 @@ export default function DistrictList({
         <div className="flex items-start gap-3">
           <AlertCircle className="w-6 h-6 text-red-500 flex-shrink-0 mt-0.5" />
           <div className="flex-1">
-            <h3 className="font-semibold text-red-700 mb-1">Lỗi tải dữ liệu</h3>
+            <h3 className="font-semibold text-red-700 mb-1">Lá»—i táº£i dá»¯ liá»‡u</h3>
             <p className="text-sm text-red-600 mb-3">
-              {(error as any)?.message || 'Không thể tải danh sách quận/huyện'}
+              {(error as Error)?.message || 'Không thể tải danh sách quận/huyện'}
             </p>
             <button
               onClick={() => refetch()}
@@ -146,7 +146,7 @@ export default function DistrictList({
 
           <select
             value={sortBy}
-            onChange={(e) => handleSort(e.target.value as any)}
+            onChange={(e) => handleSort(e.target.value as 'name' | 'area' | 'density')}
             className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
           >
             <option value="name">Tên A-Z</option>
@@ -165,13 +165,13 @@ export default function DistrictList({
             Không tìm thấy kết quả
           </h3>
           <p className="text-gray-600 mb-4">
-            Không có quận/huyện nào phù hợp với từ khóa "{searchQuery}"
+            Không có quận/huyện nào phù hợp với từ khóa &quot;{searchQuery}&quot;
           </p>
           <button
             onClick={() => handleSearch('')}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
-            Xóa bộ lọc
+            XÃ³a bá»™ lá»c
           </button>
         </div>
       ) : (

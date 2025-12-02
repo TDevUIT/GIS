@@ -2,7 +2,7 @@
 
 import { ReactNode } from 'react';
 import QueryProvider from './QueryProvider';
-import ErrorBoundary from '../components/common/ErrorBoundary';
+import ErrorBoundary from '../components/common/feedback/ErrorBoundary';
 
 interface AppProvidersProps {
   children: ReactNode;

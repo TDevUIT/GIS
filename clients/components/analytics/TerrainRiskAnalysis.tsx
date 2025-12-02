@@ -1,23 +1,44 @@
 'use client';
 
 import { useTerrainSummary, useLandslideRiskAreas, useFloodProneAreas, useSoilTypeDistribution } from '@/hooks/api';
-import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ScatterChart, Scatter } from 'recharts';
+import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Mountain, AlertTriangle, Droplets, Layers, Loader2 } from 'lucide-react';
 
 const COLORS = ['#374151', '#6b7280', '#9ca3af', '#d1d5db', '#e5e7eb', '#f3f4f6'];
-const RISK_COLORS = {
-  HIGH: '#dc2626',
-  MEDIUM: '#f59e0b',
-  LOW: '#10b981',
-};
+
+interface LandslideArea {
+  district: string;
+  riskLevel: 'HIGH' | 'MEDIUM' | 'LOW';
+  area: number;
+  slope: number;
+  affectedPopulation: number;
+}
+
+interface FloodArea {
+  district: string;
+  riskLevel: 'HIGH' | 'MEDIUM' | 'LOW';
+  area: number;
+  elevation: number;
+  affectedPopulation: number;
+}
+
+interface SoilType {
+  soilType: string;
+  area: number;
+  percentage: number;
+  suitability: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [key: string]: any;
+}
+
+type AffectedArea = LandslideArea | FloodArea;
 
 export default function TerrainRiskAnalysis() {
-  const { data: terrainResponse, isLoading: loadingTerrain } = useTerrainSummary();
+  const { isLoading: loadingTerrain } = useTerrainSummary();
   const { data: landslideResponse, isLoading: loadingLandslide } = useLandslideRiskAreas(30);
   const { data: floodResponse, isLoading: loadingFlood } = useFloodProneAreas(5);
   const { data: soilResponse, isLoading: loadingSoil } = useSoilTypeDistribution();
 
-  const terrainData = terrainResponse?.data?.data || terrainResponse?.data;
   const landslideAreas = landslideResponse?.data?.data || landslideResponse?.data || [];
   const floodAreas = floodResponse?.data?.data || floodResponse?.data || [];
   const soilTypes = soilResponse?.data?.data || soilResponse?.data || [];
@@ -31,7 +52,7 @@ export default function TerrainRiskAnalysis() {
   }
 
   // Sample data if API returns empty
-  const sampleLandslideAreas = Array.isArray(landslideAreas) && landslideAreas.length > 0 ? landslideAreas : [
+  const sampleLandslideAreas: LandslideArea[] = Array.isArray(landslideAreas) && landslideAreas.length > 0 ? landslideAreas : [
     { district: 'Quận 1', riskLevel: 'HIGH', area: 12.5, slope: 35, affectedPopulation: 5000 },
     { district: 'Quận 3', riskLevel: 'MEDIUM', area: 8.3, slope: 28, affectedPopulation: 3500 },
     { district: 'Quận 5', riskLevel: 'HIGH', area: 15.7, slope: 40, affectedPopulation: 6200 },
@@ -39,7 +60,7 @@ export default function TerrainRiskAnalysis() {
     { district: 'Quận 9', riskLevel: 'LOW', area: 5.8, slope: 18, affectedPopulation: 2000 },
   ];
 
-  const sampleFloodAreas = Array.isArray(floodAreas) && floodAreas.length > 0 ? floodAreas : [
+  const sampleFloodAreas: FloodArea[] = Array.isArray(floodAreas) && floodAreas.length > 0 ? floodAreas : [
     { district: 'Quận 2', riskLevel: 'HIGH', area: 25.4, elevation: 2, affectedPopulation: 12000 },
     { district: 'Quận 4', riskLevel: 'MEDIUM', area: 18.6, elevation: 4, affectedPopulation: 8500 },
     { district: 'Quận 6', riskLevel: 'HIGH', area: 30.2, elevation: 1.5, affectedPopulation: 15000 },
@@ -47,7 +68,7 @@ export default function TerrainRiskAnalysis() {
     { district: 'Thủ Đức', riskLevel: 'LOW', area: 12.3, elevation: 6, affectedPopulation: 4500 },
   ];
 
-  const sampleSoilTypes = Array.isArray(soilTypes) && soilTypes.length > 0 ? soilTypes : [
+  const sampleSoilTypes: SoilType[] = Array.isArray(soilTypes) && soilTypes.length > 0 ? soilTypes : [
     { soilType: 'Đất phù sa', area: 450, percentage: 35, suitability: 'Nông nghiệp' },
     { soilType: 'Đất sét', area: 320, percentage: 25, suitability: 'Xây dựng' },
     { soilType: 'Đất cát', area: 230, percentage: 18, suitability: 'Chống xói mòn' },
@@ -56,24 +77,24 @@ export default function TerrainRiskAnalysis() {
   ];
 
   // Calculate risk statistics
-  const highRiskLandslide = sampleLandslideAreas.filter((a: any) => a.riskLevel === 'HIGH').length;
-  const highRiskFlood = sampleFloodAreas.filter((a: any) => a.riskLevel === 'HIGH').length;
+  const highRiskLandslide = sampleLandslideAreas.filter((a: LandslideArea) => a.riskLevel === 'HIGH').length;
+  const highRiskFlood = sampleFloodAreas.filter((a: FloodArea) => a.riskLevel === 'HIGH').length;
   const totalAffectedPopulation = [...sampleLandslideAreas, ...sampleFloodAreas]
-    .reduce((sum: number, item: any) => sum + (item.affectedPopulation || 0), 0);
+    .reduce((sum: number, item: AffectedArea) => sum + (item.affectedPopulation || 0), 0);
 
   // Risk distribution
   const riskDistribution = [
-    { 
-      name: 'Sạt lở đất', 
-      high: sampleLandslideAreas.filter((a: any) => a.riskLevel === 'HIGH').length,
-      medium: sampleLandslideAreas.filter((a: any) => a.riskLevel === 'MEDIUM').length,
-      low: sampleLandslideAreas.filter((a: any) => a.riskLevel === 'LOW').length,
+    {
+      name: 'Sạt lở đất',
+      high: sampleLandslideAreas.filter((a: LandslideArea) => a.riskLevel === 'HIGH').length,
+      medium: sampleLandslideAreas.filter((a: LandslideArea) => a.riskLevel === 'MEDIUM').length,
+      low: sampleLandslideAreas.filter((a: LandslideArea) => a.riskLevel === 'LOW').length,
     },
-    { 
-      name: 'Ngập lụt', 
-      high: sampleFloodAreas.filter((a: any) => a.riskLevel === 'HIGH').length,
-      medium: sampleFloodAreas.filter((a: any) => a.riskLevel === 'MEDIUM').length,
-      low: sampleFloodAreas.filter((a: any) => a.riskLevel === 'LOW').length,
+    {
+      name: 'Ngập lụt',
+      high: sampleFloodAreas.filter((a: FloodArea) => a.riskLevel === 'HIGH').length,
+      medium: sampleFloodAreas.filter((a: FloodArea) => a.riskLevel === 'MEDIUM').length,
+      low: sampleFloodAreas.filter((a: FloodArea) => a.riskLevel === 'LOW').length,
     },
   ];
 
@@ -197,7 +218,7 @@ export default function TerrainRiskAnalysis() {
                 outerRadius={100}
                 label={(entry) => `${entry.soilType}: ${entry.percentage}%`}
               >
-                {sampleSoilTypes.map((entry: any, index: number) => (
+                {sampleSoilTypes.map((entry: SoilType, index: number) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>
@@ -209,7 +230,7 @@ export default function TerrainRiskAnalysis() {
         <div className="bg-white rounded-lg p-6 border border-gray-200">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Mức độ Phù hợp</h3>
           <div className="space-y-3">
-            {sampleSoilTypes.map((item: any, index: number) => (
+            {sampleSoilTypes.map((item: SoilType, index: number) => (
               <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded">
                 <div>
                   <div className="font-medium text-gray-900">{item.soilType}</div>
@@ -243,7 +264,7 @@ export default function TerrainRiskAnalysis() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {sampleLandslideAreas.map((item: any, index: number) => (
+                {sampleLandslideAreas.map((item: LandslideArea, index: number) => (
                   <tr key={index} className="hover:bg-gray-50">
                     <td className="px-4 py-2 text-gray-900">{item.district}</td>
                     <td className="px-4 py-2 text-center text-gray-600">{item.slope}°</td>
@@ -280,7 +301,7 @@ export default function TerrainRiskAnalysis() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {sampleFloodAreas.map((item: any, index: number) => (
+                {sampleFloodAreas.map((item: FloodArea, index: number) => (
                   <tr key={index} className="hover:bg-gray-50">
                     <td className="px-4 py-2 text-gray-900">{item.district}</td>
                     <td className="px-4 py-2 text-center text-gray-600">{item.elevation}m</td>
