@@ -1,12 +1,12 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getAllLandUses, getLandUseById, getLandUseAtPoint, findIntersectingLandUses } from '@/services/landUsesService';
+﻿import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { getAllLandUses, getLandUseById, getLandUseAtPoint, findIntersectingLandUses } from '@/services';
 import { queryKeys } from '@/config/queryKeys';
 import { QUERY_STALE_TIME } from '@/config/queryConfig';
 
 export function useLandUses(districtId?: string, type?: string) {
   return useQuery({
     queryKey: queryKeys.landUses.list(districtId, type),
-    queryFn: () => getAllLandUses(districtId, type),
+    queryFn: () => getAllLandUses({ districtId, type }),
     staleTime: QUERY_STALE_TIME.HOURLY,
   });
 }
@@ -39,3 +39,5 @@ export function useLandUseIntersects() {
     },
   });
 }
+
+

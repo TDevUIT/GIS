@@ -1,5 +1,5 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getAllUrbanPlans, getUrbanPlanById, getUrbanPlanAtPoint, findIntersectingUrbanPlans } from '@/services/urbanPlansService';
+﻿import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { getAllUrbanPlans, getUrbanPlanById, getUrbanPlanAtPoint, findIntersectingUrbanPlans } from '@/services';
 import { queryKeys } from '@/config/queryKeys';
 import { QUERY_STALE_TIME } from '@/config/queryConfig';
 
@@ -39,3 +39,5 @@ export function useUrbanPlanIntersects() {
     },
   });
 }
+
+

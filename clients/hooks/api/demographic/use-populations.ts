@@ -1,5 +1,5 @@
-import { useQuery } from '@tanstack/react-query';
-import { getAllPopulations, getPopulationById } from '@/services/populationsService';
+﻿import { useQuery } from '@tanstack/react-query';
+import { getAllPopulations, getPopulationById } from '@/services';
 import { queryKeys } from '@/config/queryKeys';
 import { QUERY_STALE_TIME } from '@/config/queryConfig';
 
@@ -19,3 +19,5 @@ export function usePopulation(id: string) {
     staleTime: QUERY_STALE_TIME.HOURLY,
   });
 }
+
+

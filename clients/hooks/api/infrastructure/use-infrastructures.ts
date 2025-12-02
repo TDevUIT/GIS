@@ -1,9 +1,9 @@
-import { useQuery } from '@tanstack/react-query';
-import { getAllInfrastructures, getInfrastructureById, getInfrastructuresWithinRadius } from '@/services/infrastructuresService';
+﻿import { useQuery } from '@tanstack/react-query';
+import { getAllInfrastructures, getInfrastructureById, getInfrastructuresWithinRadius, InfraCategory } from '@/services';
 import { queryKeys } from '@/config/queryKeys';
 import { QUERY_STALE_TIME } from '@/config/queryConfig';
 
-export function useInfrastructures(districtId?: string, category?: string) {
+export function useInfrastructures(districtId?: string, category?: InfraCategory) {
   return useQuery({
     queryKey: queryKeys.infrastructures.list(districtId, category),
     queryFn: () => getAllInfrastructures(districtId, category),
@@ -33,3 +33,5 @@ export function useInfrastructuresWithinRadius(
     staleTime: QUERY_STALE_TIME.LONG,
   });
 }
+
+

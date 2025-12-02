@@ -1,11 +1,11 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+﻿import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   getReports,
   generateReport,
   downloadReport,
   getReportStatus,
   deleteReport
-} from '@/services/reportService';
+} from '@/services';
 import { QUERY_STALE_TIME } from '@/config/queryConfig';
 
 

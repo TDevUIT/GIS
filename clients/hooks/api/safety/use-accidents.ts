@@ -1,5 +1,5 @@
-import { useQuery } from '@tanstack/react-query';
-import { getAllAccidents, getAccidentById } from '@/services/accidentsService';
+﻿import { useQuery } from '@tanstack/react-query';
+import { getAllAccidents, getAccidentById } from '@/services';
 import { queryKeys } from '@/config/queryKeys';
 import { QUERY_STALE_TIME } from '@/config/queryConfig';
 
@@ -19,3 +19,5 @@ export function useAccident(id: string) {
     staleTime: QUERY_STALE_TIME.MEDIUM,
   });
 }
+
+

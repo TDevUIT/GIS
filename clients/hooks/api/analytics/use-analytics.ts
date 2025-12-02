@@ -1,5 +1,5 @@
-import { useQuery } from '@tanstack/react-query';
-import { 
+﻿import { useQuery } from '@tanstack/react-query';
+import {
   getGlobalSummary,
   getInfrastructureByCategory,
   getPopulationHistory,
@@ -23,7 +23,7 @@ import {
   getSoilTypeDistribution,
   getDemographicsSummary,
   getHouseholdsSummary
-} from '@/services/analyticsService';
+} from '@/services';
 import { queryKeys } from '@/config/queryKeys';
 import { QUERY_STALE_TIME } from '@/config/queryConfig';
 
@@ -226,3 +226,5 @@ export function useSoilTypeDistribution() {
     staleTime: QUERY_STALE_TIME.LONG,
   });
 }
+
+

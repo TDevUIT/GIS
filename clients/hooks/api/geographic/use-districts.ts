@@ -1,5 +1,5 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getAllDistricts, getDistrictById, getDistrictContainingPoint, findIntersectingDistricts, getWardsOfDistrict, createDistrict, updateDistrict, deleteDistrict } from '@/services/districtsService';
+﻿import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { getAllDistricts, getDistrictById, getDistrictContainingPoint, findIntersectingDistricts, getWardsOfDistrict, createDistrict, updateDistrict, deleteDistrict } from '@/services';
 import { queryKeys } from '@/config/queryKeys';
 import { QUERY_STALE_TIME } from '@/config/queryConfig';
 
@@ -82,3 +82,5 @@ export function useDeleteDistrict() {
     },
   });
 }
+
+
