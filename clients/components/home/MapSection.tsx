@@ -1,4 +1,4 @@
-"use client";
+import Image from "next/image";
 
 const MapSection = () => {
     return (
@@ -12,12 +12,14 @@ const MapSection = () => {
                 </p>
             </div>
 
-            <div className="relative w-full bg-white rounded-2xl shadow-lg overflow-hidden">
-                <div className="relative w-full">
-                    <img
+            <div className="relative w-full bg-white rounded-2xl shadow-lg overflow-hidden h-[400px]">
+                <div className="relative w-full h-full">
+                    <Image
                         src="/images/place/map.png"
                         alt="Bản đồ Thành phố Hồ Chí Minh"
                         className="object-contain"
+                        fill
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                     />
                 </div>
             </div>

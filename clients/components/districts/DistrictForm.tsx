@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState, useEffect } from 'react';
 import { useCreateDistrict, useUpdateDistrict } from '@/hooks/api';
@@ -54,28 +54,28 @@ export default function DistrictForm({ district, onSuccess, onCancel }: District
   const validateField = (name: keyof FormData, value: string): string | undefined => {
     switch (name) {
       case 'name':
-        if (!value.trim()) return 'TÃªn quáº­n/huyá»‡n lÃ  báº¯t buá»™c';
-        if (value.length < 3) return 'TÃªn pháº£i cÃ³ Ã­t nháº¥t 3 kÃ½ tá»±';
-        if (value.length > 100) return 'TÃªn khÃ´ng Ä‘Æ°á»£c quÃ¡ 100 kÃ½ tá»±';
+        if (!value.trim()) return 'Tên quận/huyện là bắt buộc';
+        if (value.length < 3) return 'Tên phải có ít nhất 3 ký tự';
+        if (value.length > 100) return 'Tên không được quá 100 ký tự';
         return undefined;
 
       case 'code':
-        if (!value.trim()) return 'MÃ£ quáº­n/huyá»‡n lÃ  báº¯t buá»™c';
-        if (!/^[A-Z0-9]+$/.test(value)) return 'MÃ£ chá»‰ Ä‘Æ°á»£c chá»©a chá»¯ in hoa vÃ  sá»‘';
-        if (value.length < 2) return 'MÃ£ pháº£i cÃ³ Ã­t nháº¥t 2 kÃ½ tá»±';
-        if (value.length > 10) return 'MÃ£ khÃ´ng Ä‘Æ°á»£c quÃ¡ 10 kÃ½ tá»±';
+        if (!value.trim()) return 'Mã quận/huyện là bắt buộc';
+        if (!/^[A-Z0-9]+$/.test(value)) return 'Mã chỉ được chứa chữ in hoa và số';
+        if (value.length < 2) return 'Mã phải có ít nhất 2 ký tự';
+        if (value.length > 10) return 'Mã không được quá 10 ký tự';
         return undefined;
 
       case 'areaKm2':
-        if (value && isNaN(parseFloat(value))) return 'Diá»‡n tÃ­ch pháº£i lÃ  sá»‘';
-        if (value && parseFloat(value) <= 0) return 'Diá»‡n tÃ­ch pháº£i lá»›n hÆ¡n 0';
-        if (value && parseFloat(value) > 10000) return 'Diá»‡n tÃ­ch khÃ´ng há»£p lá»‡';
+        if (value && isNaN(parseFloat(value))) return 'Diện tích phải là số';
+        if (value && parseFloat(value) <= 0) return 'Diện tích phải lớn hơn 0';
+        if (value && parseFloat(value) > 10000) return 'Diện tích không hợp lệ';
         return undefined;
 
       case 'densityPerKm2':
-        if (value && isNaN(parseInt(value))) return 'Máº­t Ä‘á»™ pháº£i lÃ  sá»‘ nguyÃªn';
-        if (value && parseInt(value) < 0) return 'Máº­t Ä‘á»™ khÃ´ng Ä‘Æ°á»£c Ã¢m';
-        if (value && parseInt(value) > 1000000) return 'Máº­t Ä‘á»™ khÃ´ng há»£p lá»‡';
+        if (value && isNaN(parseInt(value))) return 'Mật độ phải là số nguyên';
+        if (value && parseInt(value) < 0) return 'Mật độ không được âm';
+        if (value && parseInt(value) > 1000000) return 'Mật độ không hợp lệ';
         return undefined;
 
       default:
@@ -181,10 +181,10 @@ export default function DistrictForm({ district, onSuccess, onCancel }: District
           <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
           <div>
             <h4 className="font-semibold text-green-800">
-              {isEditMode ? 'Cáº­p nháº­t thÃ nh cÃ´ng!' : 'Táº¡o má»›i thÃ nh cÃ´ng!'}
+              {isEditMode ? 'Cập nhật thành công!' : 'Tạo mới thành công!'}
             </h4>
             <p className="text-sm text-green-700 mt-1">
-              Quáº­n/huyá»‡n Ä‘Ã£ Ä‘Æ°á»£c {isEditMode ? 'cáº­p nháº­t' : 'táº¡o'} thÃ nh cÃ´ng.
+              Quận/huyện đã được {isEditMode ? 'cập nhật' : 'tạo'} thành công.
             </p>
           </div>
         </div>
@@ -195,9 +195,9 @@ export default function DistrictForm({ district, onSuccess, onCancel }: District
         <div className="p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
           <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
           <div>
-            <h4 className="font-semibold text-red-800">Lá»—i {isEditMode ? 'cáº­p nháº­t' : 'táº¡o má»›i'}</h4>
+            <h4 className="font-semibold text-red-800">Lỗi {isEditMode ? 'cập nhật' : 'tạo mới'}</h4>
             <p className="text-sm text-red-700 mt-1">
-              {(error as any)?.message || 'ÄÃ£ xáº£y ra lá»—i. Vui lÃ²ng thá»­ láº¡i.'}
+              {(error as Error)?.message || 'Đã xảy ra lỗi. Vui lòng thử lại.'}
             </p>
           </div>
         </div>
@@ -208,7 +208,7 @@ export default function DistrictForm({ district, onSuccess, onCancel }: District
         {/* Name Field */}
         <div>
           <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-            TÃªn quáº­n/huyá»‡n <span className="text-red-500">*</span>
+            Tên quận/huyện <span className="text-red-500">*</span>
           </label>
           <input
             type="text"
@@ -223,7 +223,7 @@ export default function DistrictForm({ district, onSuccess, onCancel }: District
                 ? 'border-red-500 focus:ring-red-500'
                 : 'border-gray-300 focus:ring-blue-500'
             } ${isPending ? 'bg-gray-100 cursor-not-allowed' : ''}`}
-            placeholder="Nháº­p tÃªn quáº­n/huyá»‡n"
+            placeholder="Nhập tên quận/huyện"
           />
           {errors.name && touched.name && (
             <p className="mt-1 text-sm text-red-600">{errors.name}</p>
@@ -233,7 +233,7 @@ export default function DistrictForm({ district, onSuccess, onCancel }: District
         {/* Code Field */}
         <div>
           <label htmlFor="code" className="block text-sm font-medium text-gray-700 mb-1">
-            MÃ£ quáº­n/huyá»‡n <span className="text-red-500">*</span>
+            Mã quận/huyện <span className="text-red-500">*</span>
           </label>
           <input
             type="text"
@@ -253,13 +253,13 @@ export default function DistrictForm({ district, onSuccess, onCancel }: District
           {errors.code && touched.code && (
             <p className="mt-1 text-sm text-red-600">{errors.code}</p>
           )}
-          <p className="mt-1 text-xs text-gray-500">Chá»‰ chá»¯ in hoa vÃ  sá»‘, khÃ´ng dáº¥u</p>
+          <p className="mt-1 text-xs text-gray-500">Chỉ chữ in hoa và số, không dấu</p>
         </div>
 
         {/* Area Field */}
         <div>
           <label htmlFor="areaKm2" className="block text-sm font-medium text-gray-700 mb-1">
-            Diá»‡n tÃ­ch (kmÂ²)
+            Diện tích (km²)
           </label>
           <input
             type="number"
@@ -286,7 +286,7 @@ export default function DistrictForm({ district, onSuccess, onCancel }: District
         {/* Density Field */}
         <div>
           <label htmlFor="densityPerKm2" className="block text-sm font-medium text-gray-700 mb-1">
-            Máº­t Ä‘á»™ dÃ¢n sá»‘ (ngÆ°á»i/kmÂ²)
+            Mật độ dân số (người/km²)
           </label>
           <input
             type="number"
@@ -320,12 +320,12 @@ export default function DistrictForm({ district, onSuccess, onCancel }: District
           {isPending ? (
             <>
               <Loader2 className="w-4 h-4 animate-spin" />
-              <span>{isEditMode ? 'Äang cáº­p nháº­t...' : 'Äang táº¡o...'}</span>
+              <span>{isEditMode ? 'Đang cập nhật...' : 'Đang tạo...'}</span>
             </>
           ) : (
             <>
               <Save className="w-4 h-4" />
-              <span>{isEditMode ? 'Cáº­p nháº­t' : 'Táº¡o má»›i'}</span>
+              <span>{isEditMode ? 'Cập nhật' : 'Tạo mới'}</span>
             </>
           )}
         </button>
@@ -336,7 +336,7 @@ export default function DistrictForm({ district, onSuccess, onCancel }: District
           disabled={isPending}
           className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Äáº·t láº¡i
+          Đặt lại
         </button>
 
         {onCancel && (
@@ -347,7 +347,7 @@ export default function DistrictForm({ district, onSuccess, onCancel }: District
             className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <X className="w-4 h-4" />
-            <span>Há»§y</span>
+            <span>Hủy</span>
           </button>
         )}
       </div>

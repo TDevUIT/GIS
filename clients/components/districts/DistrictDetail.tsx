@@ -34,14 +34,14 @@ interface DistrictDetailProps {
 export default function DistrictDetail({ id, onBack }: DistrictDetailProps) {
   const { data, isLoading, error, refetch } = useDistrict(id);
 
-  const district = data?.data as (District & { geom?: any }) | undefined;
+  const district = data?.data as (District & { geom?: { type: 'Polygon' | 'MultiPolygon'; coordinates: number[][][] | number[][][][] } }) | undefined;
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
         <div className="text-center">
           <Loader2 className="w-8 h-8 animate-spin text-blue-600 mx-auto mb-3" />
-          <p className="text-gray-600">Äang táº£i thÃ´ng tin quáº­n/huyá»‡n...</p>
+          <p className="text-gray-600">Đang tải thông tin quận/huyện...</p>
         </div>
       </div>
     );
@@ -53,9 +53,9 @@ export default function DistrictDetail({ id, onBack }: DistrictDetailProps) {
         <div className="flex items-start gap-3">
           <AlertCircle className="w-6 h-6 text-red-500 flex-shrink-0 mt-0.5" />
           <div className="flex-1">
-            <h3 className="font-semibold text-red-700 mb-1">Lá»—i táº£i dá»¯ liá»‡u</h3>
+            <h3 className="font-semibold text-red-700 mb-1">Lỗi tải dữ liệu</h3>
             <p className="text-sm text-red-600 mb-3">
-              {(error as any)?.message || 'KhÃ´ng thá»ƒ táº£i thÃ´ng tin quáº­n/huyá»‡n'}
+              {(error as Error)?.message || 'Không thể tải thông tin quận/huyện'}
             </p>
             <button
               onClick={() => refetch()}

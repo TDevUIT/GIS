@@ -97,13 +97,13 @@ export default function DistrictList({
           <div className="flex-1">
             <h3 className="font-semibold text-red-700 mb-1">Lá»—i táº£i dá»¯ liá»‡u</h3>
             <p className="text-sm text-red-600 mb-3">
-              {(error as any)?.message || 'KhÃ´ng thá»ƒ táº£i danh sÃ¡ch quáº­n/huyá»‡n'}
+              {(error as Error)?.message || 'Không thể tải danh sách quận/huyện'}
             </p>
             <button
               onClick={() => refetch()}
               className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium"
             >
-              Thá»­ láº¡i
+              Thử lại
             </button>
           </div>
         </div>
@@ -116,11 +116,11 @@ export default function DistrictList({
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">
-            Danh sÃ¡ch Quáº­n/Huyá»‡n
+            Danh sách Quận/Huyện
           </h2>
           <p className="text-sm text-gray-600 mt-1">
-            {filteredDistricts.length} quáº­n/huyá»‡n
-            {searchQuery && ` (tá»« "${searchQuery}")`}
+            {filteredDistricts.length} quận/huyện
+            {searchQuery && ` (từ "${searchQuery}")`}
           </p>
         </div>
 
@@ -131,7 +131,7 @@ export default function DistrictList({
               type="text"
               value={searchQuery}
               onChange={(e) => handleSearch(e.target.value)}
-              placeholder="TÃ¬m kiáº¿m quáº­n/huyá»‡n..."
+              placeholder="Tìm kiếm quận/huyện..."
               className="pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent w-64"
             />
             {searchQuery && (
@@ -146,12 +146,12 @@ export default function DistrictList({
 
           <select
             value={sortBy}
-            onChange={(e) => handleSort(e.target.value as any)}
+            onChange={(e) => handleSort(e.target.value as 'name' | 'area' | 'density')}
             className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
           >
-            <option value="name">TÃªn A-Z</option>
-            <option value="area">Diá»‡n tÃ­ch</option>
-            <option value="density">Máº­t Ä‘á»™ dÃ¢n sá»‘</option>
+            <option value="name">Tên A-Z</option>
+            <option value="area">Diện tích</option>
+            <option value="density">Mật độ dân số</option>
           </select>
         </div>
       </div>
@@ -162,10 +162,10 @@ export default function DistrictList({
             <Search className="w-8 h-8 text-gray-400" />
           </div>
           <h3 className="text-lg font-semibold text-gray-900 mb-2">
-            KhÃ´ng tÃ¬m tháº¥y káº¿t quáº£
+            Không tìm thấy kết quả
           </h3>
           <p className="text-gray-600 mb-4">
-            KhÃ´ng cÃ³ quáº­n/huyá»‡n nÃ o phÃ¹ há»£p vá»›i tá»« khÃ³a "{searchQuery}"
+            Không có quận/huyện nào phù hợp với từ khóa &quot;{searchQuery}&quot;
           </p>
           <button
             onClick={() => handleSearch('')}
