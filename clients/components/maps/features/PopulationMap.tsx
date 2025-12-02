@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useEffect, useState } from 'react';
 import { Marker, Popup, useMap } from 'react-leaflet';
@@ -40,9 +40,9 @@ export default function PopulationMap({ onPointClick }: PopulationMapProps) {
           });
 
         if (points.length === 0 && populations.length > 0) {
-          console.warn('⚠️ No population points have valid coordinates.');
+          console.warn('?? No population points have valid coordinates.');
         } else {
-          console.log(`✅ Loaded ${points.length} population points`);
+          console.log(`? Loaded ${points.length} population points`);
         }
 
         setPopulationData(points);
@@ -58,7 +58,7 @@ export default function PopulationMap({ onPointClick }: PopulationMapProps) {
       <div className="absolute top-20 left-1/2 -translate-x-1/2 z-[1000] bg-white/95 backdrop-blur-md px-6 py-3 rounded-lg shadow-lg border border-purple-200">
         <div className="flex items-center gap-3 text-purple-600">
           <Loader2 className="w-5 h-5 animate-spin" />
-          <span className="font-medium">Äang táº£i dá»¯ liá»‡u dÃ¢n sá»‘...</span>
+          <span className="font-medium">Đang tải dữ liệu dân số...</span>
         </div>
       </div>
     );
@@ -70,9 +70,9 @@ export default function PopulationMap({ onPointClick }: PopulationMapProps) {
         <div className="flex items-start gap-3">
           <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
           <div>
-            <h3 className="font-semibold text-red-700 mb-1">Lá»—i táº£i dá»¯ liá»‡u</h3>
+            <h3 className="font-semibold text-red-700 mb-1">Lỗi tải dữ liệu</h3>
             <p className="text-sm text-red-600">
-              {(error as any)?.message || 'KhÃ´ng thá»ƒ táº£i dá»¯ liá»‡u dÃ¢n sá»‘'}
+              {(error as Error)?.message || 'Không thể tải dữ liệu dân số'}
             </p>
           </div>
         </div>
@@ -92,9 +92,9 @@ export default function PopulationMap({ onPointClick }: PopulationMapProps) {
           <div className="flex items-start gap-3">
             <AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
             <div>
-              <h3 className="font-semibold text-yellow-800 mb-1">KhÃ´ng cÃ³ tá»a Ä‘á»™</h3>
+              <h3 className="font-semibold text-yellow-800 mb-1">Không có tọa độ</h3>
               <p className="text-sm text-yellow-700">
-                Dá»¯ liá»‡u dÃ¢n sá»‘ khÃ´ng cÃ³ thÃ´ng tin tá»a Ä‘á»™ (location).
+                Dữ liệu dân số không có thông tin tọa độ (location).
               </p>
             </div>
           </div>
@@ -107,14 +107,14 @@ export default function PopulationMap({ onPointClick }: PopulationMapProps) {
       >
         <div className="space-y-2">
           <div className="flex items-center justify-between gap-4">
-            <span className="text-sm font-semibold text-purple-800">Máº­t Ä‘á»™ dÃ¢n sá»‘</span>
+            <span className="text-sm font-semibold text-purple-800">Mật độ dân số</span>
             <Users className="w-4 h-4 text-purple-600" />
           </div>
 
           <div className="space-y-1 text-xs">
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 rounded-full" style={{ backgroundColor: '#dcfce7' }}></div>
-              <span className="text-gray-700">&lt; 1K ngÆ°á»i/kmÂ²</span>
+              <span className="text-gray-700">&lt; 1K người/km²</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 rounded-full" style={{ backgroundColor: '#86efac' }}></div>
@@ -147,7 +147,7 @@ export default function PopulationMap({ onPointClick }: PopulationMapProps) {
           </div>
 
           <div className="pt-2 border-t text-xs text-gray-500">
-            <strong>{populationData.length}</strong> Ä‘iá»ƒm
+            <strong>{populationData.length}</strong> điểm
           </div>
         </div>
       </div>
@@ -198,18 +198,18 @@ export default function PopulationMap({ onPointClick }: PopulationMapProps) {
                 <h3 className="font-bold text-base mb-2">{point.districtName}</h3>
                 <div className="space-y-1.5 text-sm">
                   <div className="flex justify-between items-center">
-                    <span className="text-gray-600">Máº­t Ä‘á»™:</span>
+                    <span className="text-gray-600">Mật độ:</span>
                     <span
                       className="font-semibold px-2 py-0.5 rounded text-white text-xs"
                       style={{ backgroundColor: color }}
                     >
-                      {point.density.toLocaleString()} ngÆ°á»i/kmÂ²
+                      {point.density.toLocaleString()} người/km²
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-gray-600">Tá»•ng dÃ¢n sá»‘:</span>
+                    <span className="text-gray-600">Tổng dân số:</span>
                     <span className="font-semibold text-gray-800">
-                      {point.total.toLocaleString()} ngÆ°á»i
+                      {point.total.toLocaleString()} người
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
@@ -219,19 +219,19 @@ export default function PopulationMap({ onPointClick }: PopulationMapProps) {
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-gray-600">Ná»¯:</span>
+                    <span className="text-gray-600">Nữ:</span>
                     <span className="text-pink-600 font-medium">
                       {point.female.toLocaleString()} ({((point.female / point.total) * 100).toFixed(1)}%)
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-gray-600">Há»™ gia Ä‘Ã¬nh:</span>
+                    <span className="text-gray-600">Hộ gia đình:</span>
                     <span className="font-semibold text-gray-800">
                       {point.households.toLocaleString()}
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-gray-600">NÄƒm:</span>
+                    <span className="text-gray-600">Năm:</span>
                     <span className="text-xs text-gray-600">{point.year}</span>
                   </div>
                 </div>

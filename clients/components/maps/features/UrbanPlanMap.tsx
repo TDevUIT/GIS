@@ -1,8 +1,7 @@
 ﻿'use client';
 
 import { useEffect, useState } from 'react';
-import { GeoJSON, useMap } from 'react-leaflet';
-import L from 'leaflet';
+import { GeoJSON } from 'react-leaflet';
 import { useUrbanPlans } from '@/hooks/api';
 import {
   convertUrbanPlanToPolygon,
@@ -19,9 +18,7 @@ interface UrbanPlanMapProps {
 }
 
 export default function UrbanPlanMap({ onPolygonClick }: UrbanPlanMapProps) {
-  const map = useMap();
   const [urbanPlanData, setUrbanPlanData] = useState<UrbanPlanPolygon[]>([]);
-  const [selectedPolygon, setSelectedPolygon] = useState<UrbanPlanPolygon | null>(null);
 
   const { data: gisUrbanPlanData, isLoading, error } = useUrbanPlans();
 
@@ -69,7 +66,7 @@ export default function UrbanPlanMap({ onPolygonClick }: UrbanPlanMapProps) {
           <div>
             <h3 className="font-semibold text-red-700 mb-1">Lá»—i táº£i dá»¯ liá»‡u</h3>
             <p className="text-sm text-red-600">
-              {(error as any)?.message || 'KhÃ´ng thá»ƒ táº£i dá»¯ liá»‡u quy hoáº¡ch Ä‘Ã´ thá»‹'}
+              {(error as Error)?.message || 'Không thể tải dữ liệu quy hoạch đô thị'}
             </p>
           </div>
         </div>
@@ -161,7 +158,6 @@ export default function UrbanPlanMap({ onPolygonClick }: UrbanPlanMapProps) {
             }}
             eventHandlers={{
               click: () => {
-                setSelectedPolygon(polygon);
                 if (onPolygonClick) {
                   onPolygonClick(polygon);
                 }

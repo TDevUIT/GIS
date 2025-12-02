@@ -1,7 +1,7 @@
 ﻿'use client';
 
 import { useEffect, useState } from 'react';
-import { Marker, Popup, useMap } from 'react-leaflet';
+import { Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import { useWaterQualities } from '@/hooks/api';
 import {
@@ -17,9 +17,7 @@ interface WaterQualityMapProps {
 }
 
 export default function WaterQualityMap({ onPointClick }: WaterQualityMapProps) {
-  const map = useMap();
   const [waterQualityData, setWaterQualityData] = useState<WaterQualityPoint[]>([]);
-  const [selectedPoint, setSelectedPoint] = useState<WaterQualityPoint | null>(null);
 
   const { data: waterQualityResponse, isLoading, error } = useWaterQualities();
 
@@ -72,7 +70,7 @@ export default function WaterQualityMap({ onPointClick }: WaterQualityMapProps) 
           <div>
             <h3 className="font-semibold text-red-700 mb-1">Lá»—i táº£i dá»¯ liá»‡u</h3>
             <p className="text-sm text-red-600">
-              {(error as any)?.message || 'KhÃ´ng thá»ƒ táº£i dá»¯ liá»‡u cháº¥t lÆ°á»£ng nÆ°á»›c'}
+              {(error as Error)?.message || 'Không thể tải dữ liệu chất lượng nước'}
             </p>
           </div>
         </div>
@@ -174,7 +172,6 @@ export default function WaterQualityMap({ onPointClick }: WaterQualityMapProps) 
             zIndexOffset={500}
             eventHandlers={{
               click: () => {
-                setSelectedPoint(point);
                 if (onPointClick) {
                   onPointClick(point);
                 }

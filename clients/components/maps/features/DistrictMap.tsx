@@ -26,23 +26,23 @@ export default function DistrictMap({
   const { data: districtsData, isLoading: districtsLoading, error: districtsError } = useDistricts();
 
   useEffect(() => {
-    const payload = (districtsData as any)?.data ?? districtsData;
+    const payload = (districtsData as unknown as { data?: unknown })?.data ?? districtsData;
     if (payload) {
       try {
         console.log('ðŸ“ Districts raw data:', payload);
-        
+
         const districts = Array.isArray(payload) ? payload : [payload];
         console.log('ðŸ“ Districts array:', districts);
 
         const geoJson: DistrictGeoJSON[] = districts
-          .filter((district: any) => {
+          .filter((district: unknown) => {
             const hasGeom = district && (district.geom || district.geometry);
             if (!hasGeom) {
               console.warn('âš ï¸ District without geom:', district?.name);
             }
             return hasGeom;
           })
-          .map((district: any) => {
+          .map((district: unknown) => {
             const converted = convertDistrictToGeoJSON(district);
             console.log('âœ… Converted district:', district.name, converted);
             return converted;
@@ -60,11 +60,13 @@ export default function DistrictMap({
   useEffect(() => {
     if (geoJsonData.length > 0 && map) {
       try {
-        const bounds = L.geoJSON(geoJsonData as any).getBounds();
+        const bounds = L.geoJSON(geoJsonData as GeoJSON.FeatureCollection).getBounds();
         if (bounds.isValid()) {
           map.fitBounds(bounds, { padding: [50, 50] });
         }
-      } catch (error) {}
+      } catch {
+        // Silently ignore bounds errors
+      }
     }
   }, [geoJsonData, map]);
 
@@ -75,7 +77,7 @@ export default function DistrictMap({
     }
   };
 
-  const getDistrictStyle = (feature?: any) => {
+  const getDistrictStyle = (feature?: GeoJSON.Feature) => {
     const isHighlighted = feature?.id === highlightedDistrictId;
     const isSelected = feature?.id === selectedDistrict?.id;
 
@@ -88,7 +90,7 @@ export default function DistrictMap({
     };
   };
 
-  const onEachFeature = (feature: any, layer: L.Layer) => {
+  const onEachFeature = (feature: GeoJSON.Feature, layer: L.Layer) => {
     layer.on({
       mouseover: (e) => {
         const layer = e.target;
@@ -108,10 +110,10 @@ export default function DistrictMap({
 
     if (showLabels && feature.properties?.name) {
       try {
-        const bounds = (layer as any).getBounds?.();
+        const bounds = (layer as L.Polygon | L.Polyline).getBounds?.();
         if (bounds && bounds.isValid && bounds.isValid()) {
           const center = bounds.getCenter();
-          
+
           if (center && center.lat !== undefined && center.lng !== undefined) {
             L.marker(center, {
               icon: L.divIcon({
@@ -143,19 +145,6 @@ export default function DistrictMap({
 
   if (districtsError) {
     return (
-      <div className="absolute top-20 left-1/2 -translate-x-1/2 z-[1000] bg-white/95 backdrop-blur-md px-6 py-4 rounded-lg shadow-lg border border-red-200 max-w-md">
-        <div className="flex items-start gap-3">
-          <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
-          <div>
-            <h3 className="font-semibold text-red-700 mb-1">Lá»—i táº£i dá»¯ liá»‡u</h3>
-            <p className="text-sm text-red-600">
-              {(districtsError as any)?.message || 'KhÃ´ng thá»ƒ táº£i dá»¯ liá»‡u quáº­n/huyá»‡n tá»« server'}
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   console.log('ðŸ“ Rendering', geoJsonData.length, 'districts on map');
 
@@ -164,7 +153,7 @@ export default function DistrictMap({
       {geoJsonData.map((district) => (
         <GeoJSON
           key={district.id}
-          data={district as any}
+          data={district as GeoJSON.Feature}
           style={getDistrictStyle}
           onEachFeature={onEachFeature}
         >
