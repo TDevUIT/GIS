@@ -1,5 +1,5 @@
 import { Z_INDEX } from '@/constants/zIndex'
-import { DistrictGeoJSON, WardGeoJSON, AccidentPoint, TrafficLine } from '@/types'
+import { DistrictGeoJSON, WardGeoJSON, TrafficLine } from '@/types'
 import { getCongestionLabel } from '@/utils/trafficHelpers'
 
 interface MapInfoPanelsProps {
@@ -9,8 +9,8 @@ interface MapInfoPanelsProps {
   setSelectedDistrict: (district: DistrictGeoJSON | null) => void
   selectedWard: WardGeoJSON | null
   setSelectedWard: (ward: WardGeoJSON | null) => void
-  selectedAccident: AccidentPoint | null
-  setSelectedAccident: (accident: AccidentPoint | null) => void
+  // selectedAccident: AccidentPoint | null
+  // setSelectedAccident: (accident: AccidentPoint | null) => void
   selectedRoad: TrafficLine | null
   setSelectedRoad: (road: TrafficLine | null) => void
   showTrafficLayer: boolean
@@ -23,8 +23,8 @@ export default function MapInfoPanels({
   setSelectedDistrict,
   selectedWard,
   setSelectedWard,
-  selectedAccident,
-  setSelectedAccident,
+  // selectedAccident,
+  // setSelectedAccident,
   selectedRoad,
   setSelectedRoad,
   showTrafficLayer,

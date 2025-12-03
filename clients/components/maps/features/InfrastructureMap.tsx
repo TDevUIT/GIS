@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Marker, Popup, useMap } from 'react-leaflet';
+import { Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import { useInfrastructures } from '@/hooks/api';
 import {
@@ -18,9 +18,9 @@ interface InfrastructureMapProps {
 }
 
 export default function InfrastructureMap({ onPointClick }: InfrastructureMapProps) {
-  const map = useMap();
+  // const map = useMap();
   const [infrastructureData, setInfrastructureData] = useState<InfrastructurePoint[]>([]);
-  const [selectedPoint, setSelectedPoint] = useState<InfrastructurePoint | null>(null);
+  const [, setSelectedPoint] = useState<InfrastructurePoint | null>(null);
 
   const { data: infrastructureResponse, isLoading, error } = useInfrastructures();
 

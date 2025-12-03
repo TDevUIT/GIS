@@ -1,7 +1,7 @@
 ﻿'use client';
 
-import { useEffect, useState, useMemo } from 'react';
-import { Marker, Popup, useMap } from 'react-leaflet';
+import { useEffect, useState } from 'react';
+import { Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import { useAirQualities } from '@/hooks/api';
 import {
@@ -17,9 +17,9 @@ interface AirQualityMapProps {
 }
 
 export default function AirQualityMap({ onPointClick }: AirQualityMapProps) {
-  const map = useMap();
+  // const map = useMap();
   const [airQualityData, setAirQualityData] = useState<AirQualityPoint[]>([]);
-  const [selectedPoint, setSelectedPoint] = useState<AirQualityPoint | null>(null);
+  const [, setSelectedPoint] = useState<AirQualityPoint | null>(null);
 
   const { data: airQualityResponse, isLoading, error } = useAirQualities();
 
@@ -72,7 +72,7 @@ export default function AirQualityMap({ onPointClick }: AirQualityMapProps) {
           <div>
             <h3 className="font-semibold text-red-700 mb-1">Lá»—i táº£i dá»¯ liá»‡u</h3>
             <p className="text-sm text-red-600">
-              {(error as any)?.message || 'KhÃ´ng thá»ƒ táº£i dá»¯ liá»‡u cháº¥t lÆ°á»£ng khÃ´ng khÃ­'}
+              {(error as Error)?.message || 'Không thể tải dữ liệu chất lượng không khí'}
             </p>
           </div>
         </div>

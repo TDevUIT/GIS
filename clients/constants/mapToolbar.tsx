@@ -203,7 +203,6 @@ export const categoryItems: CategoryItem[] = [
     id: 'buildings',
     icon: <Building2 className="w-4 h-4" />,
     label: 'Tòa nhà',
-    color: '#6366f1', // Added color to match usage if needed, though not in original interface
   },
   {
     id: 'business',

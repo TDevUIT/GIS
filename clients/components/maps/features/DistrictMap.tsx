@@ -31,20 +31,21 @@ export default function DistrictMap({
       try {
         console.log('Districts raw data:', payload);
 
-        const districts = (Array.isArray(payload) ? payload : [payload]) as any[];
+        const districts = (Array.isArray(payload) ? payload : [payload]) as unknown[];
         console.log('Districts array:', districts);
 
         const geoJson: DistrictGeoJSON[] = districts
-          .filter((district: any) => {
-            const hasGeom = district && (district.geom || district.geometry);
+          .filter((district: unknown) => {
+            const d = district as { geom?: unknown; geometry?: unknown; name?: string };
+            const hasGeom = d && (d.geom || d.geometry);
             if (!hasGeom) {
-              console.warn('District without geometry:', (district as any)?.name);
+              console.warn('District without geometry:', d?.name);
             }
             return hasGeom;
           })
-          .map((district: any) => {
+          .map((district: unknown) => {
             const converted = convertDistrictToGeoJSON(district);
-            console.log('Converted district:', (district as any).name, converted);
+            console.log('Converted district:', (district as { name?: string }).name, converted);
             return converted;
           });
 

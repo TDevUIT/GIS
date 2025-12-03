@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { GeoJSON, useMap } from 'react-leaflet';
-import L from 'leaflet';
+import { GeoJSON } from 'react-leaflet';
+// import L from 'leaflet';
 import { useTerrains } from '@/hooks/api';
 import {
   convertTerrainToPolygon,
@@ -19,9 +19,9 @@ interface TerrainMapProps {
 }
 
 export default function TerrainMap({ onPolygonClick }: TerrainMapProps) {
-  const map = useMap();
+  // const map = useMap();
   const [terrainData, setTerrainData] = useState<TerrainPolygon[]>([]);
-  const [selectedPolygon, setSelectedPolygon] = useState<TerrainPolygon | null>(null);
+  const [, setSelectedPolygon] = useState<TerrainPolygon | null>(null);
 
   const { data: gisTerrainData, isLoading, error } = useTerrains();
 

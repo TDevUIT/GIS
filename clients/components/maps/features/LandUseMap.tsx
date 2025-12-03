@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { GeoJSON, useMap } from 'react-leaflet';
-import L from 'leaflet';
+import { GeoJSON } from 'react-leaflet';
+// import L from 'leaflet';
 import { useLandUses } from '@/hooks/api';
 import {
   convertLandUseToPolygon,
@@ -18,9 +18,9 @@ interface LandUseMapProps {
 }
 
 export default function LandUseMap({ onPolygonClick }: LandUseMapProps) {
-  const map = useMap();
+  // const map = useMap();
   const [landUseData, setLandUseData] = useState<LandUsePolygon[]>([]);
-  const [selectedPolygon, setSelectedPolygon] = useState<LandUsePolygon | null>(null);
+  const [, setSelectedPolygon] = useState<LandUsePolygon | null>(null);
 
   const { data: landUseResponse, isLoading, error } = useLandUses();
 

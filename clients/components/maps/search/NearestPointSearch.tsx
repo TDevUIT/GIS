@@ -1,6 +1,6 @@
 ﻿'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import L from 'leaflet'
 import {
   Search,
@@ -87,7 +87,7 @@ export default function NearestPointSearch({
   const [selectedCategory, setSelectedCategory] = useState<POICategory | null>(null)
   const [isSearching, setIsSearching] = useState(false)
   const [results, setResults] = useState<NearestResult[]>([])
-  const [markers, setMarkers] = useState<L.Marker[]>([])
+  const markersRef = useRef<L.Marker[]>([])
   const [selectedResult, setSelectedResult] = useState<NearestResult | null>(null)
   const [searchRadius, setSearchRadius] = useState(5) // km
 
@@ -98,12 +98,18 @@ export default function NearestPointSearch({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedCategory, currentLocation, searchRadius])
 
+  const clearMarkers = useCallback(() => {
+    if (!mapInstance) return
+    markersRef.current.forEach(marker => mapInstance.removeLayer(marker))
+    markersRef.current = []
+  }, [mapInstance])
+
   // Cleanup markers on unmount
   useEffect(() => {
     return () => {
       clearMarkers()
     }
-  }, [])
+  }, [clearMarkers])
 
   const searchNearestPoints = async () => {
     if (!selectedCategory || !currentLocation) return
@@ -173,7 +179,7 @@ export default function NearestPointSearch({
           <div class="p-2">
             <div class="font-bold text-sm mb-1">${geocodingService.formatAddress(item.result)}</div>
             <div class="text-xs text-gray-600">
-              ðŸ“ ${routingService.formatDistance(item.distance)}
+              📍 ${routingService.formatDistance(item.distance)}
             </div>
           </div>
         `)
@@ -185,7 +191,7 @@ export default function NearestPointSearch({
       return marker
     })
 
-    setMarkers(newMarkers)
+    markersRef.current = newMarkers
 
     // Fit bounds to show all markers
     if (newMarkers.length > 0) {
@@ -194,11 +200,7 @@ export default function NearestPointSearch({
     }
   }
 
-  const clearMarkers = () => {
-    if (!mapInstance) return
-    markers.forEach(marker => mapInstance.removeLayer(marker))
-    setMarkers([])
-  }
+
 
   const handleGetDirections = (result: NearestResult) => {
     // This would trigger the routing panel

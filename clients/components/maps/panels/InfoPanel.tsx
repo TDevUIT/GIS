@@ -4,10 +4,6 @@ import { X } from 'lucide-react';
 import {
   useAnalyticsSummary,
   useInfrastructureByCategory,
-  usePublicTransportSummary,
-  useAccidentSummaryBySeverity,
-  useAirQualityRanking,
-  useWaterQualityRanking
 } from '@/hooks/api';
 
 interface InfoPanelProps {
@@ -18,17 +14,17 @@ interface InfoPanelProps {
 export default function InfoPanel({ type, onClose }: InfoPanelProps) {
   const { data: summaryResponse } = useAnalyticsSummary();
   const { data: infrastructureResponse } = useInfrastructureByCategory();
-  const { data: publicTransportResponse } = usePublicTransportSummary();
-  const { data: accidentsResponse } = useAccidentSummaryBySeverity();
-  const { data: airQualityResponse } = useAirQualityRanking();
-  const { data: waterQualityResponse } = useWaterQualityRanking();
+  // const { data: publicTransportResponse } = usePublicTransportSummary();
+  // const { data: accidentsResponse } = useAccidentSummaryBySeverity();
+  // const { data: airQualityResponse } = useAirQualityRanking();
+  // const { data: waterQualityResponse } = useWaterQualityRanking();
 
   const summary = summaryResponse?.data?.data || summaryResponse?.data;
   const infrastructure = infrastructureResponse?.data?.data || infrastructureResponse?.data;
-  const publicTransport = publicTransportResponse?.data?.data || publicTransportResponse?.data;
-  const accidents = accidentsResponse?.data?.data || accidentsResponse?.data;
-  const airQuality = airQualityResponse?.data?.data || airQualityResponse?.data;
-  const waterQuality = waterQualityResponse?.data?.data || waterQualityResponse?.data;
+  // const publicTransport = publicTransportResponse?.data?.data || publicTransportResponse?.data;
+  // const accidents = accidentsResponse?.data?.data || accidentsResponse?.data;
+  // const airQuality = airQualityResponse?.data?.data || airQualityResponse?.data;
+  // const waterQuality = waterQualityResponse?.data?.data || waterQualityResponse?.data;
 
   const getTitle = () => {
     switch (type) {

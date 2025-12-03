@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
-import Header from '../common/Header';
-import Footer from '../common/Footer';
-import Sidebar from '../common/Sidebar';
+import Header from '../common/navigation/Header';
+import Footer from '../common/navigation/Footer';
+import Sidebar from '../common/navigation/Sidebar';
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -12,17 +12,17 @@ export default function MainLayout({ children, showSidebar = true }: MainLayoutP
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-      
+
       <div className="flex flex-1">
         {showSidebar && <Sidebar />}
-        
+
         <main className={`flex-1 ${showSidebar ? 'ml-0 lg:ml-64' : ''}`}>
           <div className="p-6">
             {children}
           </div>
         </main>
       </div>
-      
+
       <Footer />
     </div>
   );
