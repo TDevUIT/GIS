@@ -1,9 +1,6 @@
 ﻿import { apiGet, apiPost, ApiResponse } from '../common/api';
+import type { UrbanPlanQuery } from '@/interfaces/query/urban-plan';
 
-interface UrbanPlanQuery {
-  districtId?: string;
-  zoningType?: string;
-}
 
 // GET all urban plans
 export const getAllUrbanPlans = async (query?: UrbanPlanQuery): Promise<ApiResponse> => {

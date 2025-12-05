@@ -1,9 +1,6 @@
 ﻿import { apiGet, apiPost, ApiResponse } from '../common/api';
+import type { TrafficQuery } from '@/interfaces/query/traffic';
 
-interface TrafficQuery {
-  districtId?: string;
-  roadName?: string;
-}
 
 // GET all traffic data
 export const getAllTraffics = async (query?: TrafficQuery): Promise<ApiResponse> => {

@@ -15,8 +15,8 @@ import {
   Navigation2,
   Ruler,
 } from 'lucide-react'
-import { geocodingService, GeocodingResult } from '@/services'
-import { routingService } from '@/services'
+import { geocodingService, routingService } from '@/services'
+import type { GeocodingResult } from '@/interfaces/external/geocoding'
 import { Z_INDEX } from '@/constants/zIndex'
 
 interface NearestPointSearchProps {

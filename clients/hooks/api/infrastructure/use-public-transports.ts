@@ -1,5 +1,6 @@
 ﻿import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getAllPublicTransports, getPublicTransportById, findIntersectingPublicTransports, PublicTransportMode, PublicTransportQuery } from '@/services';
+import { getAllPublicTransports, getPublicTransportById, findIntersectingPublicTransports } from '@/services';
+import type { PublicTransportMode, PublicTransportQuery } from '@/interfaces/query/public-transport';
 import { queryKeys } from '@/config/queryKeys';
 import { QUERY_STALE_TIME } from '@/config/queryConfig';
 

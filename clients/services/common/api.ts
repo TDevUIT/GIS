@@ -1,11 +1,10 @@
 import apiClient from '@/config/axios';
 import { AxiosResponse } from 'axios';
+import type { ApiResponse } from '@/interfaces/api';
 
-export interface ApiResponse<T = any> {
-  data: T;
-  message?: string;
-  status: number;
-}
+// Re-export ApiResponse from centralized interfaces
+export type { ApiResponse } from '@/interfaces/api';
+
 
 const handleError = (error: any): Error => {
   if (error.response) {

@@ -1,10 +1,6 @@
 ﻿import { apiGet, ApiResponse } from '../common/api';
+import type { AirQualityQuery } from '@/interfaces/query/air-quality';
 
-interface AirQualityQuery {
-  districtId?: string;
-  from?: string;
-  to?: string;
-}
 
 // GET all air quality records
 export const getAllAirQualities = async (query?: AirQualityQuery): Promise<ApiResponse> => {

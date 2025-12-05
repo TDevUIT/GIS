@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { Search, X, MapPin, Navigation, Loader2, Target } from 'lucide-react'
-import { geocodingService, GeocodingResult } from '@/services'
+import { geocodingService } from '@/services'
+import type { GeocodingResult } from '@/interfaces/external/geocoding'
 import { Z_INDEX } from '@/constants/zIndex'
 
 interface MapSearchBarProps {
@@ -109,7 +110,7 @@ export default function MapSearchBar({
 
   const getResultIcon = (type?: string) => {
     if (!type) return <MapPin className="w-3.5 h-3.5 text-gray-600" />
-    
+
     if (type.includes('school') || type.includes('university')) {
       return <span className="text-base">ðŸ«</span>
     }
@@ -128,7 +129,7 @@ export default function MapSearchBar({
     if (type.includes('shop') || type.includes('mall')) {
       return <span className="text-base">ðŸ›ï¸</span>
     }
-    
+
     return <MapPin className="w-3.5 h-3.5 text-gray-600" />
   }
 
@@ -148,7 +149,7 @@ export default function MapSearchBar({
               <Search className="w-4 h-4 text-gray-400" />
             )}
           </div>
-          
+
           <input
             type="text"
             value={query}

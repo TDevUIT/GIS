@@ -3,8 +3,8 @@
 import { useAccidentsByTimeOfDay, useAccidentsByDayOfWeek, useTrafficRiskAssessment } from '@/hooks/api';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { AlertTriangle, Clock, Calendar, TrendingUp, Loader2 } from 'lucide-react';
+import { CHART_COLORS_7, DAY_OF_WEEK_VI } from '@/constants';
 
-const COLORS = ['#374151', '#6b7280', '#9ca3af', '#d1d5db', '#e5e7eb', '#f3f4f6', '#f9fafb'];
 
 export default function AccidentTimeAnalysis() {
   const { data: timeOfDayResponse, isLoading: loadingTime } = useAccidentsByTimeOfDay();
@@ -24,20 +24,11 @@ export default function AccidentTimeAnalysis() {
   }
 
   // Transform day of week data to Vietnamese
-  const dayMap: { [key: string]: string } = {
-    'MONDAY': 'Thứ 2',
-    'TUESDAY': 'Thứ 3',
-    'WEDNESDAY': 'Thứ 4',
-    'THURSDAY': 'Thứ 5',
-    'FRIDAY': 'Thứ 6',
-    'SATURDAY': 'Thứ 7',
-    'SUNDAY': 'Chủ nhật',
-  };
-
   const transformedDayData = Array.isArray(dayOfWeekData) ? dayOfWeekData.map((item: { dayOfWeek: string; count: number }) => ({
     ...item,
-    dayName: dayMap[item.dayOfWeek] || item.dayOfWeek
+    dayName: DAY_OF_WEEK_VI[item.dayOfWeek] || item.dayOfWeek
   })): [];
+
 
   // Transform time of day data
   const transformedTimeData = Array.isArray(timeOfDayData) ? timeOfDayData.map((item: { hour: number; count: number }) => ({
@@ -166,7 +157,7 @@ export default function AccidentTimeAnalysis() {
                   label
                 >
                   {riskData.map((entry: { riskLevel: string; count: number }, index: number) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    <Cell key={`cell-${index}`} fill={CHART_COLORS_7[index % CHART_COLORS_7.length]} />
                   ))}
                 </Pie>
                 <Tooltip />
@@ -181,7 +172,7 @@ export default function AccidentTimeAnalysis() {
                   <div className="flex items-center gap-3">
                     <div
                       className="w-4 h-4 rounded"
-                      style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                      style={{ backgroundColor: CHART_COLORS_7[index % CHART_COLORS_7.length] }}
                     />
                     <span className="font-medium text-gray-900">{item.riskLevel}</span>
                   </div>

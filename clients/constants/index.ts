@@ -59,3 +59,7 @@ export const REPORT_TYPES = {
   INCIDENTS: 'incidents',
   COMPREHENSIVE: 'comprehensive'
 };
+
+// Chart colors and translations
+export * from './chartColors';
+export * from './translations';

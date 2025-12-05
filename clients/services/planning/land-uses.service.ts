@@ -1,9 +1,6 @@
 ﻿import { apiGet, apiPost, ApiResponse } from '../common/api';
+import type { LandUseQuery } from '@/interfaces/query/land-use';
 
-interface LandUseQuery {
-  districtId?: string;
-  type?: string;
-}
 
 // GET all land use records
 export const getAllLandUses = async (query?: LandUseQuery): Promise<ApiResponse> => {

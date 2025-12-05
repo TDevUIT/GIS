@@ -16,7 +16,8 @@ import {
   Ruler,
   RotateCcw,
 } from 'lucide-react'
-import { routingService, RoutePoint, RouteResult, TransportMode } from '@/services'
+import { routingService } from '@/services'
+import type { RoutePoint, RouteResult, TransportMode } from '@/interfaces/external/routing'
 // import { geocodingService } from '@/services'
 import { Z_INDEX } from '@/constants/zIndex'
 

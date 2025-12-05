@@ -1,11 +1,6 @@
 ﻿import { apiGet, apiPost, ApiResponse } from '../common/api';
+import type { PublicTransportMode, PublicTransportQuery } from '@/interfaces/query/public-transport';
 
-export type PublicTransportMode = 'BUS' | 'METRO' | 'BRT' | 'WATERWAY';
-
-export interface PublicTransportQuery {
-  districtId?: string;
-  mode?: PublicTransportMode;
-}
 
 // GET all public transport routes
 export const getAllPublicTransports = async (query?: PublicTransportQuery): Promise<ApiResponse> => {

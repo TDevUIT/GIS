@@ -3,39 +3,8 @@
  * Sử dụng OpenStreetMap Nominatim API
  */
 
-export interface GeocodingResult {
-  lat: number
-  lon: number
-  display_name: string
-  address?: {
-    road?: string
-    suburb?: string
-    city?: string
-    state?: string
-    country?: string
-    postcode?: string
-    quarter?: string
-  }
-  type?: string
-  importance?: number
-  place_id?: string
-}
+import type { GeocodingResult, ReverseGeocodingResult } from '@/interfaces/external/geocoding';
 
-export interface ReverseGeocodingResult {
-  lat: string
-  lon: string
-  display_name: string
-  address: {
-    road?: string
-    suburb?: string
-    quarter?: string
-    city?: string
-    state?: string
-    country?: string
-    postcode?: string
-  }
-  place_id: string
-}
 
 const NOMINATIM_BASE_URL = 'https://nominatim.openstreetmap.org'
 const GEOCODING_API_BASE_URL = process.env.NEXT_PUBLIC_GEOCODING_API_URL || NOMINATIM_BASE_URL
