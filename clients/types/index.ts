@@ -170,3 +170,6 @@ export interface Report {
   completedAt?: Date;
   downloadUrl?: string;
 }
+
+// UI-related types
+export * from './ui';
