@@ -1,10 +1,6 @@
 ﻿import { apiGet, ApiResponse } from '../common/api';
+import type { WaterQualityQuery } from '@/interfaces/query/water-quality';
 
-interface WaterQualityQuery {
-  districtId?: string;
-  from?: string;
-  to?: string;
-}
 
 // GET all water quality records
 export const getAllWaterQualities = async (query?: WaterQualityQuery): Promise<ApiResponse> => {

@@ -3,29 +3,13 @@
  * Sử dụng OpenRouteService API hoặc OSRM
  */
 
-export type TransportMode = 'driving' | 'walking' | 'cycling' | 'motorcycle'
+import type {
+  TransportMode,
+  RoutePoint,
+  RouteResult,
+  RouteInstruction
+} from '@/interfaces/external/routing';
 
-export interface RoutePoint {
-  lat: number
-  lon: number
-  name?: string
-}
-
-export interface RouteResult {
-  coordinates: [number, number][] // [lon, lat] format
-  distance: number // meters
-  duration: number // seconds
-  instructions: RouteInstruction[]
-  bbox: [number, number, number, number] // [minLon, minLat, maxLon, maxLat]
-}
-
-export interface RouteInstruction {
-  text: string
-  distance: number
-  time: number
-  type: string
-  index: number
-}
 
 const OSRM_BASE_URL = 'https://router.project-osrm.org'
 
@@ -44,7 +28,7 @@ class RoutingService {
     try {
       // Convert transport mode to OSRM profile
       const profile = this.getModeProfile(mode)
-      
+
       const coords = `${start.lon},${start.lat};${end.lon},${end.lat}`
       const url = `${OSRM_BASE_URL}/route/v1/${profile}/${coords}?overview=full&steps=true&geometries=geojson`
 
@@ -61,7 +45,7 @@ class RoutingService {
       }
 
       const route = data.routes[0]
-      
+
       return {
         coordinates: route.geometry.coordinates.map((coord: [number, number]) => coord),
         distance: route.distance,
@@ -91,7 +75,7 @@ class RoutingService {
       const coords = points
         .map(p => `${p.lon},${p.lat}`)
         .join(';')
-      
+
       const url = `${OSRM_BASE_URL}/route/v1/${profile}/${coords}?overview=full&steps=true&geometries=geojson`
 
       const response = await fetch(url)
@@ -107,7 +91,7 @@ class RoutingService {
       }
 
       const route = data.routes[0]
-      
+
       return {
         coordinates: route.geometry.coordinates,
         distance: route.distance,
@@ -134,7 +118,7 @@ class RoutingService {
   }> {
     try {
       const profile = this.getModeProfile(mode)
-      
+
       // Build coordinates string
       const allPoints = [...origins, ...destinations]
       const coords = allPoints
@@ -143,7 +127,7 @@ class RoutingService {
 
       const sources = origins.map((_, i) => i).join(';')
       const destinations_idx = destinations.map((_, i) => i + origins.length).join(';')
-      
+
       const url = `${OSRM_BASE_URL}/table/v1/${profile}/${coords}?sources=${sources}&destinations=${destinations_idx}`
 
       const response = await fetch(url)
