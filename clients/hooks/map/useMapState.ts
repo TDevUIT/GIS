@@ -11,7 +11,7 @@ import { PublicTransportRoute } from '@/utils/publicTransportHelpers'
 import { TerrainPolygon } from '@/utils/terrainHelpers'
 import { UrbanPlanPolygon } from '@/utils/urbanPlanHelpers'
 import { FeatureAction } from '@/constants/featureCategories'
-import { GeocodingResult } from '@/services'
+import type { GeocodingResult } from '@/interfaces/external/geocoding'
 
 export function useMapState() {
   const [currentLocation, setCurrentLocation] = useState<[number, number] | null>(null)
