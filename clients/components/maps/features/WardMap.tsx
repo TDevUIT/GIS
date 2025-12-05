@@ -24,7 +24,7 @@ export default function WardMap({
   const [selectedWard, setSelectedWard] = useState<WardGeoJSON | null>(null);
   const [geoJsonData, setGeoJsonData] = useState<WardGeoJSON[]>([]);
 
-  const { data: wardsData, isLoading: _isLoading, error: _error } = useWards(districtId);
+  const { data: wardsData } = useWards(districtId);
 
   useEffect(() => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -49,7 +49,7 @@ export default function WardMap({
         if (bounds.isValid()) {
           map.fitBounds(bounds, { padding: [50, 50] });
         }
-      } catch (_error) {}
+      } catch {}
     }
   }, [geoJsonData, map]);
 

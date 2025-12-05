@@ -1,13 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Marker, Popup, useMap } from 'react-leaflet';
+import { Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import { usePopulations } from '@/hooks/api';
 import {
   convertPopulationToPoint,
   getDensityColor,
-  getDensityLabel,
   PopulationPoint
 } from '@/utils/populationHelpers';
 import { Loader2, AlertCircle, Users } from 'lucide-react';
@@ -17,9 +16,9 @@ interface PopulationMapProps {
 }
 
 export default function PopulationMap({ onPointClick }: PopulationMapProps) {
-  const map = useMap();
+  // const map = useMap();
   const [populationData, setPopulationData] = useState<PopulationPoint[]>([]);
-  const [selectedPoint, setSelectedPoint] = useState<PopulationPoint | null>(null);
+  const [, setSelectedPoint] = useState<PopulationPoint | null>(null);
 
   const { data: populationResponse, isLoading, error } = usePopulations();
 
@@ -32,7 +31,7 @@ export default function PopulationMap({ onPointClick }: PopulationMapProps) {
 
         const points = populations
           .map(convertPopulationToPoint)
-          .filter((point: any) => {
+          .filter((point: PopulationPoint) => {
             return point.lat !== undefined &&
                    point.lng !== undefined &&
                    !isNaN(point.lat) &&

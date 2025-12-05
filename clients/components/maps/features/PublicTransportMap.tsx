@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { GeoJSON, useMap } from 'react-leaflet';
+import { GeoJSON } from 'react-leaflet';
 import { usePublicTransports } from '@/hooks/api';
 import {
   convertPublicTransportToRoute,
@@ -9,7 +9,6 @@ import {
   getTransportModeLabel,
   parseGeoJSON,
   PublicTransportRoute,
-  TransportMode
 } from '@/utils/publicTransportHelpers';
 import { Loader2, AlertCircle, Bus } from 'lucide-react';
 
@@ -18,9 +17,9 @@ interface PublicTransportMapProps {
 }
 
 export default function PublicTransportMap({ onRouteClick }: PublicTransportMapProps) {
-  const map = useMap();
+  // const map = useMap();
   const [transportData, setTransportData] = useState<PublicTransportRoute[]>([]);
-  const [selectedRoute, setSelectedRoute] = useState<PublicTransportRoute | null>(null);
+  const [, setSelectedRoute] = useState<PublicTransportRoute | null>(null);
 
   const { data: transportResponse, isLoading, error } = usePublicTransports();
 

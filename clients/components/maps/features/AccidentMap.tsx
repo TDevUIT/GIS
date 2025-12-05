@@ -1,7 +1,7 @@
 ﻿'use client';
 
 import { useEffect, useState, useMemo } from 'react';
-import { Marker, Popup, useMap } from 'react-leaflet';
+import { Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import { useAccidents } from '@/hooks/api';
 import { useTraffics } from '@/hooks/api';
@@ -20,9 +20,9 @@ interface AccidentMapProps {
 export default function AccidentMap({
   onAccidentClick,
 }: AccidentMapProps) {
-  const map = useMap();
+  // const map = useMap();
   const [accidentsData, setAccidentsData] = useState<AccidentPoint[]>([]);
-  const [selectedAccident, setSelectedAccident] = useState<AccidentPoint | null>(null);
+  const [, setSelectedAccident] = useState<AccidentPoint | null>(null);
   const [showFilters, setShowFilters] = useState(false);
 
   const [filters, setFilters] = useState({
@@ -30,8 +30,8 @@ export default function AccidentMap({
     dateRange: 30,
   });
 
-  const { data: accidentsResponse, isLoading, error } = useAccidents() as any;
-  const { data: trafficResponse } = useTraffics() as any;
+  const { data: accidentsResponse, isLoading, error } = useAccidents();
+  const { data: trafficResponse } = useTraffics();
 
 
   useEffect(() => {
@@ -47,8 +47,8 @@ export default function AccidentMap({
           : [];
 
         const points = accidents
-          .map((accident: any) => convertAccidentToPoint(accident, trafficDataArray))
-          .filter((point: any) => {
+          .map((accident: unknown) => convertAccidentToPoint(accident, trafficDataArray))
+          .filter((point: AccidentPoint) => {
             // Only include accidents with valid coordinates
             return point.lat !== undefined &&
                    point.lng !== undefined &&
@@ -101,7 +101,7 @@ export default function AccidentMap({
       <div className="absolute top-20 left-1/2 -translate-x-1/2 z-[1000] bg-white/95 backdrop-blur-md px-6 py-3 rounded-lg shadow-lg border border-red-200">
         <div className="flex items-center gap-3 text-red-600">
           <Loader2 className="w-5 h-5 animate-spin" />
-          <span className="font-medium">Äang táº£i dá»¯ liá»‡u tai náº¡n...</span>
+          <span className="font-medium">Đang tải dữ liệu tai nạn...</span>
         </div>
       </div>
     );
@@ -113,9 +113,9 @@ export default function AccidentMap({
         <div className="flex items-start gap-3">
           <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
           <div>
-            <h3 className="font-semibold text-red-700 mb-1">Lá»—i táº£i dá»¯ liá»‡u</h3>
+            <h3 className="font-semibold text-red-700 mb-1">Lỗi tải dữ liệu</h3>
             <p className="text-sm text-red-600">
-              {(error as any)?.message || 'KhÃ´ng thá»ƒ táº£i dá»¯ liá»‡u tai náº¡n tá»« server'}
+              {(error as Error)?.message || 'Không thể tải dữ liệu tai nạn từ server'}
             </p>
           </div>
         </div>
@@ -137,10 +137,10 @@ export default function AccidentMap({
           <div className="flex items-start gap-3">
             <AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
             <div>
-              <h3 className="font-semibold text-yellow-800 mb-1">KhÃ´ng hiá»ƒn thá»‹ Ä‘Æ°á»£c tai náº¡n</h3>
+              <h3 className="font-semibold text-yellow-800 mb-1">Không hiển thị được tai nạn</h3>
               <p className="text-sm text-yellow-700">
-                Accidents Ä‘Æ°á»£c liÃªn káº¿t vá»›i traffic qua trafficId, nhÆ°ng khÃ´ng thá»ƒ láº¥y tá»a Ä‘á»™ tá»« traffic lines.
-                Äáº£m báº£o traffic data cÃ³ trÆ°á»ng 'geom' há»£p lá»‡.
+                Accidents được liên kết với traffic qua trafficId, nhưng không thể lấy tọa độ từ traffic lines.
+                Đảm bảo traffic data có trường &apos;geom&apos; hợp lệ.
               </p>
             </div>
           </div>
@@ -160,7 +160,7 @@ export default function AccidentMap({
         {showFilters && (
           <div className="bg-white/95 backdrop-blur-md p-4 rounded-lg shadow-xl border border-gray-200 w-64">
             <div className="flex justify-between items-center mb-3">
-              <h3 className="font-semibold text-gray-800">Bá»™ lá»c</h3>
+              <h3 className="font-semibold text-gray-800">Bộ lọc</h3>
               <button onClick={() => setShowFilters(false)} className="text-gray-400 hover:text-gray-600">
                 <X className="w-4 h-4" />
               </button>
@@ -168,7 +168,7 @@ export default function AccidentMap({
 
             <div className="space-y-3">
               <div>
-                <label className="text-sm font-medium text-gray-700 mb-2 block">Má»©c Ä‘á»™ nghiÃªm trá»ng</label>
+                <label className="text-sm font-medium text-gray-700 mb-2 block">Mức độ nghiêm trọng</label>
                 <div className="space-y-2">
                   {['CRITICAL', 'HIGH', 'MEDIUM', 'LOW'].map((severity) => (
                     <label key={severity} className="flex items-center gap-2 cursor-pointer">
@@ -190,7 +190,7 @@ export default function AccidentMap({
 
               <div>
                 <label className="text-sm font-medium text-gray-700 mb-2 block">
-                  Khoáº£ng thá»i gian: {filters.dateRange} ngÃ y
+                  Khoảng thời gian: {filters.dateRange} ngày
                 </label>
                 <input
                   type="range"
@@ -205,7 +205,7 @@ export default function AccidentMap({
 
               <div className="pt-2 border-t">
                 <div className="text-xs text-gray-600">
-                  Hiá»ƒn thá»‹: <strong>{filteredAccidents.length}</strong> / {accidentsData.length} tai náº¡n
+                  Hiển thị: <strong>{filteredAccidents.length}</strong> / {accidentsData.length} tai nạn
                 </div>
               </div>
             </div>
@@ -255,14 +255,14 @@ export default function AccidentMap({
                   <h3 className="font-bold text-base mb-2">{accident.roadName}</h3>
                   <div className="space-y-1 text-sm">
                     <div>
-                      <strong>Má»©c Ä‘á»™:</strong>{' '}
+                      <strong>Mức độ:</strong>{' '}
                       <span style={{ color }}>{getSeverityLabel(accident.severity)}</span>
                     </div>
                     <div>
-                      <strong>ThÆ°Æ¡ng vong:</strong> {accident.casualties} ngÆ°á»i
+                      <strong>Thương vong:</strong> {accident.casualties} người
                     </div>
                     <div>
-                      <strong>NgÃ y:</strong> {new Date(accident.accidentDate).toLocaleDateString('vi-VN')}
+                      <strong>Ngày:</strong> {new Date(accident.accidentDate).toLocaleDateString('vi-VN')}
                     </div>
                   </div>
                 </div>

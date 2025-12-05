@@ -10,13 +10,11 @@ import {
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { X, BarChart3 } from 'lucide-react';
 
-interface AnalyticsPanelProps {
-  onClose: () => void;
-}
+
 
 const COLORS = ['#374151', '#6b7280', '#9ca3af', '#d1d5db', '#e5e7eb'];
 
-export default function AnalyticsPanel({ onClose }: AnalyticsPanelProps) {
+export default function AnalyticsPanel() {
   const [activeChart, setActiveChart] = useState<'infrastructure' | 'accidents' | 'transport'>('infrastructure');
 
   const { data: summaryResponse } = useAnalyticsSummary();
@@ -112,7 +110,7 @@ export default function AnalyticsPanel({ onClose }: AnalyticsPanelProps) {
                   outerRadius={80}
                   label
                 >
-                  {accidents.map((entry: any, index: number) => (
+                  {accidents.map((entry: { count: number; severity: string }, index: number) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>

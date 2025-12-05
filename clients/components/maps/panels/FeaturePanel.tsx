@@ -3,8 +3,8 @@
 import { useState } from 'react'
 import { ChevronDown, ChevronRight } from 'lucide-react'
 import { FeatureCategory, FeatureAction } from '@/constants/featureCategories'
-import FeatureButton from './FeatureButton'
-import { cn } from '@/lib/utils'
+import FeatureButton from '../controls/FeatureButton'
+// import { cn } from '@/lib/utils'
 
 interface FeaturePanelProps {
   category: FeatureCategory
@@ -12,10 +12,10 @@ interface FeaturePanelProps {
   activeActionId?: string
 }
 
-export default function FeaturePanel({ 
-  category, 
+export default function FeaturePanel({
+  category,
   onActionClick,
-  activeActionId 
+  activeActionId
 }: FeaturePanelProps) {
   const [isExpanded, setIsExpanded] = useState(false)
   const CategoryIcon = category.icon

@@ -69,7 +69,6 @@ export default function MapView() {
     selectedLocation, setSelectedLocation,
     selectedDistrict, setSelectedDistrict,
     selectedWard, setSelectedWard,
-    selectedAccident, setSelectedAccident,
     selectedRoad, setSelectedRoad,
 
     showDistrictsLayer, setShowDistrictsLayer,
@@ -309,15 +308,14 @@ export default function MapView() {
         setSelectedDistrict={setSelectedDistrict}
         selectedWard={selectedWard}
         setSelectedWard={setSelectedWard}
-        selectedAccident={selectedAccident}
-        setSelectedAccident={setSelectedAccident}
+
         selectedRoad={selectedRoad}
         setSelectedRoad={setSelectedRoad}
         showTrafficLayer={showTrafficLayer}
       />
 
       {showAnalyticsPanel && (
-        <AnalyticsPanel onClose={() => setShowAnalyticsPanel(false)} />
+        <AnalyticsPanel />
       )}
 
       <FeatureNotification

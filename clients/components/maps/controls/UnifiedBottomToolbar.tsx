@@ -40,7 +40,7 @@ export default function UnifiedBottomToolbar() {
   })
 
   const onTabChange = (tab: TabType) => {
-    handleTabChange(tab, setStoreActiveTab)
+    handleTabChange(tab, setStoreActiveTab as unknown as (tab: string) => void)
   }
 
   if (!isExpanded) {
