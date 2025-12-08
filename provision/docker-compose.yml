@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   postgres:
     image: postgres:14
@@ -94,6 +92,89 @@ services:
       - redis-data:/data
     networks:
       - egis-network
+
+  client:
+    build:
+      context: ../clients
+      dockerfile: Dockerfile
+    container_name: egis-client
+    restart: always
+    ports:
+      - "3000:3000"
+    networks:
+      - egis-network
+    environment:
+      - NODE_ENV=production
+
+  gis-server:
+    build:
+      context: ../services/GIS_Server
+      dockerfile: Dockerfile
+    container_name: egis-gis-server
+    restart: always
+    ports:
+      - "3001:3000"
+    networks:
+      - egis-network
+    depends_on:
+      - postgis_db
+      - rabbitmq
+      - redis-stack
+
+  web-server:
+    build:
+      context: ../services/Web_Server
+      dockerfile: Dockerfile
+    container_name: egis-web-server
+    restart: always
+    ports:
+      - "3002:3000"
+    networks:
+      - egis-network
+    depends_on:
+      - postgres
+      - rabbitmq
+      - redis-stack
+
+  processing-service:
+    build:
+      context: ../services/processing-service
+      dockerfile: Dockerfile
+    container_name: egis-processing-service
+    restart: always
+    ports:
+      - "3003:3000"
+    networks:
+      - egis-network
+    depends_on:
+      - rabbitmq
+
+  scraper-service:
+    build:
+      context: ../services/scraper-service
+      dockerfile: Dockerfile
+    container_name: egis-scraper-service
+    restart: always
+    ports:
+      - "3004:3000"
+    networks:
+      - egis-network
+    depends_on:
+      - rabbitmq
+      - redis-stack
+
+  simulation-server:
+    build:
+      context: ../services/simulation-server
+      dockerfile: Dockerfile
+    container_name: egis-simulation-server
+    restart: always
+    ports:
+      - "3005:3000"
+    networks:
+      - egis-network
+    depends_on:
+      - rabbitmq
 
 volumes:
   egis_postgres_data: {}
