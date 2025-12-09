@@ -1,2 +1,0 @@
-Placeholder for data flow diagram.
-Sources -> Data_Processor -> GIS_Server (internal) -> Web_Server (public) -> Web_Client.
