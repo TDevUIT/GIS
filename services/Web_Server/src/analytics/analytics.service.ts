@@ -1,13 +1,15 @@
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/unbound-method */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
+
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { Injectable, HttpException } from '@nestjs/common';
+import { Injectable, HttpException, Inject } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom, catchError, throwError } from 'rxjs';
 import { AxiosError } from 'axios';
 import { ConfigService } from '@nestjs/config';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import type { Cache } from 'cache-manager';
 
 @Injectable()
 export class AnalyticsService {
@@ -16,6 +18,7 @@ export class AnalyticsService {
   constructor(
     private readonly httpService: HttpService,
     private readonly configService: ConfigService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {
     const url = this.configService.get<string>('GIS_SERVER_URL');
     if (!url) {
@@ -34,6 +37,41 @@ export class AnalyticsService {
           error.response?.status || 500,
         ),
     );
+  }
+
+  async testRedisConnection() {
+    console.log('🔄 Bắt đầu test Redis Cache thủ công...');
+    try {
+      await this.cacheManager.set(
+        'test_manual_key',
+        'Redis hoạt động ngon lành!',
+        60000,
+      );
+      console.log('✅ Đã set key: test_manual_key');
+      const value = await this.cacheManager.get('test_manual_key');
+      console.log('✅ Đã get key: test_manual_key -> Value:', value);
+      const stores = this.cacheManager.stores;
+      const store = stores[0] as any;
+      const client = store?.client || store?.options?.client;
+      if (client) {
+        console.log(
+          'ℹ️ Redis Client Status:',
+          client.isOpen ? 'Open' : 'Closed',
+        );
+      }
+
+      return {
+        message: 'Redis Test Successful',
+        cachedValue: value,
+        backend: 'Redis',
+      };
+    } catch (error) {
+      console.error('❌ Lỗi kết nối Redis Cache:', error);
+      return {
+        message: 'Redis Test Failed',
+        error: error.message,
+      };
+    }
   }
 
   async getGlobalSummary() {

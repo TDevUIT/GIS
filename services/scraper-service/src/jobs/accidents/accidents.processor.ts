@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-redundant-type-constituents */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Processor, WorkerHost } from '@nestjs/bullmq';
@@ -34,9 +36,7 @@ export class AccidentsProcessor extends WorkerHost {
     const apiKey = this.configService.get<string>('GEMINI_API_KEY');
 
     if (!apiKey) {
-      throw new Error(
-        'GEMINI_API_KEY must be configured in .env file',
-      );
+      throw new Error('GEMINI_API_KEY must be configured in .env file');
     }
 
     this.genAI = new GoogleGenerativeAI(apiKey);
@@ -83,20 +83,30 @@ export class AccidentsProcessor extends WorkerHost {
         this.logger.log(
           '--- [handleScrapeVnExpress] Finished Job. No new articles to scrape. ---',
         );
-        this.logger.log(`Total processed URLs in cache: ${allArticleUrls.length}`);
+        this.logger.log(
+          `Total processed URLs in cache: ${allArticleUrls.length}`,
+        );
         return;
       }
 
-      this.logger.log(`✅ Found ${urlsToProcess.length} NEW articles to process`);
-      this.logger.log(`Already processed: ${allArticleUrls.length - urlsToProcess.length} articles`);
+      this.logger.log(
+        `✅ Found ${urlsToProcess.length} NEW articles to process`,
+      );
+      this.logger.log(
+        `Already processed: ${allArticleUrls.length - urlsToProcess.length} articles`,
+      );
 
       const MAX_ARTICLES_PER_RUN = 1;
       const articlesToProcess = urlsToProcess.slice(0, MAX_ARTICLES_PER_RUN);
 
-      this.logger.log(`📊 Crawl Config: ${MAX_ARTICLES_PER_RUN} article per run, runs every 2 minutes`);
+      this.logger.log(
+        `📊 Crawl Config: ${MAX_ARTICLES_PER_RUN} article per run, runs every 2 minutes`,
+      );
 
       if (articlesToProcess.length < urlsToProcess.length) {
-        this.logger.log(`⚠️ Limited to ${MAX_ARTICLES_PER_RUN} article per run (${urlsToProcess.length - MAX_ARTICLES_PER_RUN} remaining for next runs)`);
+        this.logger.log(
+          `⚠️ Limited to ${MAX_ARTICLES_PER_RUN} article per run (${urlsToProcess.length - MAX_ARTICLES_PER_RUN} remaining for next runs)`,
+        );
       }
 
       let newArticlesScraped = 0;
@@ -114,8 +124,12 @@ export class AccidentsProcessor extends WorkerHost {
         }
 
         if (i < articlesToProcess.length - 1) {
-          this.logger.log(`⏳ Waiting ${DELAY_BETWEEN_REQUESTS / 1000}s before next request...`);
-          await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_REQUESTS));
+          this.logger.log(
+            `⏳ Waiting ${DELAY_BETWEEN_REQUESTS / 1000}s before next request...`,
+          );
+          await new Promise((resolve) =>
+            setTimeout(resolve, DELAY_BETWEEN_REQUESTS),
+          );
         }
       }
 
@@ -136,32 +150,46 @@ export class AccidentsProcessor extends WorkerHost {
       this.logger.log(`📄 Scraping: ${url}`);
       const scraped = await this._scrapeArticleContent(url);
       if (!scraped || !scraped.content || scraped.content.length < 200) {
-        this.logger.log(`⚠️ Content too short (${scraped?.content?.length || 0} chars), skipping...`);
+        this.logger.log(
+          `⚠️ Content too short (${scraped?.content?.length || 0} chars), skipping...`,
+        );
         await this.redisClient.sadd(this.PROCESSED_URLS_KEY, url);
         return false;
       }
-      this.logger.log(`✓ Content scraped: ${scraped.content.length} characters`);
+      this.logger.log(
+        `✓ Content scraped: ${scraped.content.length} characters`,
+      );
       if (scraped.publishTime) {
         this.logger.log(`📅 Publish time from HTML: ${scraped.publishTime}`);
       }
 
       this.logger.log(`🤖 Analyzing with Gemini AI (gemini-pro)...`);
-      const extractedData = await this._extractDataWithGemini(scraped.content, scraped.publishTime);
+      const extractedData = await this._extractDataWithGemini(
+        scraped.content,
+        scraped.publishTime,
+      );
       if (!extractedData) {
         this.logger.log(`❌ No accident data found in: ${url}`);
         await this.redisClient.sadd(this.PROCESSED_URLS_KEY, url);
         return false;
       }
-      this.logger.log(`✅ Extracted data:`, JSON.stringify(extractedData, null, 2));
+      this.logger.log(
+        `✅ Extracted data:`,
+        JSON.stringify(extractedData, null, 2),
+      );
 
       let coordinates = extractedData.coordinates;
       if (!coordinates && extractedData.location) {
         this.logger.log(`🌍 Geocoding location: ${extractedData.location}`);
         coordinates = await this._geocodeLocation(extractedData.location);
         if (coordinates) {
-          this.logger.log(`✅ Geocoded: lat=${coordinates.lat}, lng=${coordinates.lng}`);
+          this.logger.log(
+            `✅ Geocoded: lat=${coordinates.lat}, lng=${coordinates.lng}`,
+          );
         } else {
-          this.logger.warn(`⚠️ Geocoding failed for: ${extractedData.location}`);
+          this.logger.warn(
+            `⚠️ Geocoding failed for: ${extractedData.location}`,
+          );
         }
       }
 
@@ -189,10 +217,18 @@ export class AccidentsProcessor extends WorkerHost {
       await this.redisClient.sadd(this.PROCESSED_URLS_KEY, url);
       this.logger.log(`✅ SUCCESS: Published accident data`);
       this.logger.log(`   Location: ${extractedData.location}`);
-      this.logger.log(`   Coordinates: ${coordinates ? `${coordinates.lat}, ${coordinates.lng}` : 'N/A'}`);
-      this.logger.log(`   Casualties: ${extractedData.casualties?.fatalities || 0} dead, ${extractedData.casualties?.injuries || 0} injured`);
-      this.logger.log(`   Vehicles: ${extractedData.vehiclesInvolved?.join(', ') || 'N/A'}`);
-      this.logger.log(`─────────────────────────────────────────────────────────`);
+      this.logger.log(
+        `   Coordinates: ${coordinates ? `${coordinates.lat}, ${coordinates.lng}` : 'N/A'}`,
+      );
+      this.logger.log(
+        `   Casualties: ${extractedData.casualties?.fatalities || 0} dead, ${extractedData.casualties?.injuries || 0} injured`,
+      );
+      this.logger.log(
+        `   Vehicles: ${extractedData.vehiclesInvolved?.join(', ') || 'N/A'}`,
+      );
+      this.logger.log(
+        `─────────────────────────────────────────────────────────`,
+      );
       return true;
     } catch (error) {
       this.logger.error(
@@ -217,22 +253,27 @@ export class AccidentsProcessor extends WorkerHost {
     return Array.from(urls);
   }
 
-  private async _scrapeArticleContent(url: string): Promise<{ content: string; publishTime?: string } | null> {
+  private async _scrapeArticleContent(
+    url: string,
+  ): Promise<{ content: string; publishTime?: string } | null> {
     try {
       const { data } = await firstValueFrom(this.httpService.get(url));
       const $ = cheerio.load(String(data));
 
       let publishTime: string | undefined;
 
-      const metaTime = $('meta[property="article:published_time"]').attr('content');
+      const metaTime = $('meta[property="article:published_time"]').attr(
+        'content',
+      );
       if (metaTime) {
         publishTime = metaTime;
       }
 
       if (!publishTime) {
-        const dateText = $('.date').text().trim() ||
-                        $('.header-content .date').text().trim() ||
-                        $('span.date').text().trim();
+        const dateText =
+          $('.date').text().trim() ||
+          $('.header-content .date').text().trim() ||
+          $('span.date').text().trim();
         if (dateText) {
           publishTime = dateText;
           this.logger.log(`📅 Found date in HTML: ${dateText}`);
@@ -240,7 +281,10 @@ export class AccidentsProcessor extends WorkerHost {
       }
 
       $('article.fck_detail').find('script, style, figure, table').remove();
-      const content = $('article.fck_detail').text().replace(/\s\s+/g, ' ').trim();
+      const content = $('article.fck_detail')
+        .text()
+        .replace(/\s\s+/g, ' ')
+        .trim();
 
       return { content, publishTime };
     } catch (error) {
@@ -252,12 +296,16 @@ export class AccidentsProcessor extends WorkerHost {
     }
   }
 
-  private async _geocodeLocation(location: string): Promise<{ lat: number; lng: number } | null> {
+  private async _geocodeLocation(
+    location: string,
+  ): Promise<{ lat: number; lng: number } | null> {
     const attempts = this._generateGeocodingAttempts(location);
 
     for (let i = 0; i < attempts.length; i++) {
       const attempt = attempts[i];
-      this.logger.log(`🔍 Geocoding attempt ${i + 1}/${attempts.length}: "${attempt}"`);
+      this.logger.log(
+        `🔍 Geocoding attempt ${i + 1}/${attempts.length}: "${attempt}"`,
+      );
 
       try {
         const encodedLocation = encodeURIComponent(attempt);
@@ -268,24 +316,30 @@ export class AccidentsProcessor extends WorkerHost {
             headers: {
               'User-Agent': 'IE402-GIS-Scraper/1.0',
             },
-          })
+          }),
         );
 
         if (Array.isArray(data) && data.length > 0) {
-          const result = data[0] as { lat: string; lon: string; display_name: string };
+          const result = data[0] as {
+            lat: string;
+            lon: string;
+            display_name: string;
+          };
           const coordinates = {
             lat: parseFloat(result.lat),
             lng: parseFloat(result.lon),
           };
           this.logger.log(`✅ Geocoding success: ${result.display_name}`);
-          this.logger.log(`   Coordinates: lat=${coordinates.lat}, lng=${coordinates.lng}`);
+          this.logger.log(
+            `   Coordinates: lat=${coordinates.lat}, lng=${coordinates.lng}`,
+          );
           return coordinates;
         } else {
           this.logger.log(`   ❌ No results for: "${attempt}"`);
         }
 
         if (i < attempts.length - 1) {
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          await new Promise((resolve) => setTimeout(resolve, 1000));
         }
       } catch (error) {
         this.logger.error(
@@ -302,25 +356,36 @@ export class AccidentsProcessor extends WorkerHost {
   private _generateGeocodingAttempts(location: string): string[] {
     const attempts: string[] = [location];
 
-    const parts = location.split(',').map(p => p.trim());
+    const parts = location.split(',').map((p) => p.trim());
 
     if (parts.length >= 3) {
       const districtProvince = parts.slice(-2).join(', ');
       attempts.push(districtProvince);
 
-      const province = parts[parts.length - 1].replace(/^(tỉnh|thành phố)\s+/i, '');
+      const province = parts[parts.length - 1].replace(
+        /^(tỉnh|thành phố)\s+/i,
+        '',
+      );
       attempts.push(province + ', Vietnam');
     } else if (parts.length >= 2) {
-      const province = parts[parts.length - 1].replace(/^(tỉnh|thành phố)\s+/i, '');
+      const province = parts[parts.length - 1].replace(
+        /^(tỉnh|thành phố)\s+/i,
+        '',
+      );
       attempts.push(province + ', Vietnam');
     }
 
     return [...new Set(attempts)];
   }
 
-  private async _extractDataWithGemini(content: string, publishTime?: string): Promise<any | null> {
+  private async _extractDataWithGemini(
+    content: string,
+    publishTime?: string,
+  ): Promise<any | null> {
     try {
-      this.logger.log(`🔧 Creating Gemini model instance with: ${this.modelName}`);
+      this.logger.log(
+        `🔧 Creating Gemini model instance with: ${this.modelName}`,
+      );
       const generativeModel = this.genAI.getGenerativeModel({
         model: this.modelName,
         safetySettings: [
@@ -339,12 +404,14 @@ export class AccidentsProcessor extends WorkerHost {
         },
       });
 
-      const publishTimeHint = publishTime ? `
+      const publishTimeHint = publishTime
+        ? `
       [THÔNG TIN THÊM]
       Thời gian đăng bài: ${publishTime}
-      Sử dụng thông tin này nếu văn bản không có thời gian xảy ra tai nạn rõ ràng.` : '';
+      Sử dụng thông tin này nếu văn bản không có thời gian xảy ra tai nạn rõ ràng.`
+        : '';
 
-            const prompt = `Bạn là một trợ lý ảo chuyên trích xuất thông tin tai nạn giao thông từ văn bản tiếng Việt.
+      const prompt = `Bạn là một trợ lý ảo chuyên trích xuất thông tin tai nạn giao thông từ văn bản tiếng Việt.
       Phân tích văn bản sau và trả về một đối tượng JSON DUY NHẤT.
 
       Các trường cần có:
@@ -397,7 +464,9 @@ export class AccidentsProcessor extends WorkerHost {
 
       Văn bản: "${content.substring(0, 15000)}"`;
 
-      this.logger.log(`📤 Sending request to Gemini API with model: ${this.modelName}`);
+      this.logger.log(
+        `📤 Sending request to Gemini API with model: ${this.modelName}`,
+      );
       const result = await generativeModel.generateContent(prompt);
       const response = result.response;
 

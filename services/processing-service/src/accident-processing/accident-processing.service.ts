@@ -70,18 +70,24 @@ export class AccidentProcessingService {
   })
   public async handleCleanedData(msg: CleanedAccidentData) {
     this.logger.log(`[GIS Processor] Received cleaned data: ${msg.sourceUrl}`);
-    
+
     // Use coordinates from scraper if available, otherwise try geocoding
     let coordinates = msg.coordinates;
     if (!coordinates && msg.location) {
-      this.logger.log(`[GIS Processor] No coordinates from scraper, attempting geocoding...`);
+      this.logger.log(
+        `[GIS Processor] No coordinates from scraper, attempting geocoding...`,
+      );
       coordinates = await this.geocodeLocation(msg.location);
     }
 
     if (coordinates) {
-      this.logger.log(`[GIS Processor] Using coordinates: lat=${coordinates.lat}, lng=${coordinates.lng}`);
+      this.logger.log(
+        `[GIS Processor] Using coordinates: lat=${coordinates.lat}, lng=${coordinates.lng}`,
+      );
     } else {
-      this.logger.warn(`[GIS Processor] No coordinates available for: ${msg.sourceUrl}`);
+      this.logger.warn(
+        `[GIS Processor] No coordinates available for: ${msg.sourceUrl}`,
+      );
     }
 
     let trafficId: string | null = null;
@@ -93,9 +99,9 @@ export class AccidentProcessingService {
     }
 
     // Convert coordinates to PostGIS POINT format if not already present
-    const geom = msg.geom || (coordinates 
-      ? `POINT(${coordinates.lng} ${coordinates.lat})`
-      : null);
+    const geom =
+      msg.geom ||
+      (coordinates ? `POINT(${coordinates.lng} ${coordinates.lat})` : null);
 
     const finalData: FinalAccidentData = {
       ...msg,
@@ -176,18 +182,18 @@ export class AccidentProcessingService {
     location: string,
   ): Promise<{ lat: number; lng: number } | null> {
     this.logger.log(`[Geocoder] Geocoding location: "${location}"`);
-    
+
     try {
       // Use Nominatim API as fallback
       const encodedLocation = encodeURIComponent(location);
       const url = `https://nominatim.openstreetmap.org/search?q=${encodedLocation}&format=json&limit=1&countrycodes=vn`;
-      
+
       const response = await firstValueFrom(
         this.httpService.get(url, {
           headers: {
             'User-Agent': 'IE402-Processing-Service/1.0',
           },
-        })
+        }),
       );
 
       if (Array.isArray(response.data) && response.data.length > 0) {
@@ -196,7 +202,9 @@ export class AccidentProcessingService {
           lat: parseFloat(result.lat),
           lng: parseFloat(result.lon),
         };
-        this.logger.log(`[Geocoder] Successfully geocoded to: ${coordinates.lat}, ${coordinates.lng}`);
+        this.logger.log(
+          `[Geocoder] Successfully geocoded to: ${coordinates.lat}, ${coordinates.lng}`,
+        );
         return coordinates;
       }
 
