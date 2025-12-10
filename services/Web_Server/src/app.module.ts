@@ -4,7 +4,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { DistrictsModule } from './districts/districts.module';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { WardsModule } from './wards/wards.module';
 import { InfrastructuresModule } from './infrastructures/infrastructures.module';
 import { PopulationsModule } from './populations/populations.module';
@@ -20,12 +20,33 @@ import { AnalyticsModule } from './analytics/analytics.module';
 import { CommonModule } from './common/common.module';
 import { EmailModule } from './email/email.module';
 import { UsersModule } from './users/users.module';
+import { CacheModule } from '@nestjs/cache-manager';
+import { redisStore } from 'cache-manager-redis-yet';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
+    }),
+    CacheModule.registerAsync({
+      isGlobal: true,
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => {
+        const store = await redisStore({
+          socket: {
+            host: configService.get<string>('REDIS_HOST') || 'localhost',
+            port: configService.get<number>('REDIS_PORT') || 6379,
+          },
+          ttl: 5 * 60 * 1000,
+        });
+
+        return {
+          store: store as any,
+          ttl: 5 * 60 * 1000,
+        };
+      },
+      inject: [ConfigService],
     }),
     HttpModule.register({
       timeout: 8000,

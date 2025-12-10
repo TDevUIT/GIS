@@ -1,4 +1,6 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
+import { Controller, Get, Param, Query, UseInterceptors } from '@nestjs/common';
+import { CacheTTL } from '@nestjs/cache-manager';
+import { HttpCacheInterceptor } from '../common/interceptors/http-cache.interceptor';
 import {
   ApiTags,
   ApiOperation,
@@ -43,8 +45,16 @@ class RiskAreaQuery {
 
 @ApiTags('Analytics')
 @Controller('analytics')
+@UseInterceptors(HttpCacheInterceptor)
+@CacheTTL(300000)
 export class AnalyticsController {
   constructor(private readonly analyticsService: AnalyticsService) {}
+
+  @Get('test-redis')
+  @ApiOperation({ summary: 'Manual Test Redis Connection' })
+  testRedis() {
+    return this.analyticsService.testRedisConnection();
+  }
 
   @Get('summary')
   @ApiOperation({
@@ -57,6 +67,7 @@ export class AnalyticsController {
     description: 'Summary data retrieved successfully',
   })
   getGlobalSummary() {
+    console.log('⚡ Controller Hit: getGlobalSummary (Cache Miss)');
     return this.analyticsService.getGlobalSummary();
   }
 
@@ -155,6 +166,7 @@ export class AnalyticsController {
   getAccidentSummaryBySeverity() {
     return this.analyticsService.getAccidentSummaryBySeverity();
   }
+
   @Get('recent-activities')
   @ApiOperation({
     summary: 'Get recent system activities',
