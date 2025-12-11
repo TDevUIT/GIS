@@ -40,8 +40,8 @@ export class AccidentsProcessor extends WorkerHost {
     switch (job.name) {
       case 'simulate-traffic-volume':
         return this.handleSimulateTrafficVolume(job);
-      // case 'simulate-random-accidents':
-      //   return this.handleSimulateRandomAccidents(job);
+      case 'simulate-random-accidents':
+        return this.handleSimulateRandomAccidents(job);
       default:
         throw new Error(`Unknown job name: ${job.name}`);
     }
@@ -138,7 +138,7 @@ export class AccidentsProcessor extends WorkerHost {
               accidentDate: new Date().toISOString(),
               severity,
               casualties,
-              sourceUrl: `egis:simulation:accident:${uniqueId}`,
+              sourceUrl: `https://egis.simulation.internal/accident/${uniqueId}`,
             };
 
             await this.postToGis('/accidents', newAccident);

@@ -1,6 +1,8 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/require-await */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Injectable, Logger } from '@nestjs/common';
 import { AmqpConnection, RabbitSubscribe } from '@golevelup/nestjs-rabbitmq';
 import { HttpService } from '@nestjs/axios';
@@ -14,7 +16,7 @@ interface RawAccidentData {
   casualties: { fatalities: number; injuries: number };
   vehiclesInvolved: string[];
   coordinates?: { lat: number; lng: number } | null;
-  geom?: string | null; // PostGIS POINT format
+  geom?: string | null;
   sourceUrl: string;
   scrapedAt: string;
 }
@@ -25,13 +27,13 @@ interface CleanedAccidentData extends RawAccidentData {
 
 interface FinalAccidentData extends CleanedAccidentData {
   trafficId: string | null;
-  // geom is inherited from CleanedAccidentData (PostGIS POINT string format)
 }
 
 @Injectable()
 export class AccidentProcessingService {
   private readonly logger = new Logger(AccidentProcessingService.name);
   private readonly gisServerUrl: string;
+  private cachedTrafficRoutes: any[] = [];
 
   constructor(
     private readonly amqpConnection: AmqpConnection,
@@ -71,7 +73,6 @@ export class AccidentProcessingService {
   public async handleCleanedData(msg: CleanedAccidentData) {
     this.logger.log(`[GIS Processor] Received cleaned data: ${msg.sourceUrl}`);
 
-    // Use coordinates from scraper if available, otherwise try geocoding
     let coordinates = msg.coordinates;
     if (!coordinates && msg.location) {
       this.logger.log(
@@ -98,16 +99,67 @@ export class AccidentProcessingService {
       );
     }
 
-    // Convert coordinates to PostGIS POINT format if not already present
-    const geom =
+    let finalGeom =
       msg.geom ||
       (coordinates ? `POINT(${coordinates.lng} ${coordinates.lat})` : null);
 
+    if (!trafficId) {
+      this.logger.warn(
+        `⚠️ [Demo Mode] Real traffic route not found. Attempting to assign RANDOM traffic...`,
+      );
+
+      const randomTraffic = await this.getRandomTraffic();
+
+      if (randomTraffic) {
+        trafficId = randomTraffic.id;
+        this.logger.log(
+          `🎲 [Demo Mode] Assigned Random Traffic ID: ${trafficId} (Road: ${randomTraffic.roadName || 'Unknown'})`,
+        );
+
+        if (randomTraffic.geom) {
+          try {
+            const geoJson =
+              typeof randomTraffic.geom === 'string'
+                ? JSON.parse(randomTraffic.geom)
+                : randomTraffic.geom;
+
+            if (
+              geoJson &&
+              (geoJson.type === 'LineString' ||
+                geoJson.type === 'MultiLineString') &&
+              Array.isArray(geoJson.coordinates) &&
+              geoJson.coordinates.length > 0
+            ) {
+              const startPoint = geoJson.coordinates[0];
+
+              if (Array.isArray(startPoint) && startPoint.length >= 2) {
+                const [lng, lat] = startPoint;
+                finalGeom = `POINT(${lng} ${lat})`;
+                this.logger.log(
+                  `📍 [Demo Mode] Relocated accident to start of road: ${lng}, ${lat}`,
+                );
+              }
+            }
+          } catch (err) {
+            this.logger.warn(
+              `❌ [Demo Mode] Failed to parse geometry from random traffic`,
+              err instanceof Error ? err.message : String(err),
+            );
+          }
+        }
+      } else {
+        this.logger.error(
+          `❌ [Demo Mode] Failed to fetch any traffic data for random assignment.`,
+        );
+      }
+    }
+
     const finalData: FinalAccidentData = {
       ...msg,
-      geom: geom,
+      geom: finalGeom,
       trafficId: trafficId,
     };
+
     void this.amqpConnection.publish(
       'amq.topic',
       'accident.final_data',
@@ -127,12 +179,14 @@ export class AccidentProcessingService {
     this.logger.log(
       `[DB Writer] Received final data, writing to DB: ${msg.sourceUrl}`,
     );
+
     if (!msg.geom || !msg.trafficId) {
       this.logger.warn(
-        `[DB Writer] Skipping write for accident without coordinates or trafficId: ${msg.sourceUrl}`,
+        `[DB Writer] Skipping write. Missing Geom or TrafficId (Random assignment failed?): ${msg.sourceUrl}`,
       );
       return;
     }
+
     try {
       const payload = {
         accidentDate: msg.dateTime,
@@ -143,16 +197,17 @@ export class AccidentProcessingService {
         trafficId: msg.trafficId,
         geom: msg.geom,
       };
+
       await firstValueFrom(
         this.httpService.post(`${this.gisServerUrl}/accidents`, payload),
       );
       this.logger.log(
         `[DB Writer] Successfully wrote to DB for: ${msg.sourceUrl}`,
       );
-    } catch (error) {
+    } catch (_error) {
       this.logger.error(
         `[DB Writer] Failed to write to DB for: ${msg.sourceUrl}`,
-        error.response?.data || error.message,
+        _error.response?.data || _error.message,
       );
     }
   }
@@ -184,7 +239,6 @@ export class AccidentProcessingService {
     this.logger.log(`[Geocoder] Geocoding location: "${location}"`);
 
     try {
-      // Use Nominatim API as fallback
       const encodedLocation = encodeURIComponent(location);
       const url = `https://nominatim.openstreetmap.org/search?q=${encodedLocation}&format=json&limit=1&countrycodes=vn`;
 
@@ -210,10 +264,10 @@ export class AccidentProcessingService {
 
       this.logger.warn(`[Geocoder] No results found for: ${location}`);
       return null;
-    } catch (error) {
+    } catch (_error) {
       this.logger.error(
         `[Geocoder] Geocoding failed for: ${location}`,
-        error.response?.data || error.message,
+        _error.response?.data || _error.message,
       );
       return null;
     }
@@ -230,10 +284,47 @@ export class AccidentProcessingService {
         `[GIS Processor] Found nearest traffic: ${response.data.id} for location (${lng}, ${lat})`,
       );
       return response.data.id;
-    } catch (error) {
-      this.logger.warn(
-        `Could not find traffic ID for location (${lng}, ${lat})`,
-        error.response?.data?.message || error.message,
+    } catch (_error) {
+      this.logger.debug(
+        `Real traffic ID check failed for (${lng}, ${lat}). This is expected in Demo if area is uncovered.`,
+      );
+      return null;
+    }
+  }
+
+  private async getRandomTraffic(): Promise<{
+    id: string;
+    roadName?: string;
+    geom?: string;
+  } | null> {
+    try {
+      if (this.cachedTrafficRoutes.length === 0) {
+        this.logger.log(`[Demo Helper] Cache empty. Fetching all traffics...`);
+        const url = `${this.gisServerUrl}/traffics`;
+        const response = await firstValueFrom(this.httpService.get(url));
+
+        const data = response.data?.data || response.data;
+
+        if (Array.isArray(data) && data.length > 0) {
+          this.cachedTrafficRoutes = data;
+          this.logger.log(
+            `[Demo Helper] Cached ${this.cachedTrafficRoutes.length} traffic routes.`,
+          );
+        }
+      }
+
+      if (this.cachedTrafficRoutes.length > 0) {
+        const randomIndex = Math.floor(
+          Math.random() * this.cachedTrafficRoutes.length,
+        );
+        return this.cachedTrafficRoutes[randomIndex];
+      }
+
+      return null;
+    } catch (_error) {
+      this.logger.error(
+        `[Demo Helper] Failed to fetch traffic list`,
+        _error.message,
       );
       return null;
     }
