@@ -21,7 +21,7 @@ async function bootstrap() {
 
   app.use('/admin/queues', serverAdapter.getRouter());
 
-  const port = process.env.SIMULATION_SERVER_PORT || 3001;
+  const port = process.env.SIMULATION_SERVER_PORT || 5001;
   await app.listen(port);
 
   Logger.log(`🚀 Simulation Server is running on port ${port}`, 'Bootstrap');
