@@ -13,6 +13,11 @@ services:
       - egis_postgres_data:/var/lib/postgresql/data
     networks:
       - egis-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d egis_database"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   pgadmin:
     image: dpage/pgadmin4
@@ -81,6 +86,11 @@ services:
       - RABBITMQ_DEFAULT_PASS=guest
     networks:
       - egis-network
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   redis-stack:
     image: redis/redis-stack:latest
@@ -116,10 +126,16 @@ services:
       - "3001:3000"
     networks:
       - egis-network
+    environment:
+      - PORT=3000
+      - CORS_ORIGIN=true
     depends_on:
-      - postgis_db
-      - rabbitmq
-      - redis-stack
+      postgis_db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      redis-stack:
+        condition: service_started
 
   web-server:
     build:
@@ -131,10 +147,16 @@ services:
       - "3002:3000"
     networks:
       - egis-network
+    environment:
+      - PORT=3000
+      - CORS_ORIGIN=true
     depends_on:
-      - postgres
-      - rabbitmq
-      - redis-stack
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      redis-stack:
+        condition: service_started
 
   processing-service:
     build:
@@ -147,7 +169,8 @@ services:
     networks:
       - egis-network
     depends_on:
-      - rabbitmq
+      rabbitmq:
+        condition: service_healthy
 
   scraper-service:
     build:
@@ -160,8 +183,10 @@ services:
     networks:
       - egis-network
     depends_on:
-      - rabbitmq
-      - redis-stack
+      rabbitmq:
+        condition: service_healthy
+      redis-stack:
+        condition: service_started
 
   simulation-server:
     build:
@@ -174,7 +199,23 @@ services:
     networks:
       - egis-network
     depends_on:
-      - rabbitmq
+      rabbitmq:
+        condition: service_healthy
+
+  nginx:
+    image: nginx:alpine
+    container_name: egis-nginx
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - client
+      - web-server
+      - gis-server
+    networks:
+      - egis-network
 
 volumes:
   egis_postgres_data: {}

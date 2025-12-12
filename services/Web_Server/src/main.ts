@@ -11,8 +11,23 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.setGlobalPrefix('api/v1');
 
+  const corsOrigin = process.env.CORS_ORIGIN;
+  let origin: boolean | string | RegExp | (string | RegExp)[] = true;
+
+  if (corsOrigin) {
+    if (corsOrigin === 'true') {
+      origin = true;
+    } else if (corsOrigin === 'false') {
+      origin = false;
+    } else if (corsOrigin.includes(',')) {
+      origin = corsOrigin.split(',').map((o) => o.trim());
+    } else {
+      origin = corsOrigin;
+    }
+  }
+
   app.enableCors({
-    origin: 'http://localhost:3000',
+    origin,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
   });
@@ -67,7 +82,7 @@ async function bootstrap() {
       'JWT-auth',
     )
     .addServer('http://localhost:8000', 'Local Development Server')
-    .addServer('https://api.ie402.example.com', 'Production Server')
+    .addServer('http://api.urbanscale.online', 'Production Server')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
@@ -82,7 +97,7 @@ async function bootstrap() {
     customCss: '.swagger-ui .topbar { display: none }',
   });
 
-  const port = 8000;
+  const port = process.env.PORT || 8000;
   await app.listen(port, '0.0.0.0');
   Logger.log(`Server is running on http://localhost:${port}`);
   Logger.log(`📚 Swagger documentation: http://localhost:${port}/api/docs`);
