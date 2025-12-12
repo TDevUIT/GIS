@@ -1,7 +1,7 @@
 export * from './utils';
 
 export const config = {
-  apiUrl: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001',
+  apiUrl: process.env.NEXT_PUBLIC_API_URL || 'http://api.urbanscale.online',
   mapboxToken: process.env.NEXT_PUBLIC_MAPBOX_TOKEN || '',
   arcgisApiKey: process.env.NEXT_PUBLIC_ARCGIS_API_KEY || '',
   isDevelopment: process.env.NODE_ENV === 'development',

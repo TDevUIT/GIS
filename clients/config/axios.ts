@@ -1,6 +1,6 @@
 import axios, { AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 
-const baseURL = process.env.NEXT_PUBLIC_WEB_SERVER_URL || 'http://localhost:5000/api/v1';
+const baseURL = process.env.NEXT_PUBLIC_WEB_SERVER_URL || 'http://api.urbanscale.online/web';
 
 export const apiClient: AxiosInstance = axios.create({
   baseURL,

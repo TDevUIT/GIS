@@ -13,8 +13,23 @@ async function bootstrap() {
   app.use(json({ limit: '50mb' }));
   app.use(urlencoded({ extended: true, limit: '50mb' }));
 
+  const corsOrigin = process.env.CORS_ORIGIN;
+  let origin: boolean | string | RegExp | (string | RegExp)[] = true;
+
+  if (corsOrigin) {
+    if (corsOrigin === 'true') {
+      origin = true;
+    } else if (corsOrigin === 'false') {
+      origin = false;
+    } else if (corsOrigin.includes(',')) {
+      origin = corsOrigin.split(',').map((o) => o.trim());
+    } else {
+      origin = corsOrigin;
+    }
+  }
+
   app.enableCors({
-    origin: '*',
+    origin,
     credentials: true,
   });
 
@@ -53,6 +68,8 @@ async function bootstrap() {
     .addTag('wards', 'Ward information')
     .addTag('water-qualities', 'Water quality monitoring')
     .addBearerAuth()
+    .addServer('http://localhost:5000', 'Local Development Server')
+    .addServer('http://api.urbanscale.online', 'Production Server')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
@@ -62,7 +79,7 @@ async function bootstrap() {
     customCss: '.swagger-ui .topbar { display: none }',
   });
 
-  const port = 5000;
+  const port = process.env.PORT || 5000;
   await app.listen(port, '0.0.0.0');
   Logger.log(`🚀 GIS Server is running on http://localhost:${port}`);
   Logger.log(`📍 API prefix: http://localhost:${port}/api/v1`);
