@@ -43,35 +43,35 @@ interface NearestResult {
 const POI_CATEGORIES: POICategory[] = [
   {
     id: 'hospital',
-    name: 'Bá»‡nh viá»‡n',
+    name: 'Bệnh viện',
     icon: <Hospital className="w-5 h-5" />,
     query: 'hospital',
     color: 'bg-red-500',
   },
   {
     id: 'school',
-    name: 'TrÆ°á»ng há»c',
+    name: 'Trường học',
     icon: <GraduationCap className="w-5 h-5" />,
     query: 'school',
     color: 'bg-blue-500',
   },
   {
     id: 'supermarket',
-    name: 'SiÃªu thá»‹',
+    name: 'Siêu thị',
     icon: <Store className="w-5 h-5" />,
     query: 'supermarket',
     color: 'bg-green-500',
   },
   {
     id: 'cafe',
-    name: 'QuÃ¡n cÃ  phÃª',
+    name: 'Quán cà phê',
     icon: <Coffee className="w-5 h-5" />,
     query: 'cafe',
     color: 'bg-amber-500',
   },
   {
     id: 'gas_station',
-    name: 'Tráº¡m xÄƒng',
+    name: 'Trạm xăng',
     icon: <Fuel className="w-5 h-5" />,
     query: 'gas station',
     color: 'bg-purple-500',
@@ -121,7 +121,7 @@ export default function NearestPointSearch({
     try {
       const [lat, lon] = currentLocation
 
-      // Calculate search bounds (rough approximation: 1 degree â‰ˆ 111 km)
+      // Calculate search bounds (rough approximation: 1 degree ≈ 111 km)
       const radiusInDegrees = searchRadius / 111
       const viewbox: [number, number, number, number] = [
         lon - radiusInDegrees,
@@ -226,7 +226,7 @@ export default function NearestPointSearch({
       <div className="p-4 bg-gray-800 text-white flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Search className="w-5 h-5" />
-          <h3 className="font-bold text-lg">TÃ¬m Ä‘iá»ƒm gáº§n nháº¥t</h3>
+          <h3 className="font-bold text-lg">Tìm điểm gần nhất</h3>
         </div>
         <button
           onClick={onClose}
@@ -243,7 +243,7 @@ export default function NearestPointSearch({
           <div className="p-3 bg-gray-50 border border-gray-200 rounded-lg text-sm">
             <div className="flex items-center gap-2 text-gray-700">
               <MapPin className="w-4 h-4" />
-              <span className="font-medium">Vá»‹ trÃ­ hiá»‡n táº¡i:</span>
+              <span className="font-medium">Vị trí hiện tại:</span>
             </div>
             <div className="text-gray-600 text-xs mt-1">
               {currentLocation[0].toFixed(6)}, {currentLocation[1].toFixed(6)}
@@ -251,14 +251,14 @@ export default function NearestPointSearch({
           </div>
         ) : (
           <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-yellow-700">
-            âš ï¸ Vui lÃ²ng báº­t vá»‹ trÃ­ hiá»‡n táº¡i Ä‘á»ƒ sá»­ dá»¥ng tÃ­nh nÄƒng nÃ y
+            ⚠️ Vui lòng bật vị trí hiện tại để sử dụng tính năng này
           </div>
         )}
 
         {/* Search Radius */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            BÃ¡n kÃ­nh tÃ¬m kiáº¿m: {searchRadius} km
+            Bán kính tìm kiếm: {searchRadius} km
           </label>
           <input
             type="range"
@@ -277,7 +277,7 @@ export default function NearestPointSearch({
         {/* Category Selection */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Chá»n loáº¡i Ä‘á»‹a Ä‘iá»ƒm
+            Chọn loại địa điểm
           </label>
           <div className="grid grid-cols-2 gap-2">
             {POI_CATEGORIES.map((category) => (
@@ -304,7 +304,7 @@ export default function NearestPointSearch({
             onClick={handleClearSelection}
             className="w-full px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition-colors text-sm"
           >
-            XÃ³a lá»±a chá»n
+            Xóa lựa chọn
           </button>
         )}
 
@@ -319,7 +319,7 @@ export default function NearestPointSearch({
         {!isSearching && results.length > 0 && (
           <div>
             <h4 className="font-semibold text-gray-700 mb-2">
-              TÃ¬m tháº¥y {results.length} káº¿t quáº£
+              Tìm thấy {results.length} kết quả
             </h4>
             <div className="space-y-2 max-h-96 overflow-y-auto">
               {results.map((item, index) => (
@@ -356,7 +356,7 @@ export default function NearestPointSearch({
                           className="flex items-center gap-1 text-gray-700 hover:text-gray-900 font-medium"
                         >
                           <Navigation2 className="w-3 h-3" />
-                          <span>Chá»‰ Ä‘Æ°á»ng</span>
+                          <span>Chỉ đường</span>
                         </button>
                       </div>
                     </div>
@@ -371,8 +371,8 @@ export default function NearestPointSearch({
         {!isSearching && selectedCategory && results.length === 0 && (
           <div className="text-center py-8 text-gray-500">
             <Search className="w-12 h-12 mx-auto mb-2 text-gray-300" />
-            <p className="font-medium">KhÃ´ng tÃ¬m tháº¥y káº¿t quáº£</p>
-            <p className="text-sm mt-1">Thá»­ tÄƒng bÃ¡n kÃ­nh tÃ¬m kiáº¿m</p>
+            <p className="font-medium">Không tìm thấy kết quả</p>
+            <p className="text-sm mt-1">Thử tăng bán kính tìm kiếm</p>
           </div>
         )}
       </div>

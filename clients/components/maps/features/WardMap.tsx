@@ -126,12 +126,12 @@ export default function WardMap({
               </h3>
               <div className="space-y-1.5 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-gray-600">MÃ£:</span>
+                  <span className="text-gray-600">Mã:</span>
                   <span className="font-semibold text-gray-800">{ward.properties.code}</span>
                 </div>
                 {ward.properties.districtName && (
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Quáº­n:</span>
+                    <span className="text-gray-600">Quận:</span>
                     <span className="font-semibold text-gray-800">
                       {ward.properties.districtName}
                     </span>

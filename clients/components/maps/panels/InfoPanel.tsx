@@ -29,17 +29,17 @@ export default function InfoPanel({ type, onClose }: InfoPanelProps) {
   const getTitle = () => {
     switch (type) {
       case 'community':
-        return 'ThÃ´ng tin Cá»™ng Ä‘á»“ng';
+        return 'Thông tin Cộng đồng';
       case 'religious':
-        return 'ThÃ´ng tin TÃ´n giÃ¡o';
+        return 'Thông tin Tôn giáo';
       case 'personal':
-        return 'ThÃ´ng tin CÃ¡ nhÃ¢n';
+        return 'Thông tin Cá nhân';
       case 'buildings':
-        return 'ThÃ´ng tin TÃ²a nhÃ ';
+        return 'Thông tin Tòa nhà';
       case 'business':
-        return 'ThÃ´ng tin Doanh nghiá»‡p';
+        return 'Thông tin Doanh nghiệp';
       default:
-        return 'ThÃ´ng tin';
+        return 'Thông tin';
     }
   };
 
@@ -49,19 +49,19 @@ export default function InfoPanel({ type, onClose }: InfoPanelProps) {
         return (
           <div className="space-y-3">
             <InfoItem
-              label="Tá»•ng sá»‘ quáº­n/huyá»‡n"
+              label="Tổng số quận/huyện"
               value={summary?.totalDistricts || 'N/A'}
             />
             <InfoItem
-              label="Tá»•ng dÃ¢n sá»‘"
+              label="Tổng dân số"
               value={summary?.latestPopulationData?.total?.toLocaleString() || 'N/A'}
             />
             <InfoItem
-              label="NÄƒm thá»‘ng kÃª"
+              label="Năm thống kê"
               value={summary?.latestPopulationData?.year || 'N/A'}
             />
             <div className="pt-3 border-t border-gray-200">
-              <h4 className="font-semibold text-gray-900 mb-2">CÆ¡ sá»Ÿ háº¡ táº§ng cá»™ng Ä‘á»“ng</h4>
+              <h4 className="font-semibold text-gray-900 mb-2">Cơ sở hạ tầng cộng đồng</h4>
               {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
               {infrastructure && Array.isArray(infrastructure) && infrastructure.map((item: any, index: number) => (
                 <InfoItem
@@ -82,12 +82,12 @@ export default function InfoPanel({ type, onClose }: InfoPanelProps) {
         return (
           <div className="space-y-3">
             <InfoItem
-              label="CÆ¡ sá»Ÿ tÃ´n giÃ¡o"
+              label="Cơ sở tôn giáo"
               value={religiousInfra?.count || 'N/A'}
             />
             <InfoItem
-              label="PhÃ¢n bá»‘ theo quáº­n"
-              value="Xem báº£n Ä‘á»“"
+              label="Phân bố theo quận"
+              value="Xem bản đồ"
             />
           </div>
         );
@@ -96,19 +96,19 @@ export default function InfoPanel({ type, onClose }: InfoPanelProps) {
         return (
           <div className="space-y-3">
             <InfoItem
-              label="Tá»•ng há»™ dÃ¢n"
+              label="Tổng hộ dân"
               value="N/A"
             />
             <InfoItem
-              label="Trung bÃ¬nh sá»‘ ngÆ°á»i/há»™"
+              label="Trung bình số người/hộ"
               value="N/A"
             />
             <InfoItem
-              label="CÃ¡ nhÃ¢n kinh doanh"
+              label="Cá nhân kinh doanh"
               value="N/A"
             />
             <InfoItem
-              label="CÆ¡ sá»Ÿ dá»‹ch vá»¥ cÃ¡ nhÃ¢n"
+              label="Cơ sở dịch vụ cá nhân"
               value="N/A"
             />
           </div>
@@ -122,11 +122,11 @@ export default function InfoPanel({ type, onClose }: InfoPanelProps) {
         return (
           <div className="space-y-3">
             <InfoItem
-              label="Tá»•ng cÆ¡ sá»Ÿ háº¡ táº§ng"
+              label="Tổng cơ sở hạ tầng"
               value={summary?.totalInfrastructures || 'N/A'}
             />
             <div className="pt-3 border-t border-gray-200">
-              <h4 className="font-semibold text-gray-900 mb-2">PhÃ¢n loáº¡i</h4>
+              <h4 className="font-semibold text-gray-900 mb-2">Phân loại</h4>
               {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
               {buildingTypes && buildingTypes.map((item: any, index: number) => (
                 <InfoItem
@@ -137,8 +137,8 @@ export default function InfoPanel({ type, onClose }: InfoPanelProps) {
               ))}
             </div>
             <InfoItem
-              label="Tá»•ng diá»‡n tÃ­ch xÃ¢y dá»±ng"
-              value="N/A mÂ²"
+              label="Tổng diện tích xây dựng"
+              value="N/A m²"
             />
           </div>
         );
@@ -147,48 +147,47 @@ export default function InfoPanel({ type, onClose }: InfoPanelProps) {
         return (
           <div className="space-y-3">
             <InfoItem
-              label="Tá»•ng sá»‘ doanh nghiá»‡p Ä‘Äƒng kÃ½"
+              label="Tổng số doanh nghiệp đăng ký"
               value="N/A"
             />
             <InfoItem
-              label="Doanh nghiá»‡p hoáº¡t Ä‘á»™ng cÃ´ng nghiá»‡p"
+              label="Doanh nghiệp hoạt động công nghiệp"
               value="N/A"
             />
             <InfoItem
-              label="Doanh nghiá»‡p váº­n táº£i & kho bÃ£i"
+              label="Doanh nghiệp vận tải & kho bãi"
               value="N/A"
             />
             <InfoItem
-              label="Doanh nghiá»‡p dá»‹ch vá»¥ lÆ°u trÃº"
+              label="Doanh nghiệp dịch vụ lưu trú"
               value="N/A"
             />
             <div className="pt-3 border-t border-gray-200">
-              <h4 className="font-semibold text-gray-900 mb-2">Quy mÃ´ nhÃ¢n sá»±</h4>
-              <InfoItem label="DÆ°á»›i 2 nhÃ¢n viÃªn" value="N/A" />
-              <InfoItem label="2-5 nhÃ¢n viÃªn" value="N/A" />
-              <InfoItem label="5-10 nhÃ¢n viÃªn" value="N/A" />
-              <InfoItem label="10-20 nhÃ¢n viÃªn" value="N/A" />
-              <InfoItem label="20+ nhÃ¢n viÃªn" value="N/A" />
+              <h4 className="font-semibold text-gray-900 mb-2">Quy mô nhân sự</h4>
+              <InfoItem label="Dưới 2 nhân viên" value="N/A" />
+              <InfoItem label="2-5 nhân viên" value="N/A" />
+              <InfoItem label="5-10 nhân viên" value="N/A" />
+              <InfoItem label="10-20 nhân viên" value="N/A" />
+              <InfoItem label="20+ nhân viên" value="N/A" />
             </div>
             <div className="pt-3 border-t border-gray-200">
-              <h4 className="font-semibold text-gray-900 mb-2">ThÃ´ng tin tÃ i chÃ­nh</h4>
-              <InfoItem label="Tá»•ng doanh thu" value="N/A" />
+              <h4 className="font-semibold text-gray-900 mb-2">Thông tin tài chính</h4>
+              <InfoItem label="Tổng doanh thu" value="N/A" />
               <InfoItem label="Doanh thu TB/DN" value="N/A" />
-              <InfoItem label="Tá»•ng vá»‘n Ä‘áº§u tÆ°" value="N/A" />
-              <InfoItem label="Tá»•ng tÃ i sáº£n" value="N/A" />
+              <InfoItem label="Tổng vốn đầu tư" value="N/A" />
+              <InfoItem label="Tổng tài sản" value="N/A" />
             </div>
           </div>
         );
 
       default:
-        return <div>Chá»n má»™t má»¥c Ä‘á»ƒ xem thÃ´ng tin</div>;
+        return <div>Chọn một mục để xem thông tin</div>;
     }
   };
 
   return (
     <div className="absolute left-24 top-36 z-[1000] w-96 max-h-[calc(100vh-200px)]">
       <div className="bg-gray-900 text-white rounded-lg shadow-xl overflow-hidden">
-        {/* Header */}
         <div className="px-4 py-3 border-b border-gray-700 flex items-center justify-between">
           <h3 className="font-semibold">{getTitle()}</h3>
           <button
@@ -199,7 +198,6 @@ export default function InfoPanel({ type, onClose }: InfoPanelProps) {
           </button>
         </div>
 
-        {/* Content */}
         <div className="p-4 overflow-y-auto max-h-[calc(100vh-280px)]">
           {getContent()}
         </div>

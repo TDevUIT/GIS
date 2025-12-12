@@ -61,7 +61,7 @@ export default function DistrictDetail({ id, onBack }: DistrictDetailProps) {
               onClick={() => refetch()}
               className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium"
             >
-              Thá»­ láº¡i
+              Thử lại
             </button>
           </div>
         </div>
@@ -79,7 +79,7 @@ export default function DistrictDetail({ id, onBack }: DistrictDetailProps) {
               <button
                 onClick={onBack}
                 className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                title="Quay láº¡i"
+                title="Quay lại"
               >
                 <ArrowLeft className="w-5 h-5 text-gray-600" />
               </button>
@@ -93,7 +93,7 @@ export default function DistrictDetail({ id, onBack }: DistrictDetailProps) {
                   {district.name}
                 </h1>
                 <p className="text-sm text-gray-600">
-                  MÃ£: {district.code}
+                  Mã: {district.code}
                 </p>
               </div>
             </div>
@@ -110,12 +110,12 @@ export default function DistrictDetail({ id, onBack }: DistrictDetailProps) {
             <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
               <Maximize className="w-5 h-5 text-blue-600" />
             </div>
-            <h3 className="font-semibold text-gray-900">Diá»‡n tÃ­ch</h3>
+            <h3 className="font-semibold text-gray-900">Diện tích</h3>
           </div>
           <p className="text-3xl font-bold text-gray-900">
             {district.areaKm2?.toFixed(2) || 'N/A'}
           </p>
-          <p className="text-sm text-gray-600 mt-1">kmÂ²</p>
+          <p className="text-sm text-gray-600 mt-1">km²</p>
         </div>
 
         <div className="bg-white border border-gray-200 rounded-lg p-6">
@@ -123,12 +123,12 @@ export default function DistrictDetail({ id, onBack }: DistrictDetailProps) {
             <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
               <Users className="w-5 h-5 text-green-600" />
             </div>
-            <h3 className="font-semibold text-gray-900">Máº­t Ä‘á»™ dÃ¢n sá»‘</h3>
+            <h3 className="font-semibold text-gray-900">Mật độ dân số</h3>
           </div>
           <p className="text-3xl font-bold text-gray-900">
             {district.densityPerKm2?.toLocaleString() || 'N/A'}
           </p>
-          <p className="text-sm text-gray-600 mt-1">ngÆ°á»i/kmÂ²</p>
+          <p className="text-sm text-gray-600 mt-1">người/km²</p>
         </div>
 
         <div className="bg-white border border-gray-200 rounded-lg p-6">
