@@ -129,6 +129,7 @@ services:
       - egis-network
     env_file: ../services/GIS_Server/.env
     environment:
+      - PORT=3000
       - DATABASE_URL=postgresql://gis_user:gis_password@postgis_db:5432/gis_db?schema=public
     depends_on:
       postgis_db:
@@ -150,6 +151,7 @@ services:
       - egis-network
     env_file: ../services/Web_Server/.env
     environment:
+      - PORT=3000
       - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/egis_database?schema=public
       - REDIS_HOST=redis-stack
     depends_on:
