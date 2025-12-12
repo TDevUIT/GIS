@@ -14,7 +14,13 @@ async function bootstrap() {
   app.use(urlencoded({ extended: true, limit: '50mb' }));
 
   const corsOrigin = process.env.CORS_ORIGIN;
-  let origin: boolean | string | RegExp | (string | RegExp)[] = true;
+  let origin: boolean | string | RegExp | (string | RegExp)[] = [
+    'http://localhost:3000',
+    'http://localhost:3001',
+    'http://localhost:5000',
+    'https://urbanscale.online',
+    'https://www.urbanscale.online',
+  ];
 
   if (corsOrigin) {
     if (corsOrigin === 'true') {

@@ -90,7 +90,8 @@ services:
       test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 10
+      start_period: 30s
 
   redis-stack:
     image: redis/redis-stack:latest
@@ -126,9 +127,7 @@ services:
       - "3001:3000"
     networks:
       - egis-network
-    environment:
-      - PORT=3000
-      - CORS_ORIGIN=true
+    env_file: ../services/GIS_Server/.env
     depends_on:
       postgis_db:
         condition: service_healthy
@@ -147,9 +146,8 @@ services:
       - "3002:3000"
     networks:
       - egis-network
-    environment:
-      - PORT=3000
-      - CORS_ORIGIN=true
+    env_file: ../services/Web_Server/.env
+
     depends_on:
       postgres:
         condition: service_healthy

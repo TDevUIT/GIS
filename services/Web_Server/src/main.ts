@@ -12,7 +12,13 @@ async function bootstrap() {
   app.setGlobalPrefix('api/v1');
 
   const corsOrigin = process.env.CORS_ORIGIN;
-  let origin: boolean | string | RegExp | (string | RegExp)[] = true;
+  let origin: boolean | string | RegExp | (string | RegExp)[] = [
+    'http://localhost:3000',
+    'http://localhost:3001',
+    'http://localhost:8000',
+    'https://urbanscale.online',
+    'https://www.urbanscale.online',
+  ];
 
   if (corsOrigin) {
     if (corsOrigin === 'true') {
@@ -29,6 +35,7 @@ async function bootstrap() {
   app.enableCors({
     origin,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    allowedHeaders: 'Content-Type, Authorization, Accept',
     credentials: true,
   });
 
