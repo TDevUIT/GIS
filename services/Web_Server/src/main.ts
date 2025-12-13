@@ -4,8 +4,10 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
 import passport from 'passport';
-import { ResponseInterceptor } from './common/interceptors/response.interceptor';
-import { HttpExceptionFilter } from './common/filters/http-exception.filter';
+import { ResponseInterceptor } from './shared/interceptors/response.interceptor';
+import { HttpExceptionFilter } from './shared/filters/http-exception.filter';
+import { requestIdMiddleware } from './shared/middlewares/request-id.middleware';
+import { LoggingInterceptor } from './shared/interceptors/logging.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -35,17 +37,19 @@ async function bootstrap() {
   app.enableCors({
     origin,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-    allowedHeaders: 'Content-Type, Authorization, Accept',
+    allowedHeaders: 'Content-Type, Authorization, Accept, x-request-id',
+    exposedHeaders: 'x-request-id',
     credentials: true,
   });
 
   app.use(cookieParser());
   app.use(passport.initialize());
+  app.use(requestIdMiddleware);
 
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
-      forbidNonWhitelisted: false,
+      forbidNonWhitelisted: true,
       transform: true,
       transformOptions: {
         enableImplicitConversion: true,
@@ -54,7 +58,10 @@ async function bootstrap() {
   );
 
   const reflector = app.get(Reflector);
-  app.useGlobalInterceptors(new ResponseInterceptor(reflector));
+  app.useGlobalInterceptors(
+    new LoggingInterceptor(),
+    new ResponseInterceptor(reflector),
+  );
   app.useGlobalFilters(new HttpExceptionFilter());
 
   const config = new DocumentBuilder()

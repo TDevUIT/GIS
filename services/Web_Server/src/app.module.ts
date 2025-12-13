@@ -1,28 +1,29 @@
 import { Module } from '@nestjs/common';
 import { HttpModule } from '@nestjs/axios';
-import { PrismaModule } from './prisma/prisma.module';
-import { AuthModule } from './auth/auth.module';
-import { CloudinaryModule } from './cloudinary/cloudinary.module';
-import { DistrictsModule } from './districts/districts.module';
+import { PrismaModule } from './infra/prisma/prisma.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { CloudinaryModule } from './infra/cloudinary/cloudinary.module';
+import { DistrictsModule } from './modules/districts/districts.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { WardsModule } from './wards/wards.module';
-import { InfrastructuresModule } from './infrastructures/infrastructures.module';
-import { PopulationsModule } from './populations/populations.module';
-import { TerrainsModule } from './terrains/terrains.module';
-import { AirQualitiesModule } from './air-qualities/air-qualities.module';
-import { WaterQualitiesModule } from './water-qualities/water-qualities.module';
-import { TrafficsModule } from './traffics/traffics.module';
-import { AccidentsModule } from './accidents/accidents.module';
-import { PublicTransportsModule } from './public-transports/public-transports.module';
-import { LandUsesModule } from './land-uses/land-uses.module';
-import { UrbanPlansModule } from './urban-plans/urban-plans.module';
-import { AnalyticsModule } from './analytics/analytics.module';
-import { CommonModule } from './common/common.module';
-import { EmailModule } from './email/email.module';
-import { UsersModule } from './users/users.module';
+import { WardsModule } from './modules/wards/wards.module';
+import { InfrastructuresModule } from './modules/infrastructures/infrastructures.module';
+import { PopulationsModule } from './modules/populations/populations.module';
+import { TerrainsModule } from './modules/terrains/terrains.module';
+import { AirQualitiesModule } from './modules/air-qualities/air-qualities.module';
+import { WaterQualitiesModule } from './modules/water-qualities/water-qualities.module';
+import { TrafficsModule } from './modules/traffics/traffics.module';
+import { AccidentsModule } from './modules/accidents/accidents.module';
+import { PublicTransportsModule } from './modules/public-transports/public-transports.module';
+import { LandUsesModule } from './modules/land-uses/land-uses.module';
+import { UrbanPlansModule } from './modules/urban-plans/urban-plans.module';
+import { AnalyticsModule } from './modules/analytics/analytics.module';
+import { CommonModule } from './shared/common.module';
+import { EmailModule } from './infra/email/email.module';
+import { UsersModule } from './modules/users/users.module';
 import { CacheModule } from '@nestjs/cache-manager';
 import { redisStore } from 'cache-manager-redis-yet';
-import { EventsModule } from './events/events.module';
+import { EventsModule } from './modules/events/events.module';
+import { GisClientModule } from './infra/gis-client/gis-client.module';
 
 @Module({
   imports: [
@@ -53,6 +54,7 @@ import { EventsModule } from './events/events.module';
       timeout: 8000,
       maxRedirects: 5,
     }),
+    GisClientModule,
     EventsModule,
     CommonModule,
     PrismaModule,
