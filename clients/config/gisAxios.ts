@@ -1,6 +1,6 @@
 import axios, { AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 
-const gisBaseURL = process.env.NEXT_PUBLIC_GIS_SERVER_URL || 'http://localhost:5000/api/v1';
+const gisBaseURL = process.env.NEXT_PUBLIC_GIS_SERVER_URL || 'http://api.urbanscale.online/gis';
 
 export const gisApiClient: AxiosInstance = axios.create({
   baseURL: gisBaseURL,

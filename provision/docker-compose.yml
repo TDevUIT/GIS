@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   postgres:
     image: postgres:14
@@ -15,6 +13,11 @@ services:
       - egis_postgres_data:/var/lib/postgresql/data
     networks:
       - egis-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d egis_database"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   pgadmin:
     image: dpage/pgadmin4
@@ -83,6 +86,12 @@ services:
       - RABBITMQ_DEFAULT_PASS=guest
     networks:
       - egis-network
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
 
   redis-stack:
     image: redis/redis-stack:latest
@@ -92,6 +101,119 @@ services:
       - "8001:8001"
     volumes:
       - redis-data:/data
+    networks:
+      - egis-network
+
+  client:
+    build:
+      context: ../clients
+      dockerfile: Dockerfile
+    container_name: egis-client
+    restart: always
+    ports:
+      - "3000:3000"
+    networks:
+      - egis-network
+    environment:
+      - NODE_ENV=production
+
+  gis-server:
+    build:
+      context: ../services/GIS_Server
+      dockerfile: Dockerfile
+    container_name: egis-gis-server
+    restart: always
+    ports:
+      - "3001:3000"
+    networks:
+      - egis-network
+    env_file: ../services/GIS_Server/.env
+    depends_on:
+      postgis_db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      redis-stack:
+        condition: service_started
+
+  web-server:
+    build:
+      context: ../services/Web_Server
+      dockerfile: Dockerfile
+    container_name: egis-web-server
+    restart: always
+    ports:
+      - "3002:3000"
+    networks:
+      - egis-network
+    env_file: ../services/Web_Server/.env
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      redis-stack:
+        condition: service_started
+
+  processing-service:
+    build:
+      context: ../services/processing-service
+      dockerfile: Dockerfile
+    container_name: egis-processing-service
+    restart: always
+    ports:
+      - "3003:3000"
+    networks:
+      - egis-network
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  scraper-service:
+    build:
+      context: ../services/scraper-service
+      dockerfile: Dockerfile
+    container_name: egis-scraper-service
+    restart: always
+    ports:
+      - "3004:3000"
+    networks:
+      - egis-network
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      redis-stack:
+        condition: service_started
+
+  simulation-server:
+    build:
+      context: ../services/simulation-server
+      dockerfile: Dockerfile
+    container_name: egis-simulation-server
+    restart: always
+    ports:
+      - "3005:3000"
+    networks:
+      - egis-network
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  nginx:
+    image: nginx:alpine
+    container_name: egis-nginx
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - client
+      - web-server
+      - gis-server
     networks:
       - egis-network
 

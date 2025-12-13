@@ -25,13 +25,24 @@ export class DistrictsService {
   }
 
   private handleError(error: AxiosError) {
-    console.error('Error from GIS Server:', error.response?.data);
+    const status = error.response?.status || 500;
+    const data = error.response?.data as any;
+    console.error('Error from GIS Server:', data);
+
+    const message =
+      (typeof data === 'object' && data && (data.message as string)) ||
+      (typeof data === 'string' && data) ||
+      'An internal error occurred in the GIS Server';
+
     return throwError(
       () =>
         new HttpException(
-          error.response?.data ||
-            'An internal error occurred in the GIS Server',
-          error.response?.status || 500,
+          {
+            message,
+            error: 'GIS_SERVER_ERROR',
+            details: data,
+          },
+          status,
         ),
     );
   }

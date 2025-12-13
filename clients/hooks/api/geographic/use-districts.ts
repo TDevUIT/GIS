@@ -5,7 +5,7 @@ import { QUERY_STALE_TIME } from '@/config/queryConfig';
 
 export function useDistricts() {
   return useQuery({
-    queryKey: queryKeys.districts.list(),
+    queryKey: queryKeys.districts.lists(),
     queryFn: getAllDistricts,
     staleTime: QUERY_STALE_TIME.DAILY,
   });
