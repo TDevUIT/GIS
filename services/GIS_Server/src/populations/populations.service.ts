@@ -9,10 +9,14 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreatePopulationDto } from './dto/create-population.dto';
 import { UpdatePopulationDto } from './dto/update-population.dto';
 import { Prisma } from '@prisma/client';
+import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
 
 @Injectable()
 export class PopulationsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private readonly amqpConnection: AmqpConnection,
+  ) {}
 
   async create(createDto: CreatePopulationDto) {
     const { districtId, year, households, demographics, ...populationData } =
@@ -36,7 +40,7 @@ export class PopulationsService {
       );
     }
 
-    return this.prisma.$transaction(
+    const result = await this.prisma.$transaction(
       async (tx) => {
         const population = await tx.population.create({
           data: {
@@ -70,6 +74,14 @@ export class PopulationsService {
       },
       { timeout: 30000 },
     );
+
+    this.amqpConnection.publish('ui_notifications', '', {
+      event: 'population.created',
+      data: result,
+      timestamp: new Date().toISOString(),
+    });
+
+    return result;
   }
 
   async findAll(districtId?: string, year?: number) {
@@ -112,7 +124,7 @@ export class PopulationsService {
     const { households, demographics, ...populationData } = updateDto;
     await this.findOne(id);
 
-    return this.prisma.$transaction(
+    const result = await this.prisma.$transaction(
       async (tx) => {
         const updatedPopulation = await tx.population.update({
           where: { id },
@@ -151,10 +163,26 @@ export class PopulationsService {
       },
       { timeout: 30000 },
     );
+
+    this.amqpConnection.publish('ui_notifications', '', {
+      event: 'population.updated',
+      data: result,
+      timestamp: new Date().toISOString(),
+    });
+
+    return result;
   }
 
   async remove(id: string) {
     await this.findOne(id);
-    return this.prisma.population.delete({ where: { id } });
+    const deleted = await this.prisma.population.delete({ where: { id } });
+
+    this.amqpConnection.publish('ui_notifications', '', {
+      event: 'population.deleted',
+      data: { id },
+      timestamp: new Date().toISOString(),
+    });
+
+    return deleted;
   }
 }

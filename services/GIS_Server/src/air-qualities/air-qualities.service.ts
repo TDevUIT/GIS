@@ -12,6 +12,7 @@ import { UpdateAirQualityDto } from './dto/update-air-quality.dto';
 import { Prisma, QualityLevel } from '@prisma/client';
 import cuid from 'cuid';
 import { FindAirQualityQueryDto } from './dto/query.dto';
+import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
 
 @Injectable()
 export class AirQualitiesService {
@@ -25,7 +26,10 @@ export class AirQualitiesService {
     LEFT JOIN "public"."districts" d ON aq."districtId" = d.id
   `;
 
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private readonly amqpConnection: AmqpConnection,
+  ) {}
 
   private determineAirQualityLevel(pm25?: number | null): QualityLevel | null {
     if (pm25 == null) return null;
@@ -65,7 +69,16 @@ export class AirQualitiesService {
       VALUES (${id}, ${airQualityData.pm25}, ${airQualityData.co2}, ${airQualityData.no2}, ${level}::"QualityLevel", ${airQualityData.recordedAt}::timestamp, ST_GeomFromText(${geom}, 4326), ${districtId})
     `;
     await this.prisma.$executeRaw(query);
-    return this.findOne(id);
+
+    const newRecord = await this.findOne(id);
+
+    void this.amqpConnection.publish('ui_notifications', '', {
+      event: 'environment.air_quality.created',
+      data: newRecord,
+      timestamp: new Date().toISOString(),
+    });
+
+    return newRecord;
   }
 
   async findAll(queryDto: FindAirQualityQueryDto) {
@@ -136,12 +149,29 @@ export class AirQualitiesService {
         UPDATE "public"."air_qualities" SET geom = ST_GeomFromText(${geom}, 4326) WHERE id = ${id};
       `;
     }
-    return this.findOne(id);
+
+    const updatedRecord = await this.findOne(id);
+
+    void this.amqpConnection.publish('ui_notifications', '', {
+      event: 'environment.air_quality.updated',
+      data: updatedRecord,
+      timestamp: new Date().toISOString(),
+    });
+
+    return updatedRecord;
   }
 
   async remove(id: string) {
     await this.findOne(id);
-    return this.prisma.airQuality.delete({ where: { id } });
+    const deleted = await this.prisma.airQuality.delete({ where: { id } });
+
+    void this.amqpConnection.publish('ui_notifications', '', {
+      event: 'environment.air_quality.deleted',
+      data: { id },
+      timestamp: new Date().toISOString(),
+    });
+
+    return deleted;
   }
 
   async findWithinRadius(lng: string, lat: string, radiusInMeters: string) {

@@ -13,6 +13,7 @@ import { Prisma } from '@prisma/client';
 import cuid from 'cuid';
 import { FindTrafficsQueryDto } from './dto/query.dto';
 import { UpdateTrafficItemDto } from './dto/update-traffic-item.dto';
+import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
 
 @Injectable()
 export class TrafficsService {
@@ -26,7 +27,10 @@ export class TrafficsService {
     LEFT JOIN "public"."districts" d ON t."districtId" = d.id
   `;
 
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private readonly amqpConnection: AmqpConnection,
+  ) {}
 
   async create(createDto: CreateTrafficDto) {
     const { districtId, geom, ...trafficData } = createDto;
@@ -44,7 +48,16 @@ export class TrafficsService {
       VALUES (${id}, ${trafficData.roadName}, ${trafficData.trafficVolume}, ST_GeomFromText(${geom}, 4326), ${districtId}, NOW())
     `;
     await this.prisma.$executeRaw(query);
-    return this.findOne(id);
+
+    const newTraffic = await this.findOne(id);
+
+    void this.amqpConnection.publish('ui_notifications', '', {
+      event: 'traffic.created',
+      data: newTraffic,
+      timestamp: new Date().toISOString(),
+    });
+
+    return newTraffic;
   }
 
   async findAll(queryDto: FindTrafficsQueryDto) {
@@ -94,12 +107,29 @@ export class TrafficsService {
         UPDATE "public"."traffics" SET geom = ST_GeomFromText(${geom}, 4326), "updatedAt" = NOW() WHERE id = ${id};
       `;
     }
-    return this.findOne(id);
+
+    const updatedTraffic = await this.findOne(id);
+
+    void this.amqpConnection.publish('ui_notifications', '', {
+      event: 'traffic.updated',
+      data: updatedTraffic,
+      timestamp: new Date().toISOString(),
+    });
+
+    return updatedTraffic;
   }
 
   async remove(id: string) {
     await this.findOne(id);
-    return this.prisma.traffic.delete({ where: { id } });
+    const deleted = await this.prisma.traffic.delete({ where: { id } });
+
+    void this.amqpConnection.publish('ui_notifications', '', {
+      event: 'traffic.deleted',
+      data: { id },
+      timestamp: new Date().toISOString(),
+    });
+
+    return deleted;
   }
 
   async findTrafficsIntersecting(wkt: string) {
@@ -122,7 +152,7 @@ export class TrafficsService {
       FROM
         traffics
       WHERE
-        ST_DWithin(geom::geography, ${point}::geography, 500) -- Tìm trong bán kính 500 mét
+        ST_DWithin(geom::geography, ${point}::geography, 500)
       ORDER BY
         dist
       LIMIT 1;
@@ -150,6 +180,15 @@ export class TrafficsService {
 
     try {
       const results = await this.prisma.$transaction(updatePromises);
+
+      void this.amqpConnection.publish('ui_notifications', '', {
+        event: 'traffic.bulk_updated',
+        data: {
+          count: results.length,
+          timestamp: new Date().toISOString(),
+        },
+      });
+
       return {
         message: `${results.length} traffic routes updated successfully.`,
         updatedCount: results.length,

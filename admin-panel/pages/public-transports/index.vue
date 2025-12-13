@@ -133,7 +133,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, reactive, watch } from 'vue';
+import { ref, computed, reactive, watch, onMounted, onUnmounted } from 'vue';
 import { PlusIcon, PencilSquareIcon, TrashIcon } from '@heroicons/vue/24/outline';
 import L from 'leaflet';
 import { getTransportLineStyle } from '~/utils/transportStyles';
@@ -141,6 +141,7 @@ import { TransportMode } from '~/types/api/shared';
 import type { DataTableColumn } from '~/components/ui/DataTable.vue';
 import type { PublicTransport } from '~/types/api/public-transport';
 import type { FeatureCollection } from 'geojson';
+import { useRealtime } from '~/composables/useRealtime';
 
 const { LGeoJson } = await import('@vue-leaflet/vue-leaflet');
 useHead({ title: 'Public Transport' });
@@ -148,6 +149,7 @@ useHead({ title: 'Public Transport' });
 const { $api } = useNuxtApp();
 const router = useRouter();
 const { confirmDelete, toastSuccess, toastError } = useSwal();
+const { subscribe, unsubscribe } = useRealtime();
 
 const filterMode = ref('');
 const selectedDistrictId = ref('');
@@ -289,6 +291,18 @@ watch(selectedRoute, (newSelection) => {
     if (bounds.isValid()) {
         map.flyToBounds(bounds, { padding: [50, 50], maxZoom: 14 });
     }
+});
+
+onMounted(() => {
+    subscribe({
+        onPublicTransportUpdated: () => {
+            refreshAllData();
+        }
+    });
+});
+
+onUnmounted(() => {
+    unsubscribe();
 });
 </script>
 

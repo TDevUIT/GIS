@@ -159,229 +159,240 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, reactive, watch } from 'vue';
-import { PlusIcon, PencilSquareIcon, TrashIcon } from '@heroicons/vue/24/outline';
-import L from 'leaflet';
-import { getTrafficLineStyle } from '~/utils/trafficStyles';
-import type { DataTableColumn } from '~/components/ui/DataTable.vue';
-import type { Traffic } from '~/types/api/traffic';
-import type { Accident } from '~/types/api/accident';
-import type { TrafficRisk } from '~/types/api/analytics';
-import type { FeatureCollection } from 'geojson';
+import { ref, computed, reactive, watch, onMounted, onUnmounted } from 'vue'
+import { PlusIcon, PencilSquareIcon, TrashIcon } from '@heroicons/vue/24/outline'
+import L from 'leaflet'
+import { getTrafficLineStyle } from '~/utils/trafficStyles'
+import type { DataTableColumn } from '~/components/ui/DataTable.vue'
+import type { Traffic } from '~/types/api/traffic'
+import type { Accident } from '~/types/api/accident'
+import type { TrafficRisk } from '~/types/api/analytics'
+import type { FeatureCollection } from 'geojson'
+import { useRealtime } from '~/composables/useRealtime'
 
-const { LGeoJson } = await import('@vue-leaflet/vue-leaflet');
-useHead({ title: 'Traffic Dashboard' });
+const { LGeoJson } = await import('@vue-leaflet/vue-leaflet')
+useHead({ title: 'Traffic Dashboard' })
 
-const { $api } = useNuxtApp();
-const router = useRouter();
-const { confirmDelete, toastSuccess, toastError } = useSwal();
+const { $api } = useNuxtApp()
+const router = useRouter()
+const { confirmDelete, toastSuccess, toastError } = useSwal()
+const { subscribe, unsubscribe } = useRealtime()
 
-const searchQuery = ref('');
-const selectedDistrictId = ref('');
-const allTraffics = ref<(Traffic & { accidents: Accident[] })[]>([]);
-const selectedTraffic = ref<Traffic | null>(null);
-const selectedTrafficWithAccidents = ref<(Traffic & { accidents: Accident[] }) | null>(null);
-const mapRef = ref();
-const mapCenter = ref<[number, number]>([10.7769, 106.7009]);
-const isAccidentModalOpen = ref(false);
-const editingAccident = ref<Accident | null>(null);
+const searchQuery = ref('')
+const selectedDistrictId = ref('')
+const allTraffics = ref<(Traffic & { accidents: Accident[] })[]>([])
+const selectedTraffic = ref<Traffic | null>(null)
+const selectedTrafficWithAccidents = ref<(Traffic & { accidents: Accident[] }) | null>(null)
+const mapRef = ref()
+const mapCenter = ref<[number, number]>([10.7769, 106.7009])
+const isAccidentModalOpen = ref(false)
+const editingAccident = ref<Accident | null>(null)
 
-const currentPage = ref(1);
-const itemsPerPage = 5;
+const currentPage = ref(1)
+const itemsPerPage = 5
 
 const analyticsData = reactive({
     riskAssessment: null as TrafficRisk[] | null,
     byTimeOfDay: null as { labels: string[]; values: number[] } | null,
     byDayOfWeek: null as { labels: string[]; values: number[] } | null,
-});
+})
 
 const { refresh: refreshAllData } = useAsyncData(
     'traffics-and-analytics',
     async () => {
-        selectedTraffic.value = null;
         const [trafficRes, accidentRes, riskRes, timeOfDayRes, dayOfWeekRes] = await Promise.all([
             $api.traffics.getAll({ districtId: selectedDistrictId.value || undefined }),
             $api.accidents.getAll(),
             $api.analytics.getTrafficRiskAssessment(),
             $api.analytics.getAccidentsByTimeOfDay(),
             $api.analytics.getAccidentsByDayOfWeek(),
-        ]);
+        ])
 
         const traffics = (trafficRes.data.data || []).map((t: any) => ({
             ...t,
             geom: typeof t.geom === 'string' ? JSON.parse(t.geom) : t.geom,
-        }));
+        }))
 
-        const accidents = accidentRes.data.data || [];
-        const accidentsByTrafficId = accidents.reduce((acc, current) => {
-            (acc[current.trafficId] = acc[current.trafficId] || []).push(current);
-            return acc;
-        }, {} as Record<string, Accident[]>);
+        const accidents = accidentRes.data.data || []
+        const accidentsByTrafficId = accidents.reduce((acc: any, current: Accident) => {
+            (acc[current.trafficId] = acc[current.trafficId] || []).push(current)
+            return acc
+        }, {} as Record<string, Accident[]>)
 
-        allTraffics.value = traffics.map(t => ({
+        allTraffics.value = traffics.map((t: any) => ({
             ...t,
-            accidents: (accidentsByTrafficId[t.id] || []).sort((a, b) => new Date(b.accidentDate).getTime() - new Date(a.accidentDate).getTime()),
-        }));
+            accidents: (accidentsByTrafficId[t.id] || []).sort((a: Accident, b: Accident) => new Date(b.accidentDate).getTime() - new Date(a.accidentDate).getTime()),
+        }))
 
-        analyticsData.riskAssessment = riskRes.data.data || [];
-        const timeData = timeOfDayRes.data.data || [];
+        analyticsData.riskAssessment = riskRes.data.data || []
+        const timeData = timeOfDayRes.data.data || []
         analyticsData.byTimeOfDay = {
-            labels: timeData.map(d => d.timeOfDay.replace(/\s/g, '')),
-            values: timeData.map(d => d.accidentCount),
-        };
-        const dayData = dayOfWeekRes.data.data || [];
+            labels: timeData.map((d: any) => d.timeOfDay.replace(/\s/g, '')),
+            values: timeData.map((d: any) => d.accidentCount),
+        }
+        const dayData = dayOfWeekRes.data.data || []
         analyticsData.byDayOfWeek = {
-            labels: dayData.map(d => d.dayOfWeek.trim()),
-            values: dayData.map(d => d.accidentCount),
-        };
+            labels: dayData.map((d: any) => d.dayOfWeek.trim()),
+            values: dayData.map((d: any) => d.accidentCount),
+        }
 
-        return { traffics: allTraffics.value, analytics: analyticsData };
+        return { traffics: allTraffics.value, analytics: analyticsData }
     },
     { watch: [selectedDistrictId] }
-);
+)
 
 const columns: DataTableColumn[] = [
     { key: 'roadName', label: 'Road Name' },
     { key: 'trafficVolume', label: 'Volume' },
     { key: 'accidentCount', label: 'Accidents' },
-];
+]
 
 const filteredTraffics = computed(() => {
-    if (!searchQuery.value) return allTraffics.value;
-    const lowerCaseQuery = searchQuery.value.toLowerCase();
-    return allTraffics.value.filter(t => t.roadName.toLowerCase().includes(lowerCaseQuery));
-});
+    if (!searchQuery.value) return allTraffics.value
+    const lowerCaseQuery = searchQuery.value.toLowerCase()
+    return allTraffics.value.filter((t: any) => t.roadName.toLowerCase().includes(lowerCaseQuery))
+})
 
-const totalPages = computed(() => Math.ceil(filteredTraffics.value.length / itemsPerPage));
+const totalPages = computed(() => Math.ceil(filteredTraffics.value.length / itemsPerPage))
 
 const paginatedTraffics = computed(() => {
-    if (!filteredTraffics.value) return [];
-    const start = (currentPage.value - 1) * itemsPerPage;
-    const end = start + itemsPerPage;
-    return filteredTraffics.value.slice(start, end);
-});
+    if (!filteredTraffics.value) return []
+    const start = (currentPage.value - 1) * itemsPerPage
+    const end = start + itemsPerPage
+    return filteredTraffics.value.slice(start, end)
+})
 
 const trafficGeoJson = computed<FeatureCollection | null>(() => {
-    if (!filteredTraffics.value.length) return null;
+    if (!filteredTraffics.value.length) return null
     return {
         type: 'FeatureCollection',
         features: filteredTraffics.value
-            .filter(t => t.geom)
-            .map(t => ({
+            .filter((t: any) => t.geom)
+            .map((t: any) => ({
                 type: 'Feature',
                 properties: { id: t.id, name: t.roadName, accidentCount: t.accidents.length },
                 geometry: t.geom as any,
             })),
-    };
-});
+    }
+})
 
-const geoJsonKey = computed(() => `${selectedDistrictId.value}-${searchQuery.value}-${selectedTraffic.value?.id}`);
+const geoJsonKey = computed(() => `${selectedDistrictId.value}-${searchQuery.value}-${selectedTraffic.value?.id}`)
 
 function geoJsonStyleFunction(feature: any) {
-    const isSelected = selectedTraffic.value?.id === feature?.properties.id;
-    return getTrafficLineStyle(feature?.properties.accidentCount, isSelected);
+    const isSelected = selectedTraffic.value?.id === feature?.properties.id
+    return getTrafficLineStyle(feature?.properties.accidentCount, isSelected)
 }
 
 function handleRowClick(traffic: Traffic) {
     if (selectedTraffic.value?.id === traffic.id) {
-        selectedTraffic.value = null;
+        selectedTraffic.value = null
     } else {
-        selectedTraffic.value = traffic;
-        viewOnMap(traffic);
+        selectedTraffic.value = traffic
+        viewOnMap(traffic)
     }
 }
 
 function onLineClick(event: any) {
-    const properties = event.layer.feature.properties;
-    const traffic = filteredTraffics.value.find(t => t.id === properties.id);
-    if (traffic) handleRowClick(traffic);
+    const properties = event.layer.feature.properties
+    const traffic = filteredTraffics.value.find((t: any) => t.id === properties.id)
+    if (traffic) handleRowClick(traffic)
 }
 
 function viewOnMap(traffic: Traffic) {
-    const map = mapRef.value?.mapObject;
-    if (!traffic.geom || !map) return;
-    const geoJsonLayer = L.geoJSON(traffic.geom as any);
-    const bounds = geoJsonLayer.getBounds();
+    const map = mapRef.value?.mapObject
+    if (!traffic.geom || !map) return
+    const geoJsonLayer = L.geoJSON(traffic.geom as any)
+    const bounds = geoJsonLayer.getBounds()
     if (bounds.isValid()) {
-        map.flyToBounds(bounds, { padding: [50, 50], maxZoom: 16 });
+        map.flyToBounds(bounds, { padding: [50, 50], maxZoom: 16 })
     }
 }
 
 function handleAddTraffic() {
-    router.push('/traffics/create');
+    router.push('/traffics/create')
 }
 
 function handleEditTraffic(id: string) {
-    router.push(`/traffics/${id}`);
+    router.push(`/traffics/${id}`)
 }
 
 async function handleDeleteTraffic(id: string, name: string) {
-    const result = await confirmDelete(`traffic route "${name}"`);
+    const result = await confirmDelete(`traffic route "${name}"`)
     if (result.isConfirmed) {
         try {
-            await $api.traffics.remove(id);
-            toastSuccess('Traffic route has been deleted.');
+            await $api.traffics.remove(id)
+            toastSuccess('Traffic route has been deleted.')
             if (selectedTraffic.value?.id === id) {
-                selectedTraffic.value = null;
+                selectedTraffic.value = null
             }
-            await refreshAllData();
+            await refreshAllData()
             if (paginatedTraffics.value.length === 0 && currentPage.value > 1) {
-                currentPage.value--;
+                currentPage.value--
             }
         } catch (err: any) {
-            toastError('Deletion failed', err.data?.message || 'An error occurred.');
+            toastError('Deletion failed', err.data?.message || 'An error occurred.')
         }
     }
 }
 
 function openAccidentModal(accident: Accident | null) {
-    editingAccident.value = accident;
-    isAccidentModalOpen.value = true;
+    editingAccident.value = accident
+    isAccidentModalOpen.value = true
 }
 
 async function handleAccidentSaved() {
-    toastSuccess(`Accident record saved successfully!`);
-    await refreshAllData();
+    toastSuccess('Accident record saved successfully!')
+    await refreshAllData()
 }
 
 async function handleDeleteAccident(accidentId: string) {
-    const result = await confirmDelete('this accident record');
+    const result = await confirmDelete('this accident record')
     if (result.isConfirmed) {
         try {
-            await $api.accidents.remove(accidentId);
-            toastSuccess('Accident record has been deleted.');
-            await refreshAllData();
+            await $api.accidents.remove(accidentId)
+            toastSuccess('Accident record has been deleted.')
+            await refreshAllData()
         } catch (err: any) {
-            toastError('Deletion failed', err.data?.message || 'An error occurred.');
+            toastError('Deletion failed', err.data?.message || 'An error occurred.')
         }
     }
 }
 
 watch(
     selectedTraffic,
-    newSelection => {
+    (newSelection) => {
         if (newSelection) {
-            selectedTrafficWithAccidents.value = allTraffics.value.find(t => t.id === newSelection.id) || null;
+            selectedTrafficWithAccidents.value = allTraffics.value.find((t: any) => t.id === newSelection.id) || null
         } else {
-            selectedTrafficWithAccidents.value = null;
+            selectedTrafficWithAccidents.value = null
         }
     },
     { deep: true }
-);
+)
 
 watch([searchQuery, selectedDistrictId], () => {
-    currentPage.value = 1;
-});
+    currentPage.value = 1
+})
 
 watch(filteredTraffics, () => {
-    if (selectedTraffic.value && !filteredTraffics.value.some(t => t.id === selectedTraffic.value?.id)) {
-        selectedTraffic.value = null;
+    if (selectedTraffic.value && !filteredTraffics.value.some((t: any) => t.id === selectedTraffic.value?.id)) {
+        selectedTraffic.value = null
     }
-});
-</script>
+})
 
-<style scoped>
-.pagination-btn {
-    @apply px-3 py-1 text-sm font-medium text-gray-300 bg-gray-700 rounded-md hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors;
-}
-</style>
+onMounted(() => {
+    subscribe({
+        onTrafficUpdated: () => {
+            console.log('⚡ Traffic updated -> Refreshing Data')
+            refreshAllData()
+        },
+        onAccidentCreated: () => refreshAllData(),
+        onAccidentUpdated: () => refreshAllData(),
+        onAccidentDeleted: () => refreshAllData(),
+    })
+})
+
+onUnmounted(() => {
+    unsubscribe()
+})
+</script>
