@@ -22,6 +22,7 @@ import { EmailModule } from './email/email.module';
 import { UsersModule } from './users/users.module';
 import { CacheModule } from '@nestjs/cache-manager';
 import { redisStore } from 'cache-manager-redis-yet';
+import { EventsModule } from './events/events.module';
 
 @Module({
   imports: [
@@ -52,6 +53,7 @@ import { redisStore } from 'cache-manager-redis-yet';
       timeout: 8000,
       maxRedirects: 5,
     }),
+    EventsModule,
     CommonModule,
     PrismaModule,
     AuthModule,

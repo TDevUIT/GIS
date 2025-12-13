@@ -10,12 +10,14 @@ import { CreateAccidentDto } from './dto/create-accident.dto';
 import { UpdateAccidentDto } from './dto/update-accident.dto';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { ImageDto } from '../common/dto/image.dto';
+import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
 
 @Injectable()
 export class AccidentsService {
   constructor(
     private prisma: PrismaService,
     private cloudinary: CloudinaryService,
+    private readonly amqpConnection: AmqpConnection,
   ) {}
 
   private readonly includeOptions = {
@@ -58,7 +60,7 @@ export class AccidentsService {
       ? `SRID=4326;POINT(${geom.coordinates[0]} ${geom.coordinates[1]})`
       : null;
 
-    return this.prisma.accident.create({
+    const newAccident = await this.prisma.accident.create({
       data: {
         ...accidentData,
         geom: geomString,
@@ -69,6 +71,14 @@ export class AccidentsService {
       },
       include: this.includeOptions,
     });
+
+    void this.amqpConnection.publish('ui_notifications', '', {
+      event: 'accident.created',
+      data: newAccident,
+      timestamp: new Date().toISOString(),
+    });
+
+    return newAccident;
   }
 
   async findAll(trafficId?: string) {
@@ -111,7 +121,7 @@ export class AccidentsService {
       ? `SRID=4326;POINT(${geom.coordinates[0]} ${geom.coordinates[1]})`
       : undefined;
 
-    return this.prisma.accident.update({
+    const updatedAccident = await this.prisma.accident.update({
       where: { id },
       data: {
         ...accidentData,
@@ -120,11 +130,29 @@ export class AccidentsService {
       },
       include: this.includeOptions,
     });
+
+    void this.amqpConnection.publish('ui_notifications', '', {
+      event: 'accident.updated',
+      data: updatedAccident,
+      timestamp: new Date().toISOString(),
+    });
+
+    return updatedAccident;
   }
 
   async remove(id: string) {
     await this.findOne(id);
-    return this.prisma.accident.delete({ where: { id } });
+    const deletedAccident = await this.prisma.accident.delete({
+      where: { id },
+    });
+
+    void this.amqpConnection.publish('ui_notifications', '', {
+      event: 'accident.deleted',
+      data: { id },
+      timestamp: new Date().toISOString(),
+    });
+
+    return deletedAccident;
   }
 
   async uploadImages(files: Express.Multer.File[]): Promise<ImageDto[]> {
@@ -143,12 +171,12 @@ export class AccidentsService {
   async setImages(accidentId: string, imagesData: ImageDto[]): Promise<any> {
     await this.findOne(accidentId);
 
-    return this.prisma.$transaction(async (tx) => {
+    const result = await this.prisma.$transaction(async (tx) => {
       const oldImages = await tx.image.findMany({ where: { accidentId } });
 
       if (oldImages.length > 0) {
         await tx.image.deleteMany({ where: { accidentId } });
-        Promise.all(
+        void Promise.all(
           oldImages.map((img) => this.cloudinary.deleteFile(img.publicId)),
         ).catch((err) =>
           console.error('Lỗi khi xóa ảnh cũ trên Cloudinary:', err),
@@ -167,6 +195,14 @@ export class AccidentsService {
 
       return tx.image.findMany({ where: { accidentId } });
     });
+
+    void this.amqpConnection.publish('ui_notifications', '', {
+      event: 'accident.updated',
+      data: { id: accidentId, images: result },
+      timestamp: new Date().toISOString(),
+    });
+
+    return result;
   }
 
   async deleteImage(accidentId: string, imageId: string): Promise<void> {
@@ -183,5 +219,11 @@ export class AccidentsService {
       this.prisma.image.delete({ where: { id: imageId } }),
       this.cloudinary.deleteFile(image.publicId),
     ]);
+
+    void this.amqpConnection.publish('ui_notifications', '', {
+      event: 'accident.updated',
+      data: { id: accidentId, deletedImageId: imageId },
+      timestamp: new Date().toISOString(),
+    });
   }
 }
