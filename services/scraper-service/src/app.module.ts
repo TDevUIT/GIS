@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { BullModule } from '@nestjs/bullmq';
 import { HttpModule } from '@nestjs/axios';
-import { AccidentsModule } from './jobs/accidents/accidents.module';
+import { AccidentsModule } from './modules/jobs/accidents/accidents.module';
 
 @Module({
   imports: [

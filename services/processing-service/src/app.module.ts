@@ -2,7 +2,7 @@ import { Module, Global } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
 import { HttpModule } from '@nestjs/axios';
-import { AccidentProcessingModule } from './accident-processing/accident-processing.module';
+import { AccidentProcessingModule } from './modules/accident-processing/accident-processing.module';
 
 @Global()
 @Module({
