@@ -22,6 +22,8 @@ import {
 import { WaterQualitiesService } from './water-qualities.service';
 import { JwtAuthGuard } from '../auth/auth.gaurd';
 import { AdminGuard } from '../auth/admin.gaurd';
+import { CreateWaterQualityDto } from './dto/create-water-quality.dto';
+import { UpdateWaterQualityDto } from './dto/update-water-quality.dto';
 
 class FindWaterQualityQuery {
   districtId?: string;
@@ -78,7 +80,7 @@ export class WaterQualitiesController {
   @ApiResponse({ status: 201, description: 'Water quality record created successfully' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
-  create(@Body() createDto: any) {
+  create(@Body() createDto: CreateWaterQualityDto) {
     return this.waterQualitiesService.create(createDto);
   }
 
@@ -91,7 +93,7 @@ export class WaterQualitiesController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
   @ApiResponse({ status: 404, description: 'Water quality record not found' })
-  update(@Param('id') id: string, @Body() updateDto: any) {
+  update(@Param('id') id: string, @Body() updateDto: UpdateWaterQualityDto) {
     return this.waterQualitiesService.update(id, updateDto);
   }
 

@@ -21,6 +21,9 @@ import {
 import { TrafficsService } from './traffics.service';
 import { JwtAuthGuard } from '../auth/auth.gaurd';
 import { AdminGuard } from '../auth/admin.gaurd';
+import { CreateTrafficDto } from './dto/create-traffic.dto';
+import { UpdateTrafficDto } from './dto/update-traffic.dto';
+import { IntersectsWktDto } from './dto/intersects-wkt.dto';
 
 class FindTrafficsQuery {
   districtId?: string;
@@ -63,8 +66,8 @@ export class TrafficsController {
     description: 'Find traffic data that intersects with a given WKT geometry',
   })
   @ApiResponse({ status: 200, description: 'Intersecting traffic data found' })
-  findIntersecting(@Body() wktBody: any) {
-    return this.trafficsService.findIntersecting(wktBody);
+  findIntersecting(@Body() body: IntersectsWktDto) {
+    return this.trafficsService.findIntersecting(body);
   }
 
   @Get(':id')
@@ -92,7 +95,7 @@ export class TrafficsController {
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
-  create(@Body() createDto: any) {
+  create(@Body() createDto: CreateTrafficDto) {
     return this.trafficsService.create(createDto);
   }
 
@@ -111,7 +114,7 @@ export class TrafficsController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
   @ApiResponse({ status: 404, description: 'Traffic record not found' })
-  update(@Param('id') id: string, @Body() updateDto: any) {
+  update(@Param('id') id: string, @Body() updateDto: UpdateTrafficDto) {
     return this.trafficsService.update(id, updateDto);
   }
 

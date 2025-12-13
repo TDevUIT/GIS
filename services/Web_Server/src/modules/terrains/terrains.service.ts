@@ -4,12 +4,15 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { Injectable } from '@nestjs/common';
 import { GisClientService } from 'src/infra/gis-client/gis-client.service';
+import { CreateTerrainDto } from './dto/create-terrain.dto';
+import { UpdateTerrainDto } from './dto/update-terrain.dto';
+import { IntersectsWktDto } from './dto/intersects-wkt.dto';
 
 @Injectable()
 export class TerrainsService {
   constructor(private readonly gisClient: GisClientService) {}
 
-  async create(createDto: any) {
+  async create(createDto: CreateTerrainDto) {
     return this.gisClient.post('/terrains', createDto);
   }
 
@@ -21,7 +24,7 @@ export class TerrainsService {
     return this.gisClient.get(`/terrains/${id}`);
   }
 
-  async update(id: string, updateDto: any) {
+  async update(id: string, updateDto: UpdateTerrainDto) {
     return this.gisClient.patch(`/terrains/${id}`, updateDto);
   }
 
@@ -33,7 +36,7 @@ export class TerrainsService {
     return this.gisClient.get('/terrains/at-point', { params: { lng, lat } });
   }
 
-  async findIntersecting(wktBody: any) {
-    return this.gisClient.post('/terrains/intersects-with', wktBody);
+  async findIntersecting(body: IntersectsWktDto) {
+    return this.gisClient.post('/terrains/intersects-with', body);
   }
 }

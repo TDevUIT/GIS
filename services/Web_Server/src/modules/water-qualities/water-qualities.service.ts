@@ -5,6 +5,8 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Injectable } from '@nestjs/common';
 import { GisClientService } from 'src/infra/gis-client/gis-client.service';
+import { CreateWaterQualityDto } from './dto/create-water-quality.dto';
+import { UpdateWaterQualityDto } from './dto/update-water-quality.dto';
 
 interface FindWaterQualityQuery {
   districtId?: string;
@@ -16,7 +18,7 @@ interface FindWaterQualityQuery {
 export class WaterQualitiesService {
   constructor(private readonly gisClient: GisClientService) {}
 
-  async create(createDto: any) {
+  async create(createDto: CreateWaterQualityDto) {
     return this.gisClient.post('/water-qualities', createDto);
   }
 
@@ -28,7 +30,7 @@ export class WaterQualitiesService {
     return this.gisClient.get(`/water-qualities/${id}`);
   }
 
-  async update(id: string, updateDto: any) {
+  async update(id: string, updateDto: UpdateWaterQualityDto) {
     return this.gisClient.patch(`/water-qualities/${id}`, updateDto);
   }
 

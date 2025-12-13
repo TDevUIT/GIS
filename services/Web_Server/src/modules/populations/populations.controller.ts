@@ -20,6 +20,8 @@ import {
 import { PopulationsService } from './populations.service';
 import { JwtAuthGuard } from '../auth/auth.gaurd';
 import { AdminGuard } from '../auth/admin.gaurd';
+import { CreatePopulationDto } from './dto/create-population.dto';
+import { UpdatePopulationDto } from './dto/update-population.dto';
 
 @ApiTags('Populations')
 @Controller('populations')
@@ -86,7 +88,7 @@ export class PopulationsController {
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
-  create(@Body() createDto: any) {
+  create(@Body() createDto: CreatePopulationDto) {
     return this.populationsService.create(createDto);
   }
 
@@ -105,7 +107,7 @@ export class PopulationsController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
   @ApiResponse({ status: 404, description: 'Population record not found' })
-  update(@Param('id') id: string, @Body() updateDto: any) {
+  update(@Param('id') id: string, @Body() updateDto: UpdatePopulationDto) {
     return this.populationsService.update(id, updateDto);
   }
 

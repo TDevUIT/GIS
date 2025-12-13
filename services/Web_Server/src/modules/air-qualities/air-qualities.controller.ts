@@ -21,6 +21,8 @@ import {
 import { AirQualitiesService } from './air-qualities.service';
 import { JwtAuthGuard } from '../auth/auth.gaurd';
 import { AdminGuard } from '../auth/admin.gaurd';
+import { CreateAirQualityDto } from './dto/create-air-quality.dto';
+import { UpdateAirQualityDto } from './dto/update-air-quality.dto';
 
 class FindAirQualityQuery {
   districtId?: string;
@@ -111,7 +113,7 @@ export class AirQualitiesController {
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
-  create(@Body() createDto: any) {
+  create(@Body() createDto: CreateAirQualityDto) {
     return this.airQualitiesService.create(createDto);
   }
 
@@ -130,7 +132,7 @@ export class AirQualitiesController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
   @ApiResponse({ status: 404, description: 'Air quality record not found' })
-  update(@Param('id') id: string, @Body() updateDto: any) {
+  update(@Param('id') id: string, @Body() updateDto: UpdateAirQualityDto) {
     return this.airQualitiesService.update(id, updateDto);
   }
 

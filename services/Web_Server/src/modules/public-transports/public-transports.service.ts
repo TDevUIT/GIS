@@ -5,6 +5,9 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { Injectable } from '@nestjs/common';
 import { GisClientService } from 'src/infra/gis-client/gis-client.service';
+import { CreatePublicTransportDto } from './dto/create-public-transport.dto';
+import { UpdatePublicTransportDto } from './dto/update-public-transport.dto';
+import { IntersectsWktDto } from './dto/intersects-wkt.dto';
 
 type TransportMode = 'BUS' | 'METRO' | 'BRT' | 'WATERWAY';
 
@@ -17,7 +20,7 @@ interface FindPublicTransportsQuery {
 export class PublicTransportsService {
   constructor(private readonly gisClient: GisClientService) {}
 
-  async create(createDto: any) {
+  async create(createDto: CreatePublicTransportDto) {
     return this.gisClient.post('/public-transports', createDto);
   }
 
@@ -29,7 +32,7 @@ export class PublicTransportsService {
     return this.gisClient.get(`/public-transports/${id}`);
   }
 
-  async update(id: string, updateDto: any) {
+  async update(id: string, updateDto: UpdatePublicTransportDto) {
     return this.gisClient.patch(`/public-transports/${id}`, updateDto);
   }
 
@@ -37,7 +40,7 @@ export class PublicTransportsService {
     return this.gisClient.delete(`/public-transports/${id}`);
   }
 
-  async findIntersecting(wktBody: any) {
-    return this.gisClient.post('/public-transports/intersects-with', wktBody);
+  async findIntersecting(body: IntersectsWktDto) {
+    return this.gisClient.post('/public-transports/intersects-with', body);
   }
 }

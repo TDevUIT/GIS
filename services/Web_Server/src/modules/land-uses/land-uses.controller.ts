@@ -21,6 +21,9 @@ import {
 import { LandUsesService } from './land-uses.service';
 import { JwtAuthGuard } from '../auth/auth.gaurd';
 import { AdminGuard } from '../auth/admin.gaurd';
+import { CreateLandUseDto } from './dto/create-land-use.dto';
+import { UpdateLandUseDto } from './dto/update-land-use.dto';
+import { IntersectsWktDto } from './dto/intersects-wkt.dto';
 
 class FindLandUsesQuery {
   districtId?: string;
@@ -76,8 +79,8 @@ export class LandUsesController {
     description: 'Find land uses that intersect with a given WKT geometry',
   })
   @ApiResponse({ status: 200, description: 'Intersecting land uses found' })
-  findIntersecting(@Body() wktBody: any) {
-    return this.landUsesService.findIntersecting(wktBody);
+  findIntersecting(@Body() body: IntersectsWktDto) {
+    return this.landUsesService.findIntersecting(body);
   }
 
   @Get(':id')
@@ -105,7 +108,7 @@ export class LandUsesController {
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
-  create(@Body() createDto: any) {
+  create(@Body() createDto: CreateLandUseDto) {
     return this.landUsesService.create(createDto);
   }
 
@@ -124,7 +127,7 @@ export class LandUsesController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
   @ApiResponse({ status: 404, description: 'Land use record not found' })
-  update(@Param('id') id: string, @Body() updateDto: any) {
+  update(@Param('id') id: string, @Body() updateDto: UpdateLandUseDto) {
     return this.landUsesService.update(id, updateDto);
   }
 

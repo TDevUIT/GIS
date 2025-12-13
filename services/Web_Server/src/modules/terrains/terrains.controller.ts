@@ -21,6 +21,9 @@ import {
 import { TerrainsService } from './terrains.service';
 import { JwtAuthGuard } from '../auth/auth.gaurd';
 import { AdminGuard } from '../auth/admin.gaurd';
+import { CreateTerrainDto } from './dto/create-terrain.dto';
+import { UpdateTerrainDto } from './dto/update-terrain.dto';
+import { IntersectsWktDto } from './dto/intersects-wkt.dto';
 
 @ApiTags('Terrains')
 @Controller('terrains')
@@ -62,8 +65,8 @@ export class TerrainsController {
     description: 'Find terrains that intersect with a given WKT geometry',
   })
   @ApiResponse({ status: 200, description: 'Intersecting terrains found' })
-  findIntersecting(@Body() wktBody: any) {
-    return this.terrainsService.findIntersecting(wktBody);
+  findIntersecting(@Body() body: IntersectsWktDto) {
+    return this.terrainsService.findIntersecting(body);
   }
 
   @Get(':id')
@@ -88,7 +91,7 @@ export class TerrainsController {
   @ApiResponse({ status: 201, description: 'Terrain created successfully' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
-  create(@Body() createDto: any) {
+  create(@Body() createDto: CreateTerrainDto) {
     return this.terrainsService.create(createDto);
   }
 
@@ -104,7 +107,7 @@ export class TerrainsController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
   @ApiResponse({ status: 404, description: 'Terrain not found' })
-  update(@Param('id') id: string, @Body() updateDto: any) {
+  update(@Param('id') id: string, @Body() updateDto: UpdateTerrainDto) {
     return this.terrainsService.update(id, updateDto);
   }
 

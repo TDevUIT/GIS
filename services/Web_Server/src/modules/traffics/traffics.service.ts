@@ -4,6 +4,9 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { Injectable } from '@nestjs/common';
 import { GisClientService } from 'src/infra/gis-client/gis-client.service';
+import { CreateTrafficDto } from './dto/create-traffic.dto';
+import { UpdateTrafficDto } from './dto/update-traffic.dto';
+import { IntersectsWktDto } from './dto/intersects-wkt.dto';
 
 interface FindTrafficsQuery {
   districtId?: string;
@@ -14,7 +17,7 @@ interface FindTrafficsQuery {
 export class TrafficsService {
   constructor(private readonly gisClient: GisClientService) {}
 
-  async create(createDto: any) {
+  async create(createDto: CreateTrafficDto) {
     return this.gisClient.post('/traffics', createDto);
   }
 
@@ -26,7 +29,7 @@ export class TrafficsService {
     return this.gisClient.get(`/traffics/${id}`);
   }
 
-  async update(id: string, updateDto: any) {
+  async update(id: string, updateDto: UpdateTrafficDto) {
     return this.gisClient.patch(`/traffics/${id}`, updateDto);
   }
 
@@ -34,7 +37,7 @@ export class TrafficsService {
     return this.gisClient.delete(`/traffics/${id}`);
   }
 
-  async findIntersecting(wktBody: any) {
-    return this.gisClient.post('/traffics/intersects-with', wktBody);
+  async findIntersecting(body: IntersectsWktDto) {
+    return this.gisClient.post('/traffics/intersects-with', body);
   }
 }

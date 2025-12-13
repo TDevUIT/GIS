@@ -4,6 +4,9 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { Injectable } from '@nestjs/common';
 import { GisClientService } from 'src/infra/gis-client/gis-client.service';
+import { CreateUrbanPlanDto } from './dto/create-urban-plan.dto';
+import { UpdateUrbanPlanDto } from './dto/update-urban-plan.dto';
+import { IntersectsWktDto } from './dto/intersects-wkt.dto';
 
 interface FindUrbanPlansQuery {
   districtId?: string;
@@ -14,7 +17,7 @@ interface FindUrbanPlansQuery {
 export class UrbanPlansService {
   constructor(private readonly gisClient: GisClientService) {}
 
-  async create(createDto: any) {
+  async create(createDto: CreateUrbanPlanDto) {
     return this.gisClient.post('/urban-plans', createDto);
   }
 
@@ -26,7 +29,7 @@ export class UrbanPlansService {
     return this.gisClient.get(`/urban-plans/${id}`);
   }
 
-  async update(id: string, updateDto: any) {
+  async update(id: string, updateDto: UpdateUrbanPlanDto) {
     return this.gisClient.patch(`/urban-plans/${id}`, updateDto);
   }
 
@@ -38,7 +41,7 @@ export class UrbanPlansService {
     return this.gisClient.get('/urban-plans/at-point', { params: { lng, lat } });
   }
 
-  async findIntersecting(wktBody: any) {
-    return this.gisClient.post('/urban-plans/intersects-with', wktBody);
+  async findIntersecting(body: IntersectsWktDto) {
+    return this.gisClient.post('/urban-plans/intersects-with', body);
   }
 }

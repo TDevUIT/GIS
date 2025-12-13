@@ -21,6 +21,9 @@ import {
 import { PublicTransportsService } from './public-transports.service';
 import { JwtAuthGuard } from '../auth/auth.gaurd';
 import { AdminGuard } from '../auth/admin.gaurd';
+import { CreatePublicTransportDto } from './dto/create-public-transport.dto';
+import { UpdatePublicTransportDto } from './dto/update-public-transport.dto';
+import { IntersectsWktDto } from './dto/intersects-wkt.dto';
 
 type TransportMode = 'BUS' | 'METRO' | 'BRT' | 'WATERWAY';
 
@@ -68,8 +71,8 @@ export class PublicTransportsController {
       'Find public transport routes that intersect with a given WKT geometry',
   })
   @ApiResponse({ status: 200, description: 'Intersecting routes found' })
-  findIntersecting(@Body() wktBody: any) {
-    return this.publicTransportsService.findIntersecting(wktBody);
+  findIntersecting(@Body() body: IntersectsWktDto) {
+    return this.publicTransportsService.findIntersecting(body);
   }
 
   @Get(':id')
@@ -97,7 +100,7 @@ export class PublicTransportsController {
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
-  create(@Body() createDto: any) {
+  create(@Body() createDto: CreatePublicTransportDto) {
     return this.publicTransportsService.create(createDto);
   }
 
@@ -116,7 +119,7 @@ export class PublicTransportsController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
   @ApiResponse({ status: 404, description: 'Transport route not found' })
-  update(@Param('id') id: string, @Body() updateDto: any) {
+  update(@Param('id') id: string, @Body() updateDto: UpdatePublicTransportDto) {
     return this.publicTransportsService.update(id, updateDto);
   }
 

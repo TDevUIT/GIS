@@ -21,6 +21,9 @@ import {
 import { WardsService } from './wards.service';
 import { JwtAuthGuard } from '../auth/auth.gaurd';
 import { AdminGuard } from '../auth/admin.gaurd';
+import { CreateWardDto } from './dto/create-ward.dto';
+import { UpdateWardDto } from './dto/update-ward.dto';
+import { IntersectsWktDto } from './dto/intersects-wkt.dto';
 
 @ApiTags('Wards')
 @Controller('wards')
@@ -62,8 +65,8 @@ export class WardsController {
     description: 'Find wards that intersect with a given WKT geometry',
   })
   @ApiResponse({ status: 200, description: 'Intersecting wards found' })
-  findIntersecting(@Body() wktBody: any) {
-    return this.wardsService.findIntersecting(wktBody);
+  findIntersecting(@Body() body: IntersectsWktDto) {
+    return this.wardsService.findIntersecting(body);
   }
 
   @Get(':id')
@@ -88,7 +91,7 @@ export class WardsController {
   @ApiResponse({ status: 201, description: 'Ward created successfully' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
-  create(@Body() createDto: any) {
+  create(@Body() createDto: CreateWardDto) {
     return this.wardsService.create(createDto);
   }
 
@@ -104,7 +107,7 @@ export class WardsController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
   @ApiResponse({ status: 404, description: 'Ward not found' })
-  update(@Param('id') id: string, @Body() updateDto: any) {
+  update(@Param('id') id: string, @Body() updateDto: UpdateWardDto) {
     return this.wardsService.update(id, updateDto);
   }
 

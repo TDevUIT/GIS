@@ -20,7 +20,10 @@ import {
 } from '@nestjs/swagger';
 import { DistrictsService } from './districts.service';
 import { JwtAuthGuard } from '../auth/auth.gaurd';
-import { AdminGuard } from 'src/auth/admin.gaurd';
+import { AdminGuard } from '../auth/admin.gaurd';
+import { CreateDistrictDto } from './dto/create-district.dto';
+import { UpdateDistrictDto } from './dto/update-district.dto';
+import { IntersectsWktDto } from './dto/intersects-wkt.dto';
 
 @ApiTags('Districts')
 @Controller('districts')
@@ -57,8 +60,8 @@ export class DistrictsController {
     description: 'Find districts that intersect with a given WKT geometry',
   })
   @ApiResponse({ status: 200, description: 'Intersecting districts found' })
-  findIntersecting(@Body() wktBody: any) {
-    return this.districtsService.findIntersecting(wktBody);
+  findIntersecting(@Body() body: IntersectsWktDto) {
+    return this.districtsService.findIntersecting(body);
   }
 
   @Get(':id')
@@ -97,7 +100,7 @@ export class DistrictsController {
     status: 403,
     description: 'Forbidden - Admin access required',
   })
-  create(@Body() createDto: any) {
+  create(@Body() createDto: CreateDistrictDto) {
     return this.districtsService.create(createDto);
   }
 
@@ -116,7 +119,7 @@ export class DistrictsController {
     description: 'Forbidden - Admin access required',
   })
   @ApiResponse({ status: 404, description: 'District not found' })
-  update(@Param('id') id: string, @Body() updateDto: any) {
+  update(@Param('id') id: string, @Body() updateDto: UpdateDistrictDto) {
     return this.districtsService.update(id, updateDto);
   }
 

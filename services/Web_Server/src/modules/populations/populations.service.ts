@@ -3,12 +3,14 @@
 
 import { Injectable } from '@nestjs/common';
 import { GisClientService } from 'src/infra/gis-client/gis-client.service';
+import { CreatePopulationDto } from './dto/create-population.dto';
+import { UpdatePopulationDto } from './dto/update-population.dto';
 
 @Injectable()
 export class PopulationsService {
   constructor(private readonly gisClient: GisClientService) {}
 
-  async create(createDto: any) {
+  async create(createDto: CreatePopulationDto) {
     return this.gisClient.post('/populations', createDto);
   }
 
@@ -28,7 +30,7 @@ export class PopulationsService {
     return this.gisClient.get(`/populations/${id}`);
   }
 
-  async update(id: string, updateDto: any) {
+  async update(id: string, updateDto: UpdatePopulationDto) {
     return this.gisClient.patch(`/populations/${id}`, updateDto);
   }
 

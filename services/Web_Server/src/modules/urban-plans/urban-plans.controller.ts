@@ -21,6 +21,9 @@ import {
 import { UrbanPlansService } from './urban-plans.service';
 import { JwtAuthGuard } from '../auth/auth.gaurd';
 import { AdminGuard } from '../auth/admin.gaurd';
+import { CreateUrbanPlanDto } from './dto/create-urban-plan.dto';
+import { UpdateUrbanPlanDto } from './dto/update-urban-plan.dto';
+import { IntersectsWktDto } from './dto/intersects-wkt.dto';
 
 class FindUrbanPlansQuery {
   districtId?: string;
@@ -79,8 +82,8 @@ export class UrbanPlansController {
     description: 'Find urban plans that intersect with a given WKT geometry',
   })
   @ApiResponse({ status: 200, description: 'Intersecting urban plans found' })
-  findIntersecting(@Body() wktBody: any) {
-    return this.urbanPlansService.findIntersecting(wktBody);
+  findIntersecting(@Body() body: IntersectsWktDto) {
+    return this.urbanPlansService.findIntersecting(body);
   }
 
   @Get(':id')
@@ -105,7 +108,7 @@ export class UrbanPlansController {
   @ApiResponse({ status: 201, description: 'Urban plan created successfully' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
-  create(@Body() createDto: any) {
+  create(@Body() createDto: CreateUrbanPlanDto) {
     return this.urbanPlansService.create(createDto);
   }
 
@@ -121,7 +124,7 @@ export class UrbanPlansController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
   @ApiResponse({ status: 404, description: 'Urban plan not found' })
-  update(@Param('id') id: string, @Body() updateDto: any) {
+  update(@Param('id') id: string, @Body() updateDto: UpdateUrbanPlanDto) {
     return this.urbanPlansService.update(id, updateDto);
   }
 

@@ -5,6 +5,9 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Injectable } from '@nestjs/common';
 import { GisClientService } from 'src/infra/gis-client/gis-client.service';
+import { CreateWardDto } from './dto/create-ward.dto';
+import { UpdateWardDto } from './dto/update-ward.dto';
+import { IntersectsWktDto } from './dto/intersects-wkt.dto';
 
 @Injectable()
 export class WardsService {
@@ -18,11 +21,11 @@ export class WardsService {
     return this.gisClient.get(`/wards/${id}`);
   }
 
-  async create(createDto: any) {
+  async create(createDto: CreateWardDto) {
     return this.gisClient.post('/wards', createDto);
   }
 
-  async update(id: string, updateDto: any) {
+  async update(id: string, updateDto: UpdateWardDto) {
     return this.gisClient.patch(`/wards/${id}`, updateDto);
   }
 
@@ -34,7 +37,7 @@ export class WardsService {
     return this.gisClient.get('/wards/contains-point', { params: { lng, lat } });
   }
 
-  async findIntersecting(wktBody: any) {
-    return this.gisClient.post('/wards/intersects-with', wktBody);
+  async findIntersecting(body: IntersectsWktDto) {
+    return this.gisClient.post('/wards/intersects-with', body);
   }
 }

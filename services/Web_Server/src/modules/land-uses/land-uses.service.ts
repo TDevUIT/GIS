@@ -5,6 +5,9 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { Injectable } from '@nestjs/common';
 import { GisClientService } from 'src/infra/gis-client/gis-client.service';
+import { CreateLandUseDto } from './dto/create-land-use.dto';
+import { UpdateLandUseDto } from './dto/update-land-use.dto';
+import { IntersectsWktDto } from './dto/intersects-wkt.dto';
 
 interface FindLandUsesQuery {
   districtId?: string;
@@ -15,7 +18,7 @@ interface FindLandUsesQuery {
 export class LandUsesService {
   constructor(private readonly gisClient: GisClientService) {}
 
-  async create(createDto: any) {
+  async create(createDto: CreateLandUseDto) {
     return this.gisClient.post('/land-uses', createDto);
   }
 
@@ -27,7 +30,7 @@ export class LandUsesService {
     return this.gisClient.get(`/land-uses/${id}`);
   }
 
-  async update(id: string, updateDto: any) {
+  async update(id: string, updateDto: UpdateLandUseDto) {
     return this.gisClient.patch(`/land-uses/${id}`, updateDto);
   }
 
@@ -39,7 +42,7 @@ export class LandUsesService {
     return this.gisClient.get('/land-uses/at-point', { params: { lng, lat } });
   }
 
-  async findIntersecting(wktBody: any) {
-    return this.gisClient.post('/land-uses/intersects-with', wktBody);
+  async findIntersecting(body: IntersectsWktDto) {
+    return this.gisClient.post('/land-uses/intersects-with', body);
   }
 }
