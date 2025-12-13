@@ -121,144 +121,158 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
-import { PlusIcon, PencilSquareIcon, TrashIcon, UsersIcon, HomeModernIcon, CalendarDaysIcon } from '@heroicons/vue/24/outline';
-import type { DataTableColumn } from '~/components/ui/DataTable.vue';
-import type { District } from '~/types/api/district';
-import type { Population } from '~/types/api/population';
-import type { DemographicsSummaryPoint, HouseholdsSummary } from '~/types/api/analytics';
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
+import { PlusIcon, PencilSquareIcon, TrashIcon, UsersIcon, HomeModernIcon, CalendarDaysIcon } from '@heroicons/vue/24/outline'
+import type { DataTableColumn } from '~/components/ui/DataTable.vue'
+import type { District } from '~/types/api/district'
+import type { Population } from '~/types/api/population'
+import type { DemographicsSummaryPoint, HouseholdsSummary } from '~/types/api/analytics'
+import { useRealtime } from '~/composables/useRealtime'
 
-useHead({ title: 'Population Management' });
+useHead({ title: 'Population Management' })
 
-const { $api } = useNuxtApp();
-const router = useRouter();
-const { confirmDelete, toastSuccess, toastError } = useSwal();
+const { $api } = useNuxtApp()
+const router = useRouter()
+const { confirmDelete, toastSuccess, toastError } = useSwal()
+const { subscribe, unsubscribe } = useRealtime()
 
-const selectedDistrictId = ref('');
-const selectedYear = ref<string>('');
-const districtOptions = ref<{ label: string; value: string }[]>([]);
-const allPopulations = ref<Population[]>([]);
-const selectedPopulation = ref<Population | null>(null);
-const demographicsData = ref<DemographicsSummaryPoint[] | undefined>();
-const householdsData = ref<HouseholdsSummary | undefined>();
+const selectedDistrictId = ref('')
+const selectedYear = ref<string>('')
+const districtOptions = ref<{ label: string; value: string }[]>([])
+const allPopulations = ref<Population[]>([])
+const selectedPopulation = ref<Population | null>(null)
+const demographicsData = ref<DemographicsSummaryPoint[] | undefined>()
+const householdsData = ref<HouseholdsSummary | undefined>()
 
-const currentPage = ref(1);
-const itemsPerPage = 5;
+const currentPage = ref(1)
+const itemsPerPage = 5
 
 const yearOptions = [
     { label: 'All Years', value: '' },
     ...Array.from({ length: 10 }, (_, i) => new Date().getFullYear() - i).map(year => ({ label: year.toString(), value: year.toString() }))
-];
+]
 
 useAsyncData('districts-for-filter', async () => {
-    const response = await $api.districts.getAll();
-    const districtData = response.data.data;
+    const response = await $api.districts.getAll()
+    const districtData = response.data.data
     if (Array.isArray(districtData)) {
         districtOptions.value = [
             { label: 'All Districts', value: '' },
             ...districtData.map((d: District) => ({ label: d.name, value: d.id }))
-        ];
+        ]
     }
-    return districtData;
-});
+    return districtData
+})
 
 const { refresh: refreshPopulations } = useAsyncData(
     'populations-list',
     async () => {
-        const params: { districtId?: string; year?: number } = {};
-        if (selectedDistrictId.value) params.districtId = selectedDistrictId.value;
-        if (selectedYear.value) params.year = parseInt(selectedYear.value, 10);
+        const params: { districtId?: string; year?: number } = {}
+        if (selectedDistrictId.value) params.districtId = selectedDistrictId.value
+        if (selectedYear.value) params.year = parseInt(selectedYear.value, 10)
 
-        const response = await $api.populations.getAll(params);
-        allPopulations.value = response.data.data || [];
+        const response = await $api.populations.getAll(params)
+        allPopulations.value = response.data.data || []
 
         if (selectedPopulation.value && !allPopulations.value.some(p => p.id === selectedPopulation.value?.id)) {
-            selectedPopulation.value = null;
+            selectedPopulation.value = null
         }
-        return allPopulations.value;
+        return allPopulations.value
     },
     { watch: [selectedDistrictId, selectedYear] }
-);
+)
 
 const columns: DataTableColumn[] = [
     { key: 'districtName', label: 'District' },
     { key: 'year', label: 'Year' },
     { key: 'populationTotal', label: 'Total Pop.' },
-    { key: 'householdsTotal', label: 'Total HH.' },
-];
+    { key: 'householdsTotal', label: 'Total HH.' }
+]
 
-const totalPages = computed(() => Math.ceil(allPopulations.value.length / itemsPerPage));
+const totalPages = computed(() => Math.ceil(allPopulations.value.length / itemsPerPage))
 
 const paginatedPopulations = computed(() => {
-    const start = (currentPage.value - 1) * itemsPerPage;
-    const end = start + itemsPerPage;
-    return allPopulations.value.slice(start, end);
-});
+    const start = (currentPage.value - 1) * itemsPerPage
+    const end = start + itemsPerPage
+    return allPopulations.value.slice(start, end)
+})
 
 watch(selectedPopulation, async (newSelection) => {
     if (newSelection?.id) {
         try {
             const [demoRes, houseRes] = await Promise.all([
                 $api.analytics.getDemographicsSummary(newSelection.id),
-                $api.analytics.getHouseholdsSummary(newSelection.id),
-            ]);
-            demographicsData.value = demoRes.data.data;
-            householdsData.value = houseRes.data.data;
+                $api.analytics.getHouseholdsSummary(newSelection.id)
+            ])
+            demographicsData.value = demoRes.data.data
+            householdsData.value = houseRes.data.data
         } catch (e) {
-            toastError('Failed to fetch chart data');
-            demographicsData.value = undefined;
-            householdsData.value = undefined;
+            toastError('Failed to fetch chart data')
+            demographicsData.value = undefined
+            householdsData.value = undefined
         }
     } else {
-        demographicsData.value = undefined;
-        householdsData.value = undefined;
+        demographicsData.value = undefined
+        householdsData.value = undefined
     }
-});
+})
 
 async function handleRowClick(population: Population) {
     if (selectedPopulation.value?.id === population.id) {
-        selectedPopulation.value = null;
-        return;
+        selectedPopulation.value = null
+        return
     }
     try {
-        const response = await $api.populations.getById(population.id);
-        selectedPopulation.value = response.data.data;
+        const response = await $api.populations.getById(population.id)
+        selectedPopulation.value = response.data.data
     } catch {
-        toastError('Error', 'Could not fetch population details.');
-        selectedPopulation.value = population;
+        toastError('Error', 'Could not fetch population details.')
+        selectedPopulation.value = population
     }
 }
 
 function handleAdd() {
-    router.push('/populations/create');
+    router.push('/populations/create')
 }
 
 function handleEdit(id: string) {
-    router.push(`/populations/${id}`);
+    router.push(`/populations/${id}`)
 }
 
 async function handleDelete(id: string, districtName = 'N/A', year: number) {
-    const result = await confirmDelete(`population data for ${districtName} in ${year}`);
+    const result = await confirmDelete(`population data for ${districtName} in ${year}`)
     if (result.isConfirmed) {
         try {
-            await $api.populations.remove(id);
-            toastSuccess('Population data has been deleted.');
+            await $api.populations.remove(id)
+            toastSuccess('Population data has been deleted.')
             if (selectedPopulation.value?.id === id) {
-                selectedPopulation.value = null;
+                selectedPopulation.value = null
             }
-            await refreshPopulations();
+            await refreshPopulations()
             if (paginatedPopulations.value.length === 0 && currentPage.value > 1) {
-                currentPage.value--;
+                currentPage.value--
             }
         } catch (err: any) {
-            toastError('Deletion failed', err.data?.message || 'An error occurred.');
+            toastError('Deletion failed', err.data?.message || 'An error occurred.')
         }
     }
 }
 
 watch([selectedDistrictId, selectedYear], () => {
-    currentPage.value = 1;
-});
+    currentPage.value = 1
+})
+
+onMounted(() => {
+    subscribe({
+        onPopulationUpdated: () => {
+            refreshPopulations()
+        }
+    })
+})
+
+onUnmounted(() => {
+    unsubscribe()
+})
 </script>
 
 <style scoped>

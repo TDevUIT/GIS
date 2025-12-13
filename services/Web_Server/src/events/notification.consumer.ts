@@ -49,7 +49,7 @@ export class NotificationConsumer {
   private async clearAnalyticsCache() {
     try {
       await (this.cacheManager as any).store?.reset?.();
-      this.logger.log('🧹 [Cache] All cache cleared due to data update.');
+      // this.logger.log('🧹 [Cache] All cache cleared due to data update.');
     } catch (error) {
       this.logger.error('❌ Failed to clear cache:', error as Error);
     }
