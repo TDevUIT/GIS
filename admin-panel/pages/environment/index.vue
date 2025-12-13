@@ -132,7 +132,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import { PlusIcon, PencilSquareIcon, TrashIcon } from '@heroicons/vue/24/outline';
 import { getQualityMarkerColor } from '~/utils/environmentStyles';
 import type { DataTableColumn } from '~/components/ui/DataTable.vue';
@@ -140,6 +140,7 @@ import type { AirQuality } from '~/types/api/air-quality';
 import type { WaterQuality } from '~/types/api/water-quality';
 import type { District } from '~/types/api/district';
 import type { AirQualityHistoryPoint, WaterQualityHistoryPoint } from '~/types/api/analytics';
+import { useRealtime } from '~/composables/useRealtime';
 
 const { LCircleMarker, LPopup } = await import('@vue-leaflet/vue-leaflet');
 const { LMarkerClusterGroup } = await import('vue-leaflet-markercluster');
@@ -153,6 +154,7 @@ type EnvironmentRecord = AirQuality | WaterQuality;
 const { $api } = useNuxtApp();
 const router = useRouter();
 const { confirmDelete, toastSuccess, toastError } = useSwal();
+const { subscribe, unsubscribe } = useRealtime();
 
 const activeTab = ref<RecordType>('air');
 const selectedDistrictId = ref<string>('');
@@ -353,6 +355,23 @@ watch(selectedDistrictId, async (newDistrictId) => {
             mapRef.value?.mapObject.flyTo(firstRecordOfDistrict.geom.coordinates.slice().reverse(), 14);
         }
     }
+});
+
+onMounted(() => {
+    subscribe({
+        onAirQualityUpdated: () => {
+            console.log('⚡ Air Quality updated -> Refreshing Data');
+            refreshAllData();
+        },
+        onWaterQualityUpdated: () => {
+            console.log('⚡ Water Quality updated -> Refreshing Data');
+            refreshAllData();
+        }
+    });
+});
+
+onUnmounted(() => {
+    unsubscribe();
 });
 </script>
 
