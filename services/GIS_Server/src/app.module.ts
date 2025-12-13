@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { PrismaModule } from './prisma/prisma.module';
 import { CommonModule } from './common/common.module';
+import { ConfigModule } from '@nestjs/config';
 import { DistrictsModule } from './districts/districts.module';
 import { WardsModule } from './wards/wards.module';
 import { InfrastructuresModule } from './infrastructures/infrastructures.module';
@@ -15,9 +16,12 @@ import { LandUsesModule } from './land-uses/land-uses.module';
 import { UrbanPlansModule } from './urban-plans/urban-plans.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { AnalyticsModule } from './analytics/analytics.module';
+import { GlobalRabbitMQModule } from './common/rabbitmq/rabbitmq.module';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
+    GlobalRabbitMQModule,
     CommonModule,
     PrismaModule,
     CloudinaryModule,

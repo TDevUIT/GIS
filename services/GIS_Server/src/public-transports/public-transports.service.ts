@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 import {
   Injectable,
@@ -10,6 +11,7 @@ import { UpdatePublicTransportDto } from './dto/update-public-transport.dto';
 import { FindPublicTransportsQueryDto } from './dto/query.dto';
 import { Prisma } from '@prisma/client';
 import cuid from 'cuid';
+import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
 
 @Injectable()
 export class PublicTransportsService {
@@ -26,7 +28,10 @@ export class PublicTransportsService {
     LEFT JOIN "public"."districts" d ON pt."districtId" = d.id
   `;
 
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private readonly amqpConnection: AmqpConnection,
+  ) {}
 
   async create(createDto: CreatePublicTransportDto) {
     const { districtId, geom, ...transportData } = createDto;
@@ -62,7 +67,16 @@ export class PublicTransportsService {
     `;
 
     await this.prisma.$executeRaw(query);
-    return this.findOne(id);
+
+    const newRecord = await this.findOne(id);
+
+    this.amqpConnection.publish('ui_notifications', '', {
+      event: 'public_transport.created',
+      data: newRecord,
+      timestamp: new Date().toISOString(),
+    });
+
+    return newRecord;
   }
 
   async findAll(queryDto: FindPublicTransportsQueryDto) {
@@ -138,12 +152,28 @@ export class PublicTransportsService {
       `;
     }
 
-    return this.findOne(id);
+    const updatedRecord = await this.findOne(id);
+
+    this.amqpConnection.publish('ui_notifications', '', {
+      event: 'public_transport.updated',
+      data: updatedRecord,
+      timestamp: new Date().toISOString(),
+    });
+
+    return updatedRecord;
   }
 
   async remove(id: string) {
     await this.findOne(id);
-    return this.prisma.publicTransport.delete({ where: { id } });
+    const deleted = await this.prisma.publicTransport.delete({ where: { id } });
+
+    this.amqpConnection.publish('ui_notifications', '', {
+      event: 'public_transport.deleted',
+      data: { id },
+      timestamp: new Date().toISOString(),
+    });
+
+    return deleted;
   }
 
   async findIntersecting(wkt: string) {

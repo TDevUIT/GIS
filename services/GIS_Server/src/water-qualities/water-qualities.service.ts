@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
@@ -12,6 +13,7 @@ import { UpdateWaterQualityDto } from './dto/update-water-quality.dto';
 import { Prisma, QualityLevel } from '@prisma/client';
 import cuid from 'cuid';
 import { FindWaterQualityQueryDto } from './dto/query.dto';
+import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
 
 @Injectable()
 export class WaterQualitiesService {
@@ -20,12 +22,16 @@ export class WaterQualitiesService {
     wq.level, wq.recorded_at as "recordedAt", wq."districtId", d.name as "districtName",
     ST_AsGeoJSON(wq.geom) as geom
   `;
+
   private readonly fromTable = Prisma.sql`
     FROM "public"."water_qualities" wq
     LEFT JOIN "public"."districts" d ON wq."districtId" = d.id
   `;
 
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private readonly amqpConnection: AmqpConnection,
+  ) {}
 
   private determineWaterQualityLevel(
     ph?: number | null,
@@ -87,7 +93,16 @@ export class WaterQualitiesService {
       )
     `;
     await this.prisma.$executeRaw(query);
-    return this.findOne(id);
+
+    const newRecord = await this.findOne(id);
+
+    void this.amqpConnection.publish('ui_notifications', '', {
+      event: 'environment.water_quality.created',
+      data: newRecord,
+      timestamp: new Date().toISOString(),
+    });
+
+    return newRecord;
   }
 
   async findAll(queryDto: FindWaterQualityQueryDto) {
@@ -127,7 +142,7 @@ export class WaterQualitiesService {
     const { geom, ...otherData } = updateDto;
     if (otherData.districtId) {
       const districtExists = await this.prisma.district.findUnique({
-        where: { id: otherData.districtId },
+        where: { id: otherData.districtId as string },
       });
       if (!districtExists) {
         throw new BadRequestException(
@@ -164,12 +179,29 @@ export class WaterQualitiesService {
         UPDATE "public"."water_qualities" SET geom = ST_GeomFromText(${geom}, 4326) WHERE id = ${id};
       `;
     }
-    return this.findOne(id);
+
+    const updatedRecord = await this.findOne(id);
+
+    void this.amqpConnection.publish('ui_notifications', '', {
+      event: 'environment.water_quality.updated',
+      data: updatedRecord,
+      timestamp: new Date().toISOString(),
+    });
+
+    return updatedRecord;
   }
 
   async remove(id: string) {
     await this.findOne(id);
-    return this.prisma.waterQuality.delete({ where: { id } });
+    const deleted = await this.prisma.waterQuality.delete({ where: { id } });
+
+    void this.amqpConnection.publish('ui_notifications', '', {
+      event: 'environment.water_quality.deleted',
+      data: { id },
+      timestamp: new Date().toISOString(),
+    });
+
+    return deleted;
   }
 
   async findWithinRadius(lng: string, lat: string, radiusInMeters: string) {
