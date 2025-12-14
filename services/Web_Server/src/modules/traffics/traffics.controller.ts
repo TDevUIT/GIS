@@ -24,11 +24,7 @@ import { AdminGuard } from '../auth/admin.gaurd';
 import { CreateTrafficDto } from './dto/create-traffic.dto';
 import { UpdateTrafficDto } from './dto/update-traffic.dto';
 import { IntersectsWktDto } from './dto/intersects-wkt.dto';
-
-class FindTrafficsQuery {
-  districtId?: string;
-  roadName?: string;
-}
+import { FindTrafficsQueryDto } from './dto/find-traffics.query.dto';
 
 @ApiTags('Traffic')
 @Controller('traffics')
@@ -56,7 +52,7 @@ export class TrafficsController {
     status: 200,
     description: 'Traffic data retrieved successfully',
   })
-  findAll(@Query() query: FindTrafficsQuery) {
+  findAll(@Query() query: FindTrafficsQueryDto) {
     return this.trafficsService.findAll(query);
   }
 

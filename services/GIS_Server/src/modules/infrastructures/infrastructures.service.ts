@@ -7,116 +7,90 @@ import {
   NotFoundException,
   BadRequestException,
 } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
 import { CreateInfrastructureDto } from './dto/create-infrastructure.dto';
 import { UpdateInfrastructureDto } from './dto/update-infrastructure.dto';
 import { InfraCategory, Prisma } from '@prisma/client';
 import cuid from 'cuid';
-import { CloudinaryService } from '../cloudinary/cloudinary.service';
-import { ImageDto } from '../common/dto/image.dto';
+import { CloudinaryService } from '../../infra/cloudinary/cloudinary.service';
+import { ImageDto } from '../../shared/dto/image.dto';
+import { InfrastructuresRepository } from './infrastructures.repository';
+
+type ImageRecord = { id: string; url: string; publicId: string };
 
 @Injectable()
 export class InfrastructuresService {
-  private readonly selectFields = Prisma.sql`
-    i.id, i.name, i.address, i.category, i."districtId", d.name as "districtName",
-    i."createdAt", i."updatedAt", ST_AsGeoJSON(i.geom) as geom,
-    json_build_object(
-      'level', s.level, 'studentCapacity', s.student_capacity, 'teacherCount', s.teacher_count,
-      'type', h.type, 'bedCapacity', h.bed_capacity, 'doctorCount', h.doctor_count,
-      'area', p.area,
-      'marketType', m.type, 'stallCount', m.stall_count,
-      'utilityType', u.type, 'capacity', u.capacity
-    ) as details
-  `;
-  private readonly fromTables = Prisma.sql`
-    FROM "public"."infrastructures" i
-    LEFT JOIN "public"."districts" d ON i."districtId" = d.id
-    LEFT JOIN "public"."schools" s ON i.id = s."infraId"
-    LEFT JOIN "public"."hospitals" h ON i.id = h."infraId"
-    LEFT JOIN "public"."parks" p ON i.id = p."infraId"
-    LEFT JOIN "public"."markets" m ON i.id = m."infraId"
-    LEFT JOIN "public"."utilities" u ON i.id = u."infraId"
-  `;
-
   constructor(
-    private prisma: PrismaService,
-    private cloudinary: CloudinaryService,
+    private readonly repository: InfrastructuresRepository,
+    private readonly cloudinary: CloudinaryService,
   ) {}
 
   async create(createDto: CreateInfrastructureDto) {
     const { districtId, category, school, hospital, park, market, utility } =
       createDto;
-    const districtExists = await this.prisma.district.findUnique({
-      where: { id: districtId },
-    });
+    const districtExists = await this.repository.districtExists(districtId);
     if (!districtExists) {
       throw new BadRequestException(
         `Quận với ID "${districtId}" không tồn tại.`,
       );
     }
-    return this.prisma.$transaction(async (tx) => {
-      const infraId = cuid();
-      await tx.$executeRaw`
-        INSERT INTO "public"."infrastructures" (id, name, address, category, geom, "districtId", "updatedAt")
-        VALUES (${infraId}, ${createDto.name}, ${createDto.address}, ${category}::"InfraCategory", ST_GeomFromText(${createDto.geom}, 4326), ${districtId}, NOW());
-      `;
-      switch (category) {
-        case InfraCategory.SCHOOL:
-          if (!school)
-            throw new BadRequestException(
-              'Thông tin chi tiết của trường học không được để trống.',
-            );
-          await tx.school.create({ data: { ...school, infraId } });
-          break;
-        case InfraCategory.HOSPITAL:
-          if (!hospital)
-            throw new BadRequestException(
-              'Thông tin chi tiết của bệnh viện không được để trống.',
-            );
-          await tx.hospital.create({ data: { ...hospital, infraId } });
-          break;
-        case InfraCategory.PARK:
-          if (!park)
-            throw new BadRequestException(
-              'Thông tin chi tiết của công viên không được để trống.',
-            );
-          await tx.park.create({ data: { ...park, infraId } });
-          break;
-        case InfraCategory.MARKET:
-          if (!market)
-            throw new BadRequestException(
-              'Thông tin chi tiết của chợ/TTTM không được để trống.',
-            );
-          await tx.market.create({ data: { ...market, infraId } });
-          break;
-        case InfraCategory.UTILITY:
-          if (!utility)
-            throw new BadRequestException(
-              'Thông tin chi tiết của tiện ích không được để trống.',
-            );
-          await tx.utility.create({ data: { ...utility, infraId } });
-          break;
-        default:
-          break;
-      }
-      return this.findOne(infraId, tx);
+    const infraId = cuid();
+
+    switch (category) {
+      case InfraCategory.SCHOOL:
+        if (!school)
+          throw new BadRequestException(
+            'Thông tin chi tiết của trường học không được để trống.',
+          );
+        break;
+      case InfraCategory.HOSPITAL:
+        if (!hospital)
+          throw new BadRequestException(
+            'Thông tin chi tiết của bệnh viện không được để trống.',
+          );
+        break;
+      case InfraCategory.PARK:
+        if (!park)
+          throw new BadRequestException(
+            'Thông tin chi tiết của công viên không được để trống.',
+          );
+        break;
+      case InfraCategory.MARKET:
+        if (!market)
+          throw new BadRequestException(
+            'Thông tin chi tiết của chợ/TTTM không được để trống.',
+          );
+        break;
+      case InfraCategory.UTILITY:
+        if (!utility)
+          throw new BadRequestException(
+            'Thông tin chi tiết của tiện ích không được để trống.',
+          );
+        break;
+    }
+
+    const created = await this.repository.createWithDetails({
+      infraId,
+      districtId,
+      name: createDto.name,
+      address: createDto.address ?? null,
+      category,
+      geomWkt: createDto.geom,
+      school: school as any,
+      hospital: hospital as any,
+      park: park as any,
+      market: market as any,
+      utility: utility as any,
     });
+
+    if (!created) {
+      throw new NotFoundException(`Hạ tầng với ID "${infraId}" không tồn tại.`);
+    }
+
+    return created;
   }
 
   async findAll(districtId?: string, category?: InfraCategory) {
-    const whereClauses: Prisma.Sql[] = [];
-    if (districtId) {
-      whereClauses.push(Prisma.sql`i."districtId" = ${districtId}`);
-    }
-    if (category) {
-      whereClauses.push(Prisma.sql`i.category = ${category}::"InfraCategory"`);
-    }
-    const where =
-      whereClauses.length > 0
-        ? Prisma.sql`WHERE ${Prisma.join(whereClauses, ' AND ')}`
-        : Prisma.empty;
-    const query = Prisma.sql`SELECT ${this.selectFields} ${this.fromTables} ${where}`;
-    return this.prisma.$queryRaw(query);
+    return this.repository.findAll(districtId, category);
   }
 
   async uploadImages(files: Express.Multer.File[]): Promise<ImageDto[]> {
@@ -132,70 +106,43 @@ export class InfrastructuresService {
     return Promise.all(uploadPromises);
   }
 
-  async setImages(infraId: string, imagesData: ImageDto[]): Promise<any> {
+  async setImages(
+    infraId: string,
+    imagesData: ImageDto[],
+  ): Promise<ImageRecord[]> {
     await this.findOne(infraId);
-    return this.prisma.$transaction(async (tx) => {
-      const oldImages = await tx.image.findMany({
-        where: { infrastructureId: infraId },
-      });
-      if (oldImages.length > 0) {
-        await tx.image.deleteMany({
-          where: { infrastructureId: infraId },
-        });
-        Promise.all(
-          oldImages.map((img) => this.cloudinary.deleteFile(img.publicId)),
-        ).catch((err) =>
-          console.error('Lỗi khi xóa ảnh cũ trên Cloudinary:', err),
-        );
-      }
-      if (imagesData && imagesData.length > 0) {
-        await tx.image.createMany({
-          data: imagesData.map((img) => ({
-            url: img.url,
-            publicId: img.publicId,
-            infrastructureId: infraId,
-          })),
-        });
-      }
-      return tx.image.findMany({ where: { infrastructureId: infraId } });
-    });
+
+    const result = await this.repository.replaceImages(
+      infraId,
+      (imagesData || []).map((img) => ({ url: img.url, publicId: img.publicId })),
+    );
+
+    if (result.oldImages.length > 0) {
+      void Promise.all(
+        result.oldImages.map((img) => this.cloudinary.deleteFile(img.publicId)),
+      ).catch((err) =>
+        console.error('Lỗi khi xóa ảnh cũ trên Cloudinary:', err),
+      );
+    }
+
+    return result.images;
   }
 
   async deleteImage(infraId: string, imageId: string): Promise<void> {
-    const image = await this.prisma.image.findFirst({
-      where: {
-        id: imageId,
-        infrastructureId: infraId,
-      },
-    });
+    const image = await this.repository.findImage(infraId, imageId);
     if (!image) {
       throw new NotFoundException(
         `Ảnh với ID "${imageId}" không tồn tại hoặc không thuộc về hạ tầng này.`,
       );
     }
     await Promise.all([
-      this.prisma.image.delete({ where: { id: imageId } }),
+      this.repository.deleteImage(imageId),
       this.cloudinary.deleteFile(image.publicId),
     ]);
   }
 
   async findOne(id: string, tx?: Prisma.TransactionClient) {
-    const prismaClient = tx || this.prisma;
-    const infra = await prismaClient.infrastructure.findUnique({
-      where: { id },
-      include: {
-        school: true,
-        hospital: true,
-        park: true,
-        market: true,
-        utility: true,
-        district: { select: { name: true } },
-        images: {
-          select: { id: true, url: true, publicId: true },
-          orderBy: { createdAt: 'asc' },
-        },
-      },
-    });
+    const infra = await this.repository.findOne(id, tx);
 
     if (!infra) {
       throw new NotFoundException(`Hạ tầng với ID "${id}" không tồn tại.`);
@@ -208,83 +155,72 @@ export class InfrastructuresService {
     const { geom, school, hospital, park, market, utility, ...otherData } =
       updateDto;
 
-    return this.prisma.$transaction(async (tx) => {
-      if (Object.keys(otherData).length > 0) {
-        await tx.infrastructure.update({
-          where: { id },
-          data: { ...otherData },
-        });
-      }
-      if (geom) {
-        await tx.$executeRaw`UPDATE "public"."infrastructures" SET geom = ST_GeomFromText(${geom}, 4326), "updatedAt" = NOW() WHERE id = ${id};`;
-      }
-      const categoryToUpdate = updateDto.category || existingInfra.category;
-      switch (categoryToUpdate) {
-        case InfraCategory.SCHOOL:
-          if (school) {
-            await tx.school.upsert({
-              where: { infraId: id },
-              update: school,
-              create: { ...school, infraId: id },
-            });
-          }
-          break;
-        case InfraCategory.HOSPITAL:
-          if (hospital) {
-            await tx.hospital.upsert({
-              where: { infraId: id },
-              update: hospital,
-              create: { ...hospital, infraId: id },
-            });
-          }
-          break;
-        case InfraCategory.PARK:
-          if (park) {
-            await tx.park.upsert({
-              where: { infraId: id },
-              update: park,
-              create: { ...park, infraId: id },
-            });
-          }
-          break;
-        case InfraCategory.MARKET:
-          if (market) {
-            await tx.market.upsert({
-              where: { infraId: id },
-              update: market,
-              create: { ...market, infraId: id },
-            });
-          }
-          break;
-        case InfraCategory.UTILITY:
-          if (utility) {
-            await tx.utility.upsert({
-              where: { infraId: id },
-              update: utility,
-              create: { ...utility, infraId: id },
-            });
-          }
-          break;
-      }
-      return this.findOne(id, tx);
+    const categoryToUpdate = updateDto.category || existingInfra.category;
+    switch (categoryToUpdate) {
+      case InfraCategory.SCHOOL:
+        if (school === undefined) break;
+        if (!school)
+          throw new BadRequestException(
+            'Thông tin chi tiết của trường học không được để trống.',
+          );
+        break;
+      case InfraCategory.HOSPITAL:
+        if (hospital === undefined) break;
+        if (!hospital)
+          throw new BadRequestException(
+            'Thông tin chi tiết của bệnh viện không được để trống.',
+          );
+        break;
+      case InfraCategory.PARK:
+        if (park === undefined) break;
+        if (!park)
+          throw new BadRequestException(
+            'Thông tin chi tiết của công viên không được để trống.',
+          );
+        break;
+      case InfraCategory.MARKET:
+        if (market === undefined) break;
+        if (!market)
+          throw new BadRequestException(
+            'Thông tin chi tiết của chợ/TTTM không được để trống.',
+          );
+        break;
+      case InfraCategory.UTILITY:
+        if (utility === undefined) break;
+        if (!utility)
+          throw new BadRequestException(
+            'Thông tin chi tiết của tiện ích không được để trống.',
+          );
+        break;
+    }
+
+    const updated = await this.repository.updateWithDetails({
+      id,
+      geomWkt: geom,
+      category: updateDto.category,
+      name: otherData.name,
+      address: otherData.address,
+      districtId: otherData.districtId,
+      school: school as any,
+      hospital: hospital as any,
+      park: park as any,
+      market: market as any,
+      utility: utility as any,
     });
+
+    if (!updated) {
+      throw new NotFoundException(`Hạ tầng với ID "${id}" không tồn tại.`);
+    }
+
+    return updated;
   }
 
   async remove(id: string) {
     await this.findOne(id);
-    return this.prisma.infrastructure.delete({ where: { id } });
+    return this.repository.remove(id);
   }
 
   async findWithinRadius(lng: string, lat: string, radiusInMeters: string) {
-    const radius = parseFloat(radiusInMeters);
-    const query = Prisma.sql`
-      SELECT ${this.selectFields} ${this.fromTables}
-      WHERE ST_DWithin(
-        i.geom::geography,
-        ST_MakePoint(${parseFloat(lng)}, ${parseFloat(lat)})::geography,
-        ${radius}
-      )
-    `;
-    return this.prisma.$queryRaw(query);
+    return this.repository.findWithinRadius(lng, lat, radiusInMeters);
   }
 }

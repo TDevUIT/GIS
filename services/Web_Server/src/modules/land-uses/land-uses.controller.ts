@@ -24,11 +24,7 @@ import { AdminGuard } from '../auth/admin.gaurd';
 import { CreateLandUseDto } from './dto/create-land-use.dto';
 import { UpdateLandUseDto } from './dto/update-land-use.dto';
 import { IntersectsWktDto } from './dto/intersects-wkt.dto';
-
-class FindLandUsesQuery {
-  districtId?: string;
-  type?: string;
-}
+import { FindLandUsesQueryDto } from './dto/find-land-uses.query.dto';
 
 @ApiTags('Land Use')
 @Controller('land-uses')
@@ -56,7 +52,7 @@ export class LandUsesController {
     status: 200,
     description: 'Land use records retrieved successfully',
   })
-  findAll(@Query() query: FindLandUsesQuery) {
+  findAll(@Query() query: FindLandUsesQueryDto) {
     return this.landUsesService.findAll(query);
   }
 

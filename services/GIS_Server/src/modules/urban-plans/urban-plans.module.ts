@@ -1,12 +1,13 @@
 import { Module } from '@nestjs/common';
 import { UrbanPlansService } from './urban-plans.service';
 import { UrbanPlansController } from './urban-plans.controller';
-import { PrismaModule } from '../prisma/prisma.module';
+import { PrismaModule } from '../../infra/prisma/prisma.module';
+import { UrbanPlansRepository } from './urban-plans.repository';
 
 @Module({
   imports: [PrismaModule],
   controllers: [UrbanPlansController],
-  providers: [UrbanPlansService],
+  providers: [UrbanPlansService, UrbanPlansRepository],
   exports: [UrbanPlansService],
 })
 export class UrbanPlansModule {}

@@ -7,37 +7,34 @@ import { GisClientService } from 'src/infra/gis-client/gis-client.service';
 import { CreateTrafficDto } from './dto/create-traffic.dto';
 import { UpdateTrafficDto } from './dto/update-traffic.dto';
 import { IntersectsWktDto } from './dto/intersects-wkt.dto';
-
-interface FindTrafficsQuery {
-  districtId?: string;
-  roadName?: string;
-}
+import { GisEndpoints } from 'src/infra/gis-client/gis-endpoints';
+import { FindTrafficsQueryDto } from './dto/find-traffics.query.dto';
 
 @Injectable()
 export class TrafficsService {
   constructor(private readonly gisClient: GisClientService) {}
 
   async create(createDto: CreateTrafficDto) {
-    return this.gisClient.post('/traffics', createDto);
+    return this.gisClient.post(GisEndpoints.traffics.base, createDto);
   }
 
-  async findAll(query: FindTrafficsQuery) {
-    return this.gisClient.get('/traffics', { params: query });
+  async findAll(query: FindTrafficsQueryDto) {
+    return this.gisClient.get(GisEndpoints.traffics.base, { params: query });
   }
 
   async findOne(id: string) {
-    return this.gisClient.get(`/traffics/${id}`);
+    return this.gisClient.get(GisEndpoints.traffics.byId(id));
   }
 
   async update(id: string, updateDto: UpdateTrafficDto) {
-    return this.gisClient.patch(`/traffics/${id}`, updateDto);
+    return this.gisClient.patch(GisEndpoints.traffics.byId(id), updateDto);
   }
 
   async remove(id: string) {
-    return this.gisClient.delete(`/traffics/${id}`);
+    return this.gisClient.delete(GisEndpoints.traffics.byId(id));
   }
 
   async findIntersecting(body: IntersectsWktDto) {
-    return this.gisClient.post('/traffics/intersects-with', body);
+    return this.gisClient.post(GisEndpoints.traffics.intersectsWith, body);
   }
 }

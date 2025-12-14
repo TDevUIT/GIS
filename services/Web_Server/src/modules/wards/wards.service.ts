@@ -8,36 +8,37 @@ import { GisClientService } from 'src/infra/gis-client/gis-client.service';
 import { CreateWardDto } from './dto/create-ward.dto';
 import { UpdateWardDto } from './dto/update-ward.dto';
 import { IntersectsWktDto } from './dto/intersects-wkt.dto';
+import { GisEndpoints } from 'src/infra/gis-client/gis-endpoints';
 
 @Injectable()
 export class WardsService {
   constructor(private readonly gisClient: GisClientService) {}
 
   async findAll(districtId?: string) {
-    return this.gisClient.get('/wards', { params: { districtId } });
+    return this.gisClient.get(GisEndpoints.wards.base, { params: { districtId } });
   }
 
   async findOne(id: string) {
-    return this.gisClient.get(`/wards/${id}`);
+    return this.gisClient.get(GisEndpoints.wards.byId(id));
   }
 
   async create(createDto: CreateWardDto) {
-    return this.gisClient.post('/wards', createDto);
+    return this.gisClient.post(GisEndpoints.wards.base, createDto);
   }
 
   async update(id: string, updateDto: UpdateWardDto) {
-    return this.gisClient.patch(`/wards/${id}`, updateDto);
+    return this.gisClient.patch(GisEndpoints.wards.byId(id), updateDto);
   }
 
   async remove(id: string) {
-    return this.gisClient.delete(`/wards/${id}`);
+    return this.gisClient.delete(GisEndpoints.wards.byId(id));
   }
 
   async findContainingPoint(lng: string, lat: string) {
-    return this.gisClient.get('/wards/contains-point', { params: { lng, lat } });
+    return this.gisClient.get(GisEndpoints.wards.containsPoint, { params: { lng, lat } });
   }
 
   async findIntersecting(body: IntersectsWktDto) {
-    return this.gisClient.post('/wards/intersects-with', body);
+    return this.gisClient.post(GisEndpoints.wards.intersectsWith, body);
   }
 }

@@ -6,7 +6,6 @@ import {
   NotFoundException,
   BadRequestException,
 } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
 import { CreateTrafficDto } from './dto/create-traffic.dto';
 import { UpdateTrafficDto } from './dto/update-traffic.dto';
 import { Prisma } from '@prisma/client';
@@ -14,42 +13,36 @@ import cuid from 'cuid';
 import { FindTrafficsQueryDto } from './dto/query.dto';
 import { UpdateTrafficItemDto } from './dto/update-traffic-item.dto';
 import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
+import { TrafficsRepository } from './traffics.repository';
 
 @Injectable()
 export class TrafficsService {
-  private readonly selectFields = Prisma.sql`
-    t.id, t.road_name as "roadName", t.traffic_volume as "trafficVolume",
-    t."updatedAt", t."districtId", d.name as "districtName",
-    ST_AsGeoJSON(t.geom) as geom
-  `;
-  private readonly fromTable = Prisma.sql`
-    FROM "public"."traffics" t
-    LEFT JOIN "public"."districts" d ON t."districtId" = d.id
-  `;
-
   constructor(
-    private prisma: PrismaService,
+    private readonly repository: TrafficsRepository,
     private readonly amqpConnection: AmqpConnection,
   ) {}
 
   async create(createDto: CreateTrafficDto) {
     const { districtId, geom, ...trafficData } = createDto;
-    const districtExists = await this.prisma.district.findUnique({
-      where: { id: districtId },
-    });
+    const districtExists = await this.repository.districtExists(districtId);
     if (!districtExists) {
       throw new BadRequestException(
         `Quận với ID "${districtId}" không tồn tại.`,
       );
     }
     const id = cuid();
-    const query = Prisma.sql`
-      INSERT INTO "public"."traffics" (id, road_name, traffic_volume, geom, "districtId", "updatedAt")
-      VALUES (${id}, ${trafficData.roadName}, ${trafficData.trafficVolume}, ST_GeomFromText(${geom}, 4326), ${districtId}, NOW())
-    `;
-    await this.prisma.$executeRaw(query);
 
-    const newTraffic = await this.findOne(id);
+    const newTraffic = await this.repository.createRaw({
+      id,
+      districtId,
+      geomWkt: geom,
+      roadName: trafficData.roadName,
+      trafficVolume: trafficData.trafficVolume,
+    });
+
+    if (!newTraffic) {
+      throw new NotFoundException(`Tuyến đường với ID "${id}" không tồn tại.`);
+    }
 
     void this.amqpConnection.publish('ui_notifications', '', {
       event: 'traffic.created',
@@ -61,54 +54,41 @@ export class TrafficsService {
   }
 
   async findAll(queryDto: FindTrafficsQueryDto) {
-    const { districtId, roadName } = queryDto;
-    const whereClauses: Prisma.Sql[] = [];
-    if (districtId) {
-      whereClauses.push(Prisma.sql`t."districtId" = ${districtId}`);
-    }
-    if (roadName) {
-      whereClauses.push(Prisma.sql`t.road_name ILIKE ${'%' + roadName + '%'}`);
-    }
-    const where =
-      whereClauses.length > 0
-        ? Prisma.sql`WHERE ${Prisma.join(whereClauses, ' AND ')}`
-        : Prisma.empty;
-    const query = Prisma.sql`SELECT ${this.selectFields} ${this.fromTable} ${where} ORDER BY t."updatedAt" DESC`;
-    return this.prisma.$queryRaw(query);
+    return this.repository.findAll(queryDto);
   }
 
   async findOne(id: string) {
-    const query = Prisma.sql`SELECT ${this.selectFields} ${this.fromTable} WHERE t.id = ${id}`;
-    const result: any[] = await this.prisma.$queryRaw(query);
-    if (result.length === 0) {
+    const record = await this.repository.findOne(id);
+    if (!record) {
       throw new NotFoundException(`Tuyến đường với ID "${id}" không tồn tại.`);
     }
-    return result[0];
+    return record;
   }
 
   async update(id: string, updateDto: UpdateTrafficDto) {
     await this.findOne(id);
     const { geom, ...otherData } = updateDto;
     if (otherData.districtId) {
-      const districtExists = await this.prisma.district.findUnique({
-        where: { id: otherData.districtId },
-      });
+      const districtExists = await this.repository.districtExists(
+        otherData.districtId,
+      );
       if (!districtExists)
         throw new BadRequestException(
           `Quận với ID "${otherData.districtId}" không tồn tại.`,
         );
     }
-    const dataToUpdate = { ...otherData, updatedAt: new Date() };
-    if (Object.keys(otherData).length > 0) {
-      await this.prisma.traffic.update({ where: { id }, data: dataToUpdate });
-    }
-    if (geom) {
-      await this.prisma.$executeRaw`
-        UPDATE "public"."traffics" SET geom = ST_GeomFromText(${geom}, 4326), "updatedAt" = NOW() WHERE id = ${id};
-      `;
-    }
 
-    const updatedTraffic = await this.findOne(id);
+    const updatedTraffic = await this.repository.updateRaw({
+      id,
+      districtId: otherData.districtId,
+      geomWkt: geom,
+      roadName: otherData.roadName,
+      trafficVolume: otherData.trafficVolume,
+    });
+
+    if (!updatedTraffic) {
+      throw new NotFoundException(`Tuyến đường với ID "${id}" không tồn tại.`);
+    }
 
     void this.amqpConnection.publish('ui_notifications', '', {
       event: 'traffic.updated',
@@ -121,7 +101,7 @@ export class TrafficsService {
 
   async remove(id: string) {
     await this.findOne(id);
-    const deleted = await this.prisma.traffic.delete({ where: { id } });
+    const deleted = await this.repository.remove(id);
 
     void this.amqpConnection.publish('ui_notifications', '', {
       event: 'traffic.deleted',
@@ -133,37 +113,17 @@ export class TrafficsService {
   }
 
   async findTrafficsIntersecting(wkt: string) {
-    const query = Prisma.sql`
-      SELECT ${this.selectFields} ${this.fromTable}
-      WHERE ST_Intersects(t.geom, ST_GeomFromText(${wkt}, 4326));
-    `;
-    return this.prisma.$queryRaw(query);
+    return this.repository.findTrafficsIntersecting(wkt);
   }
 
   async findNearest(lng: number, lat: number) {
-    const point = `SRID=4326;POINT(${lng} ${lat})`;
-    const result = await this.prisma.$queryRaw<
-      [{ id: string; name: string; dist: number }]
-    >`
-      SELECT
-        id,
-        "road_name" as name,
-        ST_Distance(geom::geography, ${point}::geography) as dist
-      FROM
-        traffics
-      WHERE
-        ST_DWithin(geom::geography, ${point}::geography, 500)
-      ORDER BY
-        dist
-      LIMIT 1;
-    `;
-
-    if (result && result.length > 0) {
-      return result[0];
+    const nearest = await this.repository.findNearest(lng, lat);
+    if (!nearest) {
+      throw new NotFoundException(
+        `No traffic route found near location (${lng}, ${lat}).`,
+      );
     }
-    throw new NotFoundException(
-      `No traffic route found near location (${lng}, ${lat}).`,
-    );
+    return nearest;
   }
 
   async bulkUpdate(updates: UpdateTrafficItemDto[]) {
@@ -171,15 +131,8 @@ export class TrafficsService {
       throw new BadRequestException('Update data cannot be empty.');
     }
 
-    const updatePromises = updates.map((item) =>
-      this.prisma.traffic.update({
-        where: { id: item.id },
-        data: { trafficVolume: item.trafficVolume },
-      }),
-    );
-
     try {
-      const results = await this.prisma.$transaction(updatePromises);
+      const results = await this.repository.bulkUpdateVolumes(updates);
 
       void this.amqpConnection.publish('ui_notifications', '', {
         event: 'traffic.bulk_updated',

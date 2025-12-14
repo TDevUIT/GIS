@@ -7,39 +7,35 @@ import { Injectable } from '@nestjs/common';
 import { GisClientService } from 'src/infra/gis-client/gis-client.service';
 import { CreateWaterQualityDto } from './dto/create-water-quality.dto';
 import { UpdateWaterQualityDto } from './dto/update-water-quality.dto';
-
-interface FindWaterQualityQuery {
-  districtId?: string;
-  from?: string;
-  to?: string;
-}
+import { GisEndpoints } from 'src/infra/gis-client/gis-endpoints';
+import { FindWaterQualitiesQueryDto } from './dto/find-water-qualities.query.dto';
 
 @Injectable()
 export class WaterQualitiesService {
   constructor(private readonly gisClient: GisClientService) {}
 
   async create(createDto: CreateWaterQualityDto) {
-    return this.gisClient.post('/water-qualities', createDto);
+    return this.gisClient.post(GisEndpoints.waterQualities.base, createDto);
   }
 
-  async findAll(query: FindWaterQualityQuery) {
-    return this.gisClient.get('/water-qualities', { params: query });
+  async findAll(query: FindWaterQualitiesQueryDto) {
+    return this.gisClient.get(GisEndpoints.waterQualities.base, { params: query });
   }
 
   async findOne(id: string) {
-    return this.gisClient.get(`/water-qualities/${id}`);
+    return this.gisClient.get(GisEndpoints.waterQualities.byId(id));
   }
 
   async update(id: string, updateDto: UpdateWaterQualityDto) {
-    return this.gisClient.patch(`/water-qualities/${id}`, updateDto);
+    return this.gisClient.patch(GisEndpoints.waterQualities.byId(id), updateDto);
   }
 
   async remove(id: string) {
-    return this.gisClient.delete(`/water-qualities/${id}`);
+    return this.gisClient.delete(GisEndpoints.waterQualities.byId(id));
   }
 
   async findWithinRadius(lng: string, lat: string, radiusInMeters: string) {
-    return this.gisClient.get('/water-qualities/within-radius', {
+    return this.gisClient.get(GisEndpoints.waterQualities.withinRadius, {
       params: { lng, lat, radiusInMeters },
     });
   }

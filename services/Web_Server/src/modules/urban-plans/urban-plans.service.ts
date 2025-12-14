@@ -7,41 +7,38 @@ import { GisClientService } from 'src/infra/gis-client/gis-client.service';
 import { CreateUrbanPlanDto } from './dto/create-urban-plan.dto';
 import { UpdateUrbanPlanDto } from './dto/update-urban-plan.dto';
 import { IntersectsWktDto } from './dto/intersects-wkt.dto';
-
-interface FindUrbanPlansQuery {
-  districtId?: string;
-  zoningType?: string;
-}
+import { GisEndpoints } from 'src/infra/gis-client/gis-endpoints';
+import { FindUrbanPlansQueryDto } from './dto/find-urban-plans.query.dto';
 
 @Injectable()
 export class UrbanPlansService {
   constructor(private readonly gisClient: GisClientService) {}
 
   async create(createDto: CreateUrbanPlanDto) {
-    return this.gisClient.post('/urban-plans', createDto);
+    return this.gisClient.post(GisEndpoints.urbanPlans.base, createDto);
   }
 
-  async findAll(query: FindUrbanPlansQuery) {
-    return this.gisClient.get('/urban-plans', { params: query });
+  async findAll(query: FindUrbanPlansQueryDto) {
+    return this.gisClient.get(GisEndpoints.urbanPlans.base, { params: query });
   }
 
   async findOne(id: string) {
-    return this.gisClient.get(`/urban-plans/${id}`);
+    return this.gisClient.get(GisEndpoints.urbanPlans.byId(id));
   }
 
   async update(id: string, updateDto: UpdateUrbanPlanDto) {
-    return this.gisClient.patch(`/urban-plans/${id}`, updateDto);
+    return this.gisClient.patch(GisEndpoints.urbanPlans.byId(id), updateDto);
   }
 
   async remove(id: string) {
-    return this.gisClient.delete(`/urban-plans/${id}`);
+    return this.gisClient.delete(GisEndpoints.urbanPlans.byId(id));
   }
 
   async findAtPoint(lng: string, lat: string) {
-    return this.gisClient.get('/urban-plans/at-point', { params: { lng, lat } });
+    return this.gisClient.get(GisEndpoints.urbanPlans.atPoint, { params: { lng, lat } });
   }
 
   async findIntersecting(body: IntersectsWktDto) {
-    return this.gisClient.post('/urban-plans/intersects-with', body);
+    return this.gisClient.post(GisEndpoints.urbanPlans.intersectsWith, body);
   }
 }

@@ -5,16 +5,16 @@ import {
   BadRequestException,
   ConflictException,
 } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
 import { CreatePopulationDto } from './dto/create-population.dto';
 import { UpdatePopulationDto } from './dto/update-population.dto';
 import { Prisma } from '@prisma/client';
 import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
+import { PopulationsRepository } from './populations.repository';
 
 @Injectable()
 export class PopulationsService {
   constructor(
-    private prisma: PrismaService,
+    private readonly repository: PopulationsRepository,
     private readonly amqpConnection: AmqpConnection,
   ) {}
 
@@ -22,58 +22,31 @@ export class PopulationsService {
     const { districtId, year, households, demographics, ...populationData } =
       createDto;
 
-    const districtExists = await this.prisma.district.findUnique({
-      where: { id: districtId },
-    });
+    const districtExists = await this.repository.districtExists(districtId);
     if (!districtExists) {
       throw new BadRequestException(
         `Quận với ID "${districtId}" không tồn tại.`,
       );
     }
 
-    const recordExists = await this.prisma.population.findUnique({
-      where: { districtId_year: { districtId, year } },
-    });
+    const recordExists = await this.repository.recordExists(districtId, year);
     if (recordExists) {
       throw new ConflictException(
         `Dữ liệu dân số cho quận ID "${districtId}" và năm "${year}" đã tồn tại.`,
       );
     }
 
-    const result = await this.prisma.$transaction(
-      async (tx) => {
-        const population = await tx.population.create({
-          data: {
-            ...populationData,
-            year,
-            district: {
-              connect: { id: districtId },
-            },
-          },
-        });
+    const result = await this.repository.createWithDetails({
+      districtId,
+      year,
+      populationData: populationData as any,
+      households: households as any,
+      demographics: demographics as any,
+    });
 
-        if (households && households.length > 0) {
-          await tx.household.createMany({
-            data: households.map((h) => ({
-              ...h,
-              populationId: population.id,
-            })),
-          });
-        }
-
-        if (demographics && demographics.length > 0) {
-          await tx.demographic.createMany({
-            data: demographics.map((d) => ({
-              ...d,
-              populationId: population.id,
-            })),
-          });
-        }
-
-        return this.findOne(population.id, tx);
-      },
-      { timeout: 30000 },
-    );
+    if (!result) {
+      throw new NotFoundException('Dữ liệu dân số không tồn tại.');
+    }
 
     this.amqpConnection.publish('ui_notifications', '', {
       event: 'population.created',
@@ -85,33 +58,11 @@ export class PopulationsService {
   }
 
   async findAll(districtId?: string, year?: number) {
-    return this.prisma.population.findMany({
-      where: {
-        districtId,
-        year,
-      },
-      include: {
-        district: {
-          select: { name: true },
-        },
-      },
-      orderBy: [{ year: 'desc' }, { district: { name: 'asc' } }],
-    });
+    return this.repository.findAll(districtId, year);
   }
 
   async findOne(id: string, tx?: Prisma.TransactionClient) {
-    const prismaClient = tx || this.prisma;
-    const population = await prismaClient.population.findUnique({
-      where: { id },
-      include: {
-        district: {
-          select: { name: true, code: true },
-        },
-        households: true,
-        demographics: true,
-      },
-    });
-
+    const population = await this.repository.findOne(id, tx);
     if (!population) {
       throw new NotFoundException(
         `Dữ liệu dân số với ID "${id}" không tồn tại.`,
@@ -124,45 +75,18 @@ export class PopulationsService {
     const { households, demographics, ...populationData } = updateDto;
     await this.findOne(id);
 
-    const result = await this.prisma.$transaction(
-      async (tx) => {
-        const updatedPopulation = await tx.population.update({
-          where: { id },
-          data: populationData,
-        });
+    const result = await this.repository.updateWithDetails({
+      id,
+      populationData: populationData as any,
+      households: households as any,
+      demographics: demographics as any,
+    });
 
-        if (demographics) {
-          await tx.demographic.deleteMany({
-            where: { populationId: id },
-          });
-          if (demographics.length > 0) {
-            await tx.demographic.createMany({
-              data: demographics.map((d) => ({
-                ...d,
-                populationId: id,
-              })),
-            });
-          }
-        }
-
-        if (households) {
-          await tx.household.deleteMany({
-            where: { populationId: id },
-          });
-          if (households.length > 0) {
-            await tx.household.createMany({
-              data: households.map((h) => ({
-                ...h,
-                populationId: id,
-              })),
-            });
-          }
-        }
-
-        return this.findOne(id, tx);
-      },
-      { timeout: 30000 },
-    );
+    if (!result) {
+      throw new NotFoundException(
+        `Dữ liệu dân số với ID "${id}" không tồn tại.`,
+      );
+    }
 
     this.amqpConnection.publish('ui_notifications', '', {
       event: 'population.updated',
@@ -175,7 +99,7 @@ export class PopulationsService {
 
   async remove(id: string) {
     await this.findOne(id);
-    const deleted = await this.prisma.population.delete({ where: { id } });
+    const deleted = await this.repository.remove(id);
 
     this.amqpConnection.publish('ui_notifications', '', {
       event: 'population.deleted',

@@ -79,10 +79,18 @@ export class GisClientService {
 
   private toGatewayHttpException(error: AxiosError) {
     const status = error.response?.status || 502;
-    const data = error.response?.data as any;
+    const data = error.response?.data as unknown;
+
+    const dataMessage =
+      typeof data === 'object' &&
+      data !== null &&
+      'message' in data &&
+      typeof (data as { message?: unknown }).message === 'string'
+        ? (data as { message: string }).message
+        : undefined;
 
     const message =
-      (typeof data === 'object' && data && (data.message as string)) ||
+      dataMessage ||
       (typeof data === 'string' && data) ||
       error.message ||
       'An internal error occurred in the GIS Server';
@@ -109,10 +117,10 @@ export class GisClientService {
     return `${this.baseUrl}${path}`;
   }
 
-  private async requestWithResilience<T = any>(
+  private async requestWithResilience<T = unknown>(
     method: 'get' | 'post' | 'patch' | 'delete',
     path: string,
-    body?: any,
+    body?: unknown,
     config?: AxiosRequestConfig,
   ): Promise<T> {
     const circuit = this.getCircuitBreakerState();
@@ -168,7 +176,7 @@ export class GisClientService {
 
         this.recordSuccess();
         return response.data;
-      } catch (e: any) {
+      } catch (e: unknown) {
         const axiosError = e as AxiosError;
 
         if (attempt < maxRetries && this.isRetryableError(axiosError)) {
@@ -179,7 +187,7 @@ export class GisClientService {
 
         this.recordFailure();
 
-        if (axiosError && (axiosError as any).isAxiosError) {
+        if (axiosError && (axiosError as unknown as { isAxiosError?: boolean }).isAxiosError) {
           throw this.toGatewayHttpException(axiosError);
         }
 
@@ -200,19 +208,19 @@ export class GisClientService {
     );
   }
 
-  async get<T = any>(path: string, config?: AxiosRequestConfig) {
+  async get<T = unknown>(path: string, config?: AxiosRequestConfig) {
     return this.requestWithResilience<T>('get', path, undefined, config);
   }
 
-  async post<T = any>(path: string, body?: any, config?: AxiosRequestConfig) {
+  async post<T = unknown>(path: string, body?: unknown, config?: AxiosRequestConfig) {
     return this.requestWithResilience<T>('post', path, body, config);
   }
 
-  async patch<T = any>(path: string, body?: any, config?: AxiosRequestConfig) {
+  async patch<T = unknown>(path: string, body?: unknown, config?: AxiosRequestConfig) {
     return this.requestWithResilience<T>('patch', path, body, config);
   }
 
-  async delete<T = any>(path: string, config?: AxiosRequestConfig) {
+  async delete<T = unknown>(path: string, config?: AxiosRequestConfig) {
     return this.requestWithResilience<T>('delete', path, undefined, config);
   }
 }

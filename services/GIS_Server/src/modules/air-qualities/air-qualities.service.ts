@@ -6,28 +6,18 @@ import {
   NotFoundException,
   BadRequestException,
 } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
 import { CreateAirQualityDto } from './dto/create-air-quality.dto';
 import { UpdateAirQualityDto } from './dto/update-air-quality.dto';
-import { Prisma, QualityLevel } from '@prisma/client';
+import { QualityLevel } from '@prisma/client';
 import cuid from 'cuid';
 import { FindAirQualityQueryDto } from './dto/query.dto';
 import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
+import { AirQualitiesRepository } from './air-qualities.repository';
 
 @Injectable()
 export class AirQualitiesService {
-  private readonly selectFields = Prisma.sql`
-    aq.id, aq.pm25, aq.co2, aq.no2, aq.level, aq.recorded_at as "recordedAt",
-    aq."districtId", d.name as "districtName",
-    ST_AsGeoJSON(aq.geom) as geom
-  `;
-  private readonly fromTable = Prisma.sql`
-    FROM "public"."air_qualities" aq
-    LEFT JOIN "public"."districts" d ON aq."districtId" = d.id
-  `;
-
   constructor(
-    private prisma: PrismaService,
+    private readonly repository: AirQualitiesRepository,
     private readonly amqpConnection: AmqpConnection,
   ) {}
 
@@ -39,22 +29,9 @@ export class AirQualitiesService {
     return QualityLevel.HAZARDOUS;
   }
 
-  private transformRecord(record: any) {
-    if (record && record.geom && typeof record.geom === 'string') {
-      try {
-        record.geom = JSON.parse(record.geom);
-      } catch (e) {
-        console.error('Failed to parse geom JSON string:', e);
-      }
-    }
-    return record;
-  }
-
   async create(createDto: CreateAirQualityDto) {
     const { districtId, geom, ...airQualityData } = createDto;
-    const districtExists = await this.prisma.district.findUnique({
-      where: { id: districtId },
-    });
+    const districtExists = await this.repository.districtExists(districtId);
     if (!districtExists) {
       throw new BadRequestException(
         `Quận với ID "${districtId}" không tồn tại.`,
@@ -64,13 +41,16 @@ export class AirQualitiesService {
     const level = this.determineAirQualityLevel(airQualityData.pm25);
     const id = cuid();
 
-    const query = Prisma.sql`
-      INSERT INTO "public"."air_qualities" (id, pm25, co2, no2, level, recorded_at, geom, "districtId")
-      VALUES (${id}, ${airQualityData.pm25}, ${airQualityData.co2}, ${airQualityData.no2}, ${level}::"QualityLevel", ${airQualityData.recordedAt}::timestamp, ST_GeomFromText(${geom}, 4326), ${districtId})
-    `;
-    await this.prisma.$executeRaw(query);
-
-    const newRecord = await this.findOne(id);
+    const newRecord = await this.repository.createRaw({
+      id,
+      districtId,
+      geomWkt: geom,
+      pm25: airQualityData.pm25,
+      co2: airQualityData.co2,
+      no2: airQualityData.no2,
+      recordedAt: airQualityData.recordedAt,
+      level,
+    });
 
     void this.amqpConnection.publish('ui_notifications', '', {
       event: 'environment.air_quality.created',
@@ -82,75 +62,53 @@ export class AirQualitiesService {
   }
 
   async findAll(queryDto: FindAirQualityQueryDto) {
-    const { districtId, from, to } = queryDto;
-    const whereClauses: Prisma.Sql[] = [];
-    if (districtId) {
-      whereClauses.push(Prisma.sql`aq."districtId" = ${districtId}`);
-    }
-    if (from) {
-      whereClauses.push(Prisma.sql`aq.recorded_at >= ${from}::timestamp`);
-    }
-    if (to) {
-      whereClauses.push(Prisma.sql`aq.recorded_at <= ${to}::timestamp`);
-    }
-    const where =
-      whereClauses.length > 0
-        ? Prisma.sql`WHERE ${Prisma.join(whereClauses, ' AND ')}`
-        : Prisma.empty;
-
-    const query = Prisma.sql`
-      SELECT ${this.selectFields} ${this.fromTable}
-      ${where}
-      ORDER BY aq.recorded_at DESC
-    `;
-    const results: any[] = await this.prisma.$queryRaw(query);
-    return results.map((record) => this.transformRecord(record));
+    return this.repository.findAll(queryDto);
   }
 
   async findOne(id: string) {
-    const query = Prisma.sql`SELECT ${this.selectFields} ${this.fromTable} WHERE aq.id = ${id}`;
-    const result: any[] = await this.prisma.$queryRaw(query);
-    if (result.length === 0) {
+    const record = await this.repository.findOne(id);
+    if (!record) {
       throw new NotFoundException(
         `Bản ghi chất lượng không khí với ID "${id}" không tồn tại.`,
       );
     }
-    return this.transformRecord(result[0]);
+    return record;
   }
 
   async update(id: string, updateDto: UpdateAirQualityDto) {
     await this.findOne(id);
     const { geom, ...otherData } = updateDto;
     if (otherData.districtId) {
-      const districtExists = await this.prisma.district.findUnique({
-        where: { id: otherData.districtId },
-      });
+      const districtExists = await this.repository.districtExists(
+        otherData.districtId,
+      );
       if (!districtExists)
         throw new BadRequestException(
           `Quận với ID "${otherData.districtId}" không tồn tại.`,
         );
     }
 
-    if (Object.keys(otherData).length > 0) {
-      const dataToUpdate: Prisma.AirQualityUpdateInput = { ...otherData };
-      if (dataToUpdate.pm25 !== undefined) {
-        dataToUpdate.level = this.determineAirQualityLevel(
-          dataToUpdate.pm25 as number,
-        );
-      }
-      await this.prisma.airQuality.update({
-        where: { id },
-        data: dataToUpdate,
-      });
-    }
+    const level =
+      otherData.pm25 !== undefined
+        ? this.determineAirQualityLevel(otherData.pm25)
+        : undefined;
 
-    if (geom) {
-      await this.prisma.$executeRaw`
-        UPDATE "public"."air_qualities" SET geom = ST_GeomFromText(${geom}, 4326) WHERE id = ${id};
-      `;
-    }
+    const updatedRecord = await this.repository.updateRaw({
+      id,
+      districtId: otherData.districtId,
+      geomWkt: geom,
+      pm25: otherData.pm25,
+      co2: otherData.co2,
+      no2: otherData.no2,
+      recordedAt: otherData.recordedAt,
+      level,
+    });
 
-    const updatedRecord = await this.findOne(id);
+    if (!updatedRecord) {
+      throw new NotFoundException(
+        `Bản ghi chất lượng không khí với ID "${id}" không tồn tại.`,
+      );
+    }
 
     void this.amqpConnection.publish('ui_notifications', '', {
       event: 'environment.air_quality.updated',
@@ -163,7 +121,7 @@ export class AirQualitiesService {
 
   async remove(id: string) {
     await this.findOne(id);
-    const deleted = await this.prisma.airQuality.delete({ where: { id } });
+    const deleted = await this.repository.remove(id);
 
     void this.amqpConnection.publish('ui_notifications', '', {
       event: 'environment.air_quality.deleted',
@@ -175,17 +133,6 @@ export class AirQualitiesService {
   }
 
   async findWithinRadius(lng: string, lat: string, radiusInMeters: string) {
-    const radius = parseFloat(radiusInMeters);
-    const query = Prisma.sql`
-      SELECT ${this.selectFields} ${this.fromTable}
-      WHERE ST_DWithin(
-        aq.geom::geography,
-        ST_MakePoint(${parseFloat(lng)}, ${parseFloat(lat)})::geography,
-        ${radius}
-      )
-      ORDER BY aq.recorded_at DESC
-    `;
-    const results: any[] = await this.prisma.$queryRaw(query);
-    return results.map((record) => this.transformRecord(record));
+    return this.repository.findWithinRadius(lng, lat, radiusInMeters);
   }
 }

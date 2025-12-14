@@ -5,41 +5,25 @@ import {
   NotFoundException,
   BadRequestException,
 } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
 import { CreatePublicTransportDto } from './dto/create-public-transport.dto';
 import { UpdatePublicTransportDto } from './dto/update-public-transport.dto';
 import { FindPublicTransportsQueryDto } from './dto/query.dto';
-import { Prisma } from '@prisma/client';
+import { TransportMode } from '@prisma/client';
 import cuid from 'cuid';
 import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
+import { PublicTransportsRepository } from './public-transports.repository';
 
 @Injectable()
 export class PublicTransportsService {
-  private readonly selectFields = Prisma.sql`
-    pt.id, pt.route_name as "routeName", pt.mode, pt.capacity,
-    pt.stops_count as "stopsCount", pt.frequency_min as "frequencyMin", pt.operating_hours as "operatingHours",
-    pt."createdAt", pt."updatedAt",
-    pt."districtId", d.name as "districtName",
-    ST_AsGeoJSON(pt.geom) as geom
-  `;
-
-  private readonly fromTable = Prisma.sql`
-    FROM "public"."public_transports" pt
-    LEFT JOIN "public"."districts" d ON pt."districtId" = d.id
-  `;
-
   constructor(
-    private prisma: PrismaService,
+    private readonly repository: PublicTransportsRepository,
     private readonly amqpConnection: AmqpConnection,
   ) {}
 
   async create(createDto: CreatePublicTransportDto) {
     const { districtId, geom, ...transportData } = createDto;
 
-    const districtExists = await this.prisma.district.findUnique({
-      where: { id: districtId },
-    });
-
+    const districtExists = await this.repository.districtExists(districtId);
     if (!districtExists) {
       throw new BadRequestException(
         `Quận với ID "${districtId}" không tồn tại.`,
@@ -48,29 +32,23 @@ export class PublicTransportsService {
 
     const id = cuid();
 
-    const query = Prisma.sql`
-      INSERT INTO "public"."public_transports" 
-        (id, route_name, mode, capacity, stops_count, frequency_min, operating_hours, geom, "districtId", "createdAt", "updatedAt")
-      VALUES (
-        ${id}, 
-        ${transportData.routeName}, 
-        ${transportData.mode}::"TransportMode", 
-        ${transportData.capacity}, 
-        ${transportData.stopsCount},
-        ${transportData.frequencyMin},
-        ${transportData.operatingHours},
-        ST_GeomFromText(${geom}, 4326), 
-        ${districtId},
-        NOW(),
-        NOW()
-      )
-    `;
+    const newRecord = await this.repository.createRaw({
+      id,
+      districtId,
+      geomWkt: geom,
+      routeName: transportData.routeName,
+      mode: transportData.mode,
+      capacity: transportData.capacity,
+      stopsCount: transportData.stopsCount,
+      frequencyMin: transportData.frequencyMin,
+      operatingHours: transportData.operatingHours,
+    });
 
-    await this.prisma.$executeRaw(query);
+    if (!newRecord) {
+      throw new NotFoundException(`Tuyến GTCC với ID "${id}" không tồn tại.`);
+    }
 
-    const newRecord = await this.findOne(id);
-
-    this.amqpConnection.publish('ui_notifications', '', {
+    void this.amqpConnection.publish('ui_notifications', '', {
       event: 'public_transport.created',
       data: newRecord,
       timestamp: new Date().toISOString(),
@@ -80,40 +58,15 @@ export class PublicTransportsService {
   }
 
   async findAll(queryDto: FindPublicTransportsQueryDto) {
-    const { districtId, mode } = queryDto;
-    const whereClauses: Prisma.Sql[] = [];
-
-    if (districtId) {
-      whereClauses.push(Prisma.sql`pt."districtId" = ${districtId}`);
-    }
-
-    if (mode) {
-      whereClauses.push(Prisma.sql`pt.mode = ${mode}::"TransportMode"`);
-    }
-
-    const where =
-      whereClauses.length > 0
-        ? Prisma.sql`WHERE ${Prisma.join(whereClauses, ' AND ')}`
-        : Prisma.empty;
-
-    const query = Prisma.sql`
-      SELECT ${this.selectFields} ${this.fromTable} ${where} ORDER BY pt.route_name ASC
-    `;
-
-    return this.prisma.$queryRaw(query);
+    return this.repository.findAll(queryDto);
   }
 
   async findOne(id: string) {
-    const query = Prisma.sql`
-      SELECT ${this.selectFields} ${this.fromTable} WHERE pt.id = ${id}
-    `;
-    const result: any[] = await this.prisma.$queryRaw(query);
-
-    if (result.length === 0) {
+    const record = await this.repository.findOne(id);
+    if (!record) {
       throw new NotFoundException(`Tuyến GTCC với ID "${id}" không tồn tại.`);
     }
-
-    return result[0];
+    return record;
   }
 
   async update(id: string, updateDto: UpdatePublicTransportDto) {
@@ -122,9 +75,7 @@ export class PublicTransportsService {
     const { geom, districtId, ...otherData } = updateDto;
 
     if (districtId) {
-      const districtExists = await this.prisma.district.findUnique({
-        where: { id: districtId },
-      });
+      const districtExists = await this.repository.districtExists(districtId);
       if (!districtExists) {
         throw new BadRequestException(
           `Quận với ID "${districtId}" không tồn tại.`,
@@ -132,29 +83,23 @@ export class PublicTransportsService {
       }
     }
 
-    const dataToUpdate = {
-      ...otherData,
-      ...(districtId && { district: { connect: { id: districtId } } }),
-    };
+    const updatedRecord = await this.repository.updateRaw({
+      id,
+      geomWkt: geom,
+      districtId,
+      routeName: otherData.routeName,
+      mode: otherData.mode as TransportMode | undefined,
+      capacity: otherData.capacity,
+      stopsCount: otherData.stopsCount,
+      frequencyMin: otherData.frequencyMin,
+      operatingHours: otherData.operatingHours,
+    });
 
-    if (Object.keys(dataToUpdate).length > 0) {
-      await this.prisma.publicTransport.update({
-        where: { id },
-        data: dataToUpdate,
-      });
+    if (!updatedRecord) {
+      throw new NotFoundException(`Tuyến GTCC với ID "${id}" không tồn tại.`);
     }
 
-    if (geom) {
-      await this.prisma.$executeRaw`
-        UPDATE "public"."public_transports" 
-        SET geom = ST_GeomFromText(${geom}, 4326), "updatedAt" = NOW() 
-        WHERE id = ${id};
-      `;
-    }
-
-    const updatedRecord = await this.findOne(id);
-
-    this.amqpConnection.publish('ui_notifications', '', {
+    void this.amqpConnection.publish('ui_notifications', '', {
       event: 'public_transport.updated',
       data: updatedRecord,
       timestamp: new Date().toISOString(),
@@ -165,9 +110,9 @@ export class PublicTransportsService {
 
   async remove(id: string) {
     await this.findOne(id);
-    const deleted = await this.prisma.publicTransport.delete({ where: { id } });
+    const deleted = await this.repository.remove(id);
 
-    this.amqpConnection.publish('ui_notifications', '', {
+    void this.amqpConnection.publish('ui_notifications', '', {
       event: 'public_transport.deleted',
       data: { id },
       timestamp: new Date().toISOString(),
@@ -177,10 +122,6 @@ export class PublicTransportsService {
   }
 
   async findIntersecting(wkt: string) {
-    const query = Prisma.sql`
-      SELECT ${this.selectFields} ${this.fromTable}
-      WHERE ST_Intersects(pt.geom, ST_GeomFromText(${wkt}, 4326));
-    `;
-    return this.prisma.$queryRaw(query);
+    return this.repository.findIntersecting(wkt);
   }
 }

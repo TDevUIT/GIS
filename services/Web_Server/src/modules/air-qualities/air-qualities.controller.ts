@@ -23,12 +23,7 @@ import { JwtAuthGuard } from '../auth/auth.gaurd';
 import { AdminGuard } from '../auth/admin.gaurd';
 import { CreateAirQualityDto } from './dto/create-air-quality.dto';
 import { UpdateAirQualityDto } from './dto/update-air-quality.dto';
-
-class FindAirQualityQuery {
-  districtId?: string;
-  from?: string;
-  to?: string;
-}
+import { FindAirQualitiesQueryDto } from './dto/find-air-qualities.query.dto';
 
 @ApiTags('Air Quality')
 @Controller('air-qualities')
@@ -62,7 +57,7 @@ export class AirQualitiesController {
     status: 200,
     description: 'Air quality records retrieved successfully',
   })
-  findAll(@Query() query: FindAirQualityQuery) {
+  findAll(@Query() query: FindAirQualitiesQueryDto) {
     return this.airQualitiesService.findAll(query);
   }
 

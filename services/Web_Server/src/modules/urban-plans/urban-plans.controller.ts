@@ -24,11 +24,7 @@ import { AdminGuard } from '../auth/admin.gaurd';
 import { CreateUrbanPlanDto } from './dto/create-urban-plan.dto';
 import { UpdateUrbanPlanDto } from './dto/update-urban-plan.dto';
 import { IntersectsWktDto } from './dto/intersects-wkt.dto';
-
-class FindUrbanPlansQuery {
-  districtId?: string;
-  zoningType?: string;
-}
+import { FindUrbanPlansQueryDto } from './dto/find-urban-plans.query.dto';
 
 @ApiTags('Urban Plans')
 @Controller('urban-plans')
@@ -56,7 +52,7 @@ export class UrbanPlansController {
     status: 200,
     description: 'Urban plans retrieved successfully',
   })
-  findAll(@Query() query: FindUrbanPlansQuery) {
+  findAll(@Query() query: FindUrbanPlansQueryDto) {
     return this.urbanPlansService.findAll(query);
   }
 

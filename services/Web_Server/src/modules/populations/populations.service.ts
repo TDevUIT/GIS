@@ -5,13 +5,14 @@ import { Injectable } from '@nestjs/common';
 import { GisClientService } from 'src/infra/gis-client/gis-client.service';
 import { CreatePopulationDto } from './dto/create-population.dto';
 import { UpdatePopulationDto } from './dto/update-population.dto';
+import { GisEndpoints } from 'src/infra/gis-client/gis-endpoints';
 
 @Injectable()
 export class PopulationsService {
   constructor(private readonly gisClient: GisClientService) {}
 
   async create(createDto: CreatePopulationDto) {
-    return this.gisClient.post('/populations', createDto);
+    return this.gisClient.post(GisEndpoints.populations.base, createDto);
   }
 
   async findAll(districtId?: string, year?: number) {
@@ -23,18 +24,18 @@ export class PopulationsService {
       params.year = year;
     }
 
-    return this.gisClient.get('/populations', { params });
+    return this.gisClient.get(GisEndpoints.populations.base, { params });
   }
 
   async findOne(id: string) {
-    return this.gisClient.get(`/populations/${id}`);
+    return this.gisClient.get(GisEndpoints.populations.byId(id));
   }
 
   async update(id: string, updateDto: UpdatePopulationDto) {
-    return this.gisClient.patch(`/populations/${id}`, updateDto);
+    return this.gisClient.patch(GisEndpoints.populations.byId(id), updateDto);
   }
 
   async remove(id: string) {
-    return this.gisClient.delete(`/populations/${id}`);
+    return this.gisClient.delete(GisEndpoints.populations.byId(id));
   }
 }

@@ -24,13 +24,7 @@ import { AdminGuard } from '../auth/admin.gaurd';
 import { CreatePublicTransportDto } from './dto/create-public-transport.dto';
 import { UpdatePublicTransportDto } from './dto/update-public-transport.dto';
 import { IntersectsWktDto } from './dto/intersects-wkt.dto';
-
-type TransportMode = 'BUS' | 'METRO' | 'BRT' | 'WATERWAY';
-
-class FindPublicTransportsQuery {
-  districtId?: string;
-  mode?: TransportMode;
-}
+import { FindPublicTransportsQueryDto } from './dto/find-public-transports.query.dto';
 
 @ApiTags('Public Transport')
 @Controller('public-transports')
@@ -60,7 +54,7 @@ export class PublicTransportsController {
     status: 200,
     description: 'Public transport routes retrieved successfully',
   })
-  findAll(@Query() query: FindPublicTransportsQuery) {
+  findAll(@Query() query: FindPublicTransportsQueryDto) {
     return this.publicTransportsService.findAll(query);
   }
 

@@ -24,12 +24,7 @@ import { JwtAuthGuard } from '../auth/auth.gaurd';
 import { AdminGuard } from '../auth/admin.gaurd';
 import { CreateWaterQualityDto } from './dto/create-water-quality.dto';
 import { UpdateWaterQualityDto } from './dto/update-water-quality.dto';
-
-class FindWaterQualityQuery {
-  districtId?: string;
-  from?: string;
-  to?: string;
-}
+import { FindWaterQualitiesQueryDto } from './dto/find-water-qualities.query.dto';
 
 @ApiTags('Water Quality')
 @Controller('water-qualities')
@@ -42,7 +37,7 @@ export class WaterQualitiesController {
   @ApiQuery({ name: 'from', required: false, description: 'Start date (YYYY-MM-DD)', example: '2024-01-01' })
   @ApiQuery({ name: 'to', required: false, description: 'End date (YYYY-MM-DD)', example: '2024-12-31' })
   @ApiResponse({ status: 200, description: 'Water quality records retrieved successfully' })
-  findAll(@Query() query: FindWaterQualityQuery) {
+  findAll(@Query() query: FindWaterQualitiesQueryDto) {
     return this.waterQualitiesService.findAll(query);
   }
 

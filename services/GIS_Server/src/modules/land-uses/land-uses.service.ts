@@ -5,41 +5,30 @@ import {
   BadRequestException,
   ConflictException,
 } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
 import { CreateLandUseDto } from './dto/create-land-use.dto';
 import { UpdateLandUseDto } from './dto/update-land-use.dto';
 import { FindLandUsesQueryDto } from './dto/query.dto';
-import { Prisma } from '@prisma/client';
 import cuid from 'cuid';
+import { LandUsesRepository } from './land-uses.repository';
 
 @Injectable()
 export class LandUsesService {
-  private readonly selectFields = Prisma.sql`
-    lu.id, lu.type, lu.area_km2 as "areaKm2", lu.year,
-    lu."createdAt", lu."updatedAt", lu."districtId", d.name as "districtName",
-    ST_AsGeoJSON(lu.geom) as geom
-  `;
-  private readonly fromTable = Prisma.sql`
-    FROM "public"."land_uses" lu
-    LEFT JOIN "public"."districts" d ON lu."districtId" = d.id
-  `;
-
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly repository: LandUsesRepository) {}
 
   async create(createDto: CreateLandUseDto) {
     const { districtId, year, type, geom, ...landUseData } = createDto;
 
-    const districtExists = await this.prisma.district.findUnique({
-      where: { id: districtId },
-    });
+    const districtExists = await this.repository.districtExists(districtId);
     if (!districtExists) {
       throw new BadRequestException(
         `District with ID "${districtId}" does not exist.`,
       );
     }
 
-    const recordExists = await this.prisma.landUse.findUnique({
-      where: { districtId_type_year: { districtId, type, year } },
+    const recordExists = await this.repository.recordExists({
+      districtId,
+      type,
+      year,
     });
     if (recordExists) {
       throw new ConflictException(
@@ -48,43 +37,33 @@ export class LandUsesService {
     }
 
     const id = cuid();
-    const query = Prisma.sql`
-      INSERT INTO "public"."land_uses" (id, type, area_km2, year, geom, "districtId", "updatedAt")
-      VALUES (${id}, ${type}, ${landUseData.areaKm2}, ${year}, ST_GeomFromGeoJSON(${geom}), ${districtId}, NOW())
-    `;
 
-    await this.prisma.$executeRaw(query);
-    return this.findOne(id);
+    const created = await this.repository.createRaw({
+      id,
+      districtId,
+      type,
+      year,
+      areaKm2: landUseData.areaKm2,
+      geomGeoJson: geom,
+    });
+
+    if (!created) {
+      throw new NotFoundException(`Land use record with ID "${id}" not found.`);
+    }
+
+    return created;
   }
 
   async findAll(queryDto: FindLandUsesQueryDto) {
-    const { districtId, type } = queryDto;
-    const whereClauses: Prisma.Sql[] = [];
-
-    if (districtId) {
-      whereClauses.push(Prisma.sql`lu."districtId" = ${districtId}`);
-    }
-    if (type) {
-      whereClauses.push(Prisma.sql`lu.type ILIKE ${'%' + type + '%'}`);
-    }
-
-    const where =
-      whereClauses.length > 0
-        ? Prisma.sql`WHERE ${Prisma.join(whereClauses, ' AND ')}`
-        : Prisma.empty;
-
-    const query = Prisma.sql`SELECT ${this.selectFields} ${this.fromTable} ${where} ORDER BY lu.year DESC, lu.type ASC`;
-    return this.prisma.$queryRaw(query);
+    return this.repository.findAll(queryDto);
   }
 
   async findOne(id: string) {
-    const query = Prisma.sql`SELECT ${this.selectFields} ${this.fromTable} WHERE lu.id = ${id}`;
-    const result: any[] = await this.prisma.$queryRaw(query);
-
-    if (result.length === 0) {
+    const record = await this.repository.findOne(id);
+    if (!record) {
       throw new NotFoundException(`Land use record with ID "${id}" not found.`);
     }
-    return result[0];
+    return record;
   }
 
   async update(id: string, updateDto: UpdateLandUseDto) {
@@ -92,58 +71,47 @@ export class LandUsesService {
     const { geom, ...otherData } = updateDto;
 
     if (otherData.districtId) {
-      const districtExists = await this.prisma.district.findUnique({
-        where: { id: otherData.districtId },
-      });
+      const districtExists = await this.repository.districtExists(
+        otherData.districtId,
+      );
       if (!districtExists)
         throw new BadRequestException(
           `District with ID "${otherData.districtId}" does not exist.`,
         );
     }
 
-    if (Object.keys(otherData).length > 0) {
-      await this.prisma.landUse.update({
-        where: { id },
-        data: { ...otherData, updatedAt: new Date() },
-      });
+    const updated = await this.repository.updateRaw({
+      id,
+      districtId: otherData.districtId,
+      type: otherData.type,
+      year: otherData.year,
+      areaKm2: otherData.areaKm2,
+      geomGeoJson: geom,
+    });
+
+    if (!updated) {
+      throw new NotFoundException(`Land use record with ID "${id}" not found.`);
     }
 
-    if (geom) {
-      await this.prisma.$executeRaw`
-        UPDATE "public"."land_uses" SET geom = ST_GeomFromGeoJSON(${geom}), "updatedAt" = NOW() WHERE id = ${id};
-      `;
-    }
-
-    return this.findOne(id);
+    return updated;
   }
 
   async remove(id: string) {
     await this.findOne(id);
-    return this.prisma.landUse.delete({ where: { id } });
+    return this.repository.remove(id);
   }
 
   async findLandUseAtPoint(lng: string, lat: string) {
-    const searchPointWkt = `POINT(${lng} ${lat})`;
-    const query = Prisma.sql`
-      SELECT ${this.selectFields} ${this.fromTable}
-      WHERE ST_Contains(lu.geom, ST_GeomFromText(${searchPointWkt}, 4326))
-      ORDER BY lu.year DESC
-      LIMIT 1;
-    `;
-    const result: any[] = await this.prisma.$queryRaw(query);
-    if (result.length === 0) {
+    const record = await this.repository.findLandUseAtPoint(lng, lat);
+    if (!record) {
       throw new NotFoundException(
         `No land use data found at coordinate (${lng}, ${lat}).`,
       );
     }
-    return result[0];
+    return record;
   }
 
   async findIntersecting(wkt: string) {
-    const query = Prisma.sql`
-      SELECT ${this.selectFields} ${this.fromTable}
-      WHERE ST_Intersects(lu.geom, ST_GeomFromText(${wkt}, 4326));
-    `;
-    return this.prisma.$queryRaw(query);
+    return this.repository.findIntersecting(wkt);
   }
 }

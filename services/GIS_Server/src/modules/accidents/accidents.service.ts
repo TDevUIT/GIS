@@ -5,40 +5,27 @@ import {
   NotFoundException,
   BadRequestException,
 } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
 import { CreateAccidentDto } from './dto/create-accident.dto';
 import { UpdateAccidentDto } from './dto/update-accident.dto';
-import { CloudinaryService } from '../cloudinary/cloudinary.service';
-import { ImageDto } from '../common/dto/image.dto';
+import { CloudinaryService } from '../../infra/cloudinary/cloudinary.service';
+import { ImageDto } from '../../shared/dto/image.dto';
 import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
+import { AccidentsRepository } from './accidents.repository';
+
+type ImageRecord = { id: string; url: string; publicId: string };
 
 @Injectable()
 export class AccidentsService {
   constructor(
-    private prisma: PrismaService,
-    private cloudinary: CloudinaryService,
+    private readonly repository: AccidentsRepository,
+    private readonly cloudinary: CloudinaryService,
     private readonly amqpConnection: AmqpConnection,
   ) {}
 
-  private readonly includeOptions = {
-    traffic: {
-      select: {
-        id: true,
-        roadName: true,
-      },
-    },
-    images: {
-      select: { id: true, url: true, publicId: true },
-      orderBy: { createdAt: 'asc' as const },
-    },
-  } as const;
-
   async create(createDto: CreateAccidentDto) {
-    const { trafficId, sourceUrl, geom, ...accidentData } = createDto as any;
+    const { trafficId, sourceUrl, geom, ...accidentData } = createDto;
 
-    const existingAccident = await this.prisma.accident.findUnique({
-      where: { sourceUrl: sourceUrl },
-    });
+    const existingAccident = await this.repository.findBySourceUrl(sourceUrl);
 
     if (existingAccident) {
       console.log(
@@ -47,9 +34,7 @@ export class AccidentsService {
       return existingAccident;
     }
 
-    const trafficExists = await this.prisma.traffic.findUnique({
-      where: { id: trafficId },
-    });
+    const trafficExists = await this.repository.trafficExists(trafficId);
     if (!trafficExists) {
       throw new BadRequestException(
         `Traffic route with ID "${trafficId}" does not exist.`,
@@ -60,16 +45,11 @@ export class AccidentsService {
       ? `SRID=4326;POINT(${geom.coordinates[0]} ${geom.coordinates[1]})`
       : null;
 
-    const newAccident = await this.prisma.accident.create({
-      data: {
-        ...accidentData,
-        geom: geomString,
-        sourceUrl: sourceUrl,
-        traffic: {
-          connect: { id: trafficId },
-        },
-      },
-      include: this.includeOptions,
+    const newAccident = await this.repository.create({
+      trafficId,
+      sourceUrl,
+      geomString,
+      data: accidentData as any,
     });
 
     void this.amqpConnection.publish('ui_notifications', '', {
@@ -82,22 +62,11 @@ export class AccidentsService {
   }
 
   async findAll(trafficId?: string) {
-    return this.prisma.accident.findMany({
-      where: {
-        trafficId,
-      },
-      include: this.includeOptions,
-      orderBy: {
-        accidentDate: 'desc',
-      },
-    });
+    return this.repository.findAll(trafficId);
   }
 
   async findOne(id: string) {
-    const accident = await this.prisma.accident.findUnique({
-      where: { id },
-      include: this.includeOptions,
-    });
+    const accident = await this.repository.findOne(id);
     if (!accident) {
       throw new NotFoundException(`Accident with ID "${id}" not found.`);
     }
@@ -106,11 +75,9 @@ export class AccidentsService {
 
   async update(id: string, updateDto: UpdateAccidentDto) {
     await this.findOne(id);
-    const { trafficId, geom, ...accidentData } = updateDto as any;
+    const { trafficId, geom, ...accidentData } = updateDto;
     if (trafficId) {
-      const trafficExists = await this.prisma.traffic.findUnique({
-        where: { id: trafficId },
-      });
+      const trafficExists = await this.repository.trafficExists(trafficId);
       if (!trafficExists) {
         throw new BadRequestException(
           `Traffic route with ID "${trafficId}" does not exist.`,
@@ -121,14 +88,11 @@ export class AccidentsService {
       ? `SRID=4326;POINT(${geom.coordinates[0]} ${geom.coordinates[1]})`
       : undefined;
 
-    const updatedAccident = await this.prisma.accident.update({
-      where: { id },
-      data: {
-        ...accidentData,
-        ...(geomString !== undefined ? { geom: geomString } : {}),
-        ...(trafficId && { traffic: { connect: { id: trafficId } } }),
-      },
-      include: this.includeOptions,
+    const updatedAccident = await this.repository.update({
+      id,
+      trafficId,
+      geomString,
+      data: accidentData as any,
     });
 
     void this.amqpConnection.publish('ui_notifications', '', {
@@ -142,9 +106,7 @@ export class AccidentsService {
 
   async remove(id: string) {
     await this.findOne(id);
-    const deletedAccident = await this.prisma.accident.delete({
-      where: { id },
-    });
+    const deletedAccident = await this.repository.remove(id);
 
     void this.amqpConnection.publish('ui_notifications', '', {
       event: 'accident.deleted',
@@ -168,47 +130,36 @@ export class AccidentsService {
     return Promise.all(uploadPromises);
   }
 
-  async setImages(accidentId: string, imagesData: ImageDto[]): Promise<any> {
+  async setImages(
+    accidentId: string,
+    imagesData: ImageDto[],
+  ): Promise<ImageRecord[]> {
     await this.findOne(accidentId);
 
-    const result = await this.prisma.$transaction(async (tx) => {
-      const oldImages = await tx.image.findMany({ where: { accidentId } });
+    const result = await this.repository.replaceImages(
+      accidentId,
+      (imagesData || []).map((img) => ({ url: img.url, publicId: img.publicId })),
+    );
 
-      if (oldImages.length > 0) {
-        await tx.image.deleteMany({ where: { accidentId } });
-        void Promise.all(
-          oldImages.map((img) => this.cloudinary.deleteFile(img.publicId)),
-        ).catch((err) =>
-          console.error('Lỗi khi xóa ảnh cũ trên Cloudinary:', err),
-        );
-      }
-
-      if (imagesData && imagesData.length > 0) {
-        await tx.image.createMany({
-          data: imagesData.map((img) => ({
-            url: img.url,
-            publicId: img.publicId,
-            accidentId: accidentId,
-          })),
-        });
-      }
-
-      return tx.image.findMany({ where: { accidentId } });
-    });
+    if (result.oldImages.length > 0) {
+      void Promise.all(
+        result.oldImages.map((img) => this.cloudinary.deleteFile(img.publicId)),
+      ).catch((err) =>
+        console.error('Lỗi khi xóa ảnh cũ trên Cloudinary:', err),
+      );
+    }
 
     void this.amqpConnection.publish('ui_notifications', '', {
       event: 'accident.updated',
-      data: { id: accidentId, images: result },
+      data: { id: accidentId, images: result.images },
       timestamp: new Date().toISOString(),
     });
 
-    return result;
+    return result.images as any;
   }
 
   async deleteImage(accidentId: string, imageId: string): Promise<void> {
-    const image = await this.prisma.image.findFirst({
-      where: { id: imageId, accidentId: accidentId },
-    });
+    const image = await this.repository.findImage(accidentId, imageId);
     if (!image) {
       throw new NotFoundException(
         `Ảnh với ID "${imageId}" không tồn tại hoặc không thuộc về tai nạn này.`,
@@ -216,7 +167,7 @@ export class AccidentsService {
     }
 
     await Promise.all([
-      this.prisma.image.delete({ where: { id: imageId } }),
+      this.repository.deleteImage(imageId),
       this.cloudinary.deleteFile(image.publicId),
     ]);
 

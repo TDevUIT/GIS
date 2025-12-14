@@ -7,6 +7,7 @@ import { Injectable, Inject } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import type { Cache } from 'cache-manager';
 import { GisClientService } from 'src/infra/gis-client/gis-client.service';
+import { GisEndpoints } from 'src/infra/gis-client/gis-endpoints';
 
 @Injectable()
 export class AnalyticsService {
@@ -51,100 +52,100 @@ export class AnalyticsService {
   }
 
   async getGlobalSummary() {
-    return this.gisClient.get('/analytics/summary');
+    return this.gisClient.get(GisEndpoints.analytics.summary);
   }
 
   async getInfrastructureByCategory() {
-    return this.gisClient.get('/analytics/infrastructure-by-category');
+    return this.gisClient.get(GisEndpoints.analytics.infrastructureByCategory);
   }
 
   async getPopulationHistory(districtId: string) {
-    return this.gisClient.get(`/analytics/population-history/${districtId}`);
+    return this.gisClient.get(GisEndpoints.analytics.populationHistory(districtId));
   }
 
   async getLandUseSummary(districtId: string, year?: number) {
-    return this.gisClient.get('/analytics/land-use-summary', {
+    return this.gisClient.get(GisEndpoints.analytics.landUseSummary, {
       params: { districtId, year },
     });
   }
 
   async getAirQualityHistory(districtId: string) {
-    return this.gisClient.get(`/analytics/air-quality-history/${districtId}`);
+    return this.gisClient.get(GisEndpoints.analytics.airQualityHistory(districtId));
   }
 
   async getWaterQualityHistory(districtId: string) {
-    return this.gisClient.get(`/analytics/water-quality-history/${districtId}`);
+    return this.gisClient.get(GisEndpoints.analytics.waterQualityHistory(districtId));
   }
 
   async getAccidentSummaryBySeverity() {
-    return this.gisClient.get('/analytics/accident-summary-by-severity');
+    return this.gisClient.get(GisEndpoints.analytics.accidentSummaryBySeverity);
   }
 
   async getRecentActivities() {
-    return this.gisClient.get('/analytics/recent-activities');
+    return this.gisClient.get(GisEndpoints.analytics.recentActivities);
   }
 
   async getDemographicsSummary(populationId: string) {
-    return this.gisClient.get(`/analytics/demographics-summary/${populationId}`);
+    return this.gisClient.get(GisEndpoints.analytics.demographicsSummary(populationId));
   }
 
   async getHouseholdsSummary(populationId: string) {
-    return this.gisClient.get(`/analytics/households-summary/${populationId}`);
+    return this.gisClient.get(GisEndpoints.analytics.householdsSummary(populationId));
   }
 
   async getAccidentHotspots() {
-    return this.gisClient.get('/analytics/accident-hotspots');
+    return this.gisClient.get(GisEndpoints.analytics.accidentHotspots);
   }
 
   async getAccidentsByTimeOfDay() {
-    return this.gisClient.get('/analytics/accidents-by-time-of-day');
+    return this.gisClient.get(GisEndpoints.analytics.accidentsByTimeOfDay);
   }
 
   async getAccidentsByDayOfWeek() {
-    return this.gisClient.get('/analytics/accidents-by-day-of-week');
+    return this.gisClient.get(GisEndpoints.analytics.accidentsByDayOfWeek);
   }
 
   async getTrafficRiskAssessment() {
-    return this.gisClient.get('/analytics/traffic-risk-assessment');
+    return this.gisClient.get(GisEndpoints.analytics.trafficRiskAssessment);
   }
 
   async getPublicTransportSummaryByMode() {
-    return this.gisClient.get('/analytics/public-transport-summary-by-mode');
+    return this.gisClient.get(GisEndpoints.analytics.publicTransportSummaryByMode);
   }
 
   async getPublicTransportCapacityByMode() {
-    return this.gisClient.get('/analytics/public-transport-capacity-by-mode');
+    return this.gisClient.get(GisEndpoints.analytics.publicTransportCapacityByMode);
   }
 
   async getMostFrequentRoutes() {
-    return this.gisClient.get('/analytics/most-frequent-routes');
+    return this.gisClient.get(GisEndpoints.analytics.mostFrequentRoutes);
   }
 
   async getAirQualityRankingByDistrict() {
-    return this.gisClient.get('/analytics/air-quality-ranking-by-district');
+    return this.gisClient.get(GisEndpoints.analytics.airQualityRankingByDistrict);
   }
 
   async getWaterQualityRankingByDistrict() {
-    return this.gisClient.get('/analytics/water-quality-ranking-by-district');
+    return this.gisClient.get(GisEndpoints.analytics.waterQualityRankingByDistrict);
   }
 
   async getTerrainSummaryByDistrict() {
-    return this.gisClient.get('/analytics/terrain-summary-by-district');
+    return this.gisClient.get(GisEndpoints.analytics.terrainSummaryByDistrict);
   }
 
   async getLandslideRiskAreas(slopeThreshold?: number) {
-    return this.gisClient.get('/analytics/landslide-risk-areas', {
+    return this.gisClient.get(GisEndpoints.analytics.landslideRiskAreas, {
       params: { slopeThreshold },
     });
   }
 
   async getFloodProneAreas(elevationThreshold?: number) {
-    return this.gisClient.get('/analytics/flood-prone-areas', {
+    return this.gisClient.get(GisEndpoints.analytics.floodProneAreas, {
       params: { elevationThreshold },
     });
   }
 
   async getSoilTypeDistribution() {
-    return this.gisClient.get('/analytics/soil-type-distribution');
+    return this.gisClient.get(GisEndpoints.analytics.soilTypeDistribution);
   }
 }

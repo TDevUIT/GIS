@@ -7,36 +7,37 @@ import { GisClientService } from 'src/infra/gis-client/gis-client.service';
 import { CreateTerrainDto } from './dto/create-terrain.dto';
 import { UpdateTerrainDto } from './dto/update-terrain.dto';
 import { IntersectsWktDto } from './dto/intersects-wkt.dto';
+import { GisEndpoints } from 'src/infra/gis-client/gis-endpoints';
 
 @Injectable()
 export class TerrainsService {
   constructor(private readonly gisClient: GisClientService) {}
 
   async create(createDto: CreateTerrainDto) {
-    return this.gisClient.post('/terrains', createDto);
+    return this.gisClient.post(GisEndpoints.terrains.base, createDto);
   }
 
   async findAll(districtId?: string) {
-    return this.gisClient.get('/terrains', { params: { districtId } });
+    return this.gisClient.get(GisEndpoints.terrains.base, { params: { districtId } });
   }
 
   async findOne(id: string) {
-    return this.gisClient.get(`/terrains/${id}`);
+    return this.gisClient.get(GisEndpoints.terrains.byId(id));
   }
 
   async update(id: string, updateDto: UpdateTerrainDto) {
-    return this.gisClient.patch(`/terrains/${id}`, updateDto);
+    return this.gisClient.patch(GisEndpoints.terrains.byId(id), updateDto);
   }
 
   async remove(id: string) {
-    return this.gisClient.delete(`/terrains/${id}`);
+    return this.gisClient.delete(GisEndpoints.terrains.byId(id));
   }
 
   async findAtPoint(lng: string, lat: string) {
-    return this.gisClient.get('/terrains/at-point', { params: { lng, lat } });
+    return this.gisClient.get(GisEndpoints.terrains.atPoint, { params: { lng, lat } });
   }
 
   async findIntersecting(body: IntersectsWktDto) {
-    return this.gisClient.post('/terrains/intersects-with', body);
+    return this.gisClient.post(GisEndpoints.terrains.intersectsWith, body);
   }
 }
