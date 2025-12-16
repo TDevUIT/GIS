@@ -7,7 +7,9 @@ import {
   Param,
   Delete,
   Query,
+  UseGuards,
 } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import {
   ApiTags,
   ApiOperation,
@@ -19,6 +21,7 @@ import { AirQualitiesService } from './air-qualities.service';
 import { CreateAirQualityDto } from './dto/create-air-quality.dto';
 import { UpdateAirQualityDto } from './dto/update-air-quality.dto';
 import { FindAirQualityQueryDto, FindWithinRadiusDto } from './dto/query.dto';
+import { AdminGuard } from '../../auth/admin.guard';
 
 @ApiTags('air-qualities')
 @Controller('air-qualities')
@@ -32,6 +35,7 @@ export class AirQualitiesController {
   })
   @ApiResponse({ status: 400, description: 'Bad request' })
   @Post()
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
   create(@Body() createAirQualityDto: CreateAirQualityDto) {
     return this.airQualitiesService.create(createAirQualityDto);
   }
@@ -77,6 +81,7 @@ export class AirQualitiesController {
   })
   @ApiResponse({ status: 404, description: 'Air quality record not found' })
   @Patch(':id')
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
   update(
     @Param('id') id: string,
     @Body() updateAirQualityDto: UpdateAirQualityDto,
@@ -92,6 +97,7 @@ export class AirQualitiesController {
   })
   @ApiResponse({ status: 404, description: 'Air quality record not found' })
   @Delete(':id')
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
   remove(@Param('id') id: string) {
     return this.airQualitiesService.remove(id);
   }

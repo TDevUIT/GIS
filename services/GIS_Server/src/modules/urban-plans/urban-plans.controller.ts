@@ -7,7 +7,9 @@ import {
   Param,
   Delete,
   Query,
+  UseGuards,
 } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import {
   ApiTags,
   ApiOperation,
@@ -20,7 +22,8 @@ import { UrbanPlansService } from './urban-plans.service';
 import { CreateUrbanPlanDto } from './dto/create-urban-plan.dto';
 import { UpdateUrbanPlanDto } from './dto/update-urban-plan.dto';
 import { FindUrbanPlansQueryDto } from './dto/query.dto';
-import { GisPointQueryDto, GisWktBodyDto } from '../common/dto/gis-query.dto';
+import { GisPointQueryDto, GisWktBodyDto } from '../../shared/dto/gis-query.dto';
+import { AdminGuard } from '../../auth/admin.guard';
 
 @ApiTags('urban-plans')
 @Controller('urban-plans')
@@ -58,6 +61,7 @@ export class UrbanPlansController {
   })
   @ApiResponse({ status: 400, description: 'Bad request' })
   @Post()
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
   create(@Body() createUrbanPlanDto: CreateUrbanPlanDto) {
     return this.urbanPlansService.create(createUrbanPlanDto);
   }
@@ -86,6 +90,7 @@ export class UrbanPlansController {
   })
   @ApiResponse({ status: 404, description: 'Urban plan record not found' })
   @Patch(':id')
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
   update(
     @Param('id') id: string,
     @Body() updateUrbanPlanDto: UpdateUrbanPlanDto,
@@ -101,6 +106,7 @@ export class UrbanPlansController {
   })
   @ApiResponse({ status: 404, description: 'Urban plan record not found' })
   @Delete(':id')
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
   remove(@Param('id') id: string) {
     return this.urbanPlansService.remove(id);
   }

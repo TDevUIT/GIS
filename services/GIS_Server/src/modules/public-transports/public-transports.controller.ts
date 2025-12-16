@@ -7,7 +7,9 @@ import {
   Param,
   Delete,
   Query,
+  UseGuards,
 } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import {
   ApiTags,
   ApiOperation,
@@ -20,6 +22,7 @@ import { CreatePublicTransportDto } from './dto/create-public-transport.dto';
 import { UpdatePublicTransportDto } from './dto/update-public-transport.dto';
 import { FindPublicTransportsQueryDto } from './dto/query.dto';
 import { IntersectsWktDto } from '../districts/dto/query-gis.dto';
+import { AdminGuard } from '../../auth/admin.guard';
 
 @ApiTags('public-transports')
 @Controller('public-transports')
@@ -48,6 +51,7 @@ export class PublicTransportsController {
   })
   @ApiResponse({ status: 400, description: 'Bad request' })
   @Post()
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
   create(@Body() createPublicTransportDto: CreatePublicTransportDto) {
     return this.publicTransportsService.create(createPublicTransportDto);
   }
@@ -82,6 +86,7 @@ export class PublicTransportsController {
     description: 'Public transport record not found',
   })
   @Patch(':id')
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
   update(
     @Param('id') id: string,
     @Body() updatePublicTransportDto: UpdatePublicTransportDto,
@@ -100,6 +105,7 @@ export class PublicTransportsController {
     description: 'Public transport record not found',
   })
   @Delete(':id')
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
   remove(@Param('id') id: string) {
     return this.publicTransportsService.remove(id);
   }

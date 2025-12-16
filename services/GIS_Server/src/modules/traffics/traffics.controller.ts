@@ -7,7 +7,9 @@ import {
   Param,
   Delete,
   Query,
+  UseGuards,
 } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import {
   ApiTags,
   ApiOperation,
@@ -21,6 +23,7 @@ import { UpdateTrafficDto } from './dto/update-traffic.dto';
 import { FindTrafficsQueryDto, IntersectsWktDto } from './dto/query.dto';
 import { FindByLocationDto } from './dto/find-by-location.dto';
 import { BulkUpdateTrafficDto } from './dto/bulk-update-traffic.dto';
+import { AdminGuard } from '../../auth/admin.guard';
 
 @ApiTags('traffics')
 @Controller('traffics')
@@ -47,6 +50,7 @@ export class TrafficsController {
   })
   @ApiResponse({ status: 400, description: 'Bad request' })
   @Post()
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
   create(@Body() createTrafficDto: CreateTrafficDto) {
     return this.trafficsService.create(createTrafficDto);
   }
@@ -85,6 +89,7 @@ export class TrafficsController {
     description: 'Bad request due to invalid payload',
   })
   @Patch('bulk-update')
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
   bulkUpdate(@Body() bulkUpdateTrafficDto: BulkUpdateTrafficDto) {
     return this.trafficsService.bulkUpdate(bulkUpdateTrafficDto.updates);
   }
@@ -97,6 +102,7 @@ export class TrafficsController {
   })
   @ApiResponse({ status: 404, description: 'Traffic record not found' })
   @Patch(':id')
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
   update(@Param('id') id: string, @Body() updateTrafficDto: UpdateTrafficDto) {
     return this.trafficsService.update(id, updateTrafficDto);
   }
@@ -109,6 +115,7 @@ export class TrafficsController {
   })
   @ApiResponse({ status: 404, description: 'Traffic record not found' })
   @Delete(':id')
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
   remove(@Param('id') id: string) {
     return this.trafficsService.remove(id);
   }

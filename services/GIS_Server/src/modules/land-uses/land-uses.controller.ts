@@ -7,7 +7,9 @@ import {
   Param,
   Delete,
   Query,
+  UseGuards,
 } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import {
   ApiTags,
   ApiOperation,
@@ -20,7 +22,8 @@ import { LandUsesService } from './land-uses.service';
 import { CreateLandUseDto } from './dto/create-land-use.dto';
 import { UpdateLandUseDto } from './dto/update-land-use.dto';
 import { FindLandUsesQueryDto } from './dto/query.dto';
-import { GisPointQueryDto, GisWktBodyDto } from '../common/dto/gis-query.dto';
+import { GisPointQueryDto, GisWktBodyDto } from '../../shared/dto/gis-query.dto';
+import { AdminGuard } from '../../auth/admin.guard';
 
 @ApiTags('land-uses')
 @Controller('land-uses')
@@ -55,6 +58,7 @@ export class LandUsesController {
   })
   @ApiResponse({ status: 400, description: 'Bad request' })
   @Post()
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
   create(@Body() createLandUseDto: CreateLandUseDto) {
     return this.landUsesService.create(createLandUseDto);
   }
@@ -83,6 +87,7 @@ export class LandUsesController {
   })
   @ApiResponse({ status: 404, description: 'Land use record not found' })
   @Patch(':id')
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
   update(@Param('id') id: string, @Body() updateLandUseDto: UpdateLandUseDto) {
     return this.landUsesService.update(id, updateLandUseDto);
   }
@@ -95,6 +100,7 @@ export class LandUsesController {
   })
   @ApiResponse({ status: 404, description: 'Land use record not found' })
   @Delete(':id')
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
   remove(@Param('id') id: string) {
     return this.landUsesService.remove(id);
   }

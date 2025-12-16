@@ -7,7 +7,9 @@ import {
   Param,
   Delete,
   Query,
+  UseGuards,
 } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import {
   ApiTags,
   ApiOperation,
@@ -20,6 +22,7 @@ import { TerrainsService } from './terrains.service';
 import { CreateTerrainDto } from './dto/create-terrain.dto';
 import { UpdateTerrainDto } from './dto/update-terrain.dto';
 import { QueryPointDto, IntersectsWktDto } from './dto/query-gis.dto';
+import { AdminGuard } from '../../auth/admin.guard';
 
 @ApiTags('terrains')
 @Controller('terrains')
@@ -54,6 +57,7 @@ export class TerrainsController {
   })
   @ApiResponse({ status: 400, description: 'Bad request' })
   @Post()
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
   create(@Body() createTerrainDto: CreateTerrainDto) {
     return this.terrainsService.create(createTerrainDto);
   }
@@ -83,6 +87,7 @@ export class TerrainsController {
   })
   @ApiResponse({ status: 404, description: 'Terrain record not found' })
   @Patch(':id')
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
   update(@Param('id') id: string, @Body() updateTerrainDto: UpdateTerrainDto) {
     return this.terrainsService.update(id, updateTerrainDto);
   }
@@ -95,6 +100,7 @@ export class TerrainsController {
   })
   @ApiResponse({ status: 404, description: 'Terrain record not found' })
   @Delete(':id')
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
   remove(@Param('id') id: string) {
     return this.terrainsService.remove(id);
   }

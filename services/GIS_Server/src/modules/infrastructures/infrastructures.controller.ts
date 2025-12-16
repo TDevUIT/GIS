@@ -9,7 +9,9 @@ import {
   Query,
   UseInterceptors,
   UploadedFiles,
+  UseGuards,
 } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import {
   ApiTags,
   ApiOperation,
@@ -26,6 +28,7 @@ import { FindWithinRadiusDto } from './dto/query-gis.dto';
 import { InfraCategory } from '@prisma/client';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { ManageImagesDto } from './dto/manage-images.dto';
+import { AdminGuard } from '../../auth/admin.guard';
 
 @ApiTags('infrastructures')
 @Controller('infrastructures')
@@ -55,6 +58,7 @@ export class InfrastructuresController {
   })
   @ApiResponse({ status: 400, description: 'Bad request' })
   @Post()
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
   create(@Body() createInfrastructureDto: CreateInfrastructureDto) {
     return this.infrastructuresService.create(createInfrastructureDto);
   }
@@ -79,6 +83,7 @@ export class InfrastructuresController {
   })
   @Post('upload')
   @UseInterceptors(FilesInterceptor('images', 10))
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
   uploadImages(@UploadedFiles() files: Express.Multer.File[]) {
     return this.infrastructuresService.uploadImages(files);
   }
@@ -88,6 +93,7 @@ export class InfrastructuresController {
   @ApiResponse({ status: 200, description: 'Images set successfully' })
   @ApiResponse({ status: 404, description: 'Infrastructure not found' })
   @Post(':id/images')
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
   setImages(@Param('id') id: string, @Body() manageImagesDto: ManageImagesDto) {
     return this.infrastructuresService.setImages(id, manageImagesDto.images);
   }
@@ -101,6 +107,7 @@ export class InfrastructuresController {
     description: 'Infrastructure or image not found',
   })
   @Delete(':id/images/:imageId')
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
   deleteImage(@Param('id') id: string, @Param('imageId') imageId: string) {
     return this.infrastructuresService.deleteImage(id, imageId);
   }
@@ -139,6 +146,7 @@ export class InfrastructuresController {
   })
   @ApiResponse({ status: 404, description: 'Infrastructure not found' })
   @Patch(':id')
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
   update(
     @Param('id') id: string,
     @Body() updateInfrastructureDto: UpdateInfrastructureDto,
@@ -154,6 +162,7 @@ export class InfrastructuresController {
   })
   @ApiResponse({ status: 404, description: 'Infrastructure not found' })
   @Delete(':id')
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
   remove(@Param('id') id: string) {
     return this.infrastructuresService.remove(id);
   }

@@ -1,6 +1,6 @@
 import { IsArray, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
-import { ImageDto } from '../../common/dto/image.dto';
+import { ImageDto } from '../../../shared/dto/image.dto';
 
 export class ManageImagesDto {
   @IsArray()

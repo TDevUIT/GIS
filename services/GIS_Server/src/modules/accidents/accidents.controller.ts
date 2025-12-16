@@ -8,7 +8,9 @@ import {
   Delete,
   UploadedFiles,
   UseInterceptors,
+  UseGuards,
 } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import {
   ApiTags,
   ApiOperation,
@@ -22,6 +24,7 @@ import { CreateAccidentDto } from './dto/create-accident.dto';
 import { UpdateAccidentDto } from './dto/update-accident.dto';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { ManageImagesDto } from './dto/manage-images.dto';
+import { AdminGuard } from '../../auth/admin.guard';
 
 @ApiTags('accidents')
 @Controller('accidents')
@@ -35,6 +38,7 @@ export class AccidentsController {
   })
   @ApiResponse({ status: 400, description: 'Bad request' })
   @Post()
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
   create(@Body() createAccidentDto: CreateAccidentDto) {
     return this.accidentsService.create(createAccidentDto);
   }
@@ -63,6 +67,7 @@ export class AccidentsController {
   })
   @ApiResponse({ status: 404, description: 'Accident not found' })
   @Patch(':id')
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
   update(
     @Param('id') id: string,
     @Body() updateAccidentDto: UpdateAccidentDto,
@@ -78,6 +83,7 @@ export class AccidentsController {
   })
   @ApiResponse({ status: 404, description: 'Accident not found' })
   @Delete(':id')
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
   remove(@Param('id') id: string) {
     return this.accidentsService.remove(id);
   }
@@ -102,6 +108,7 @@ export class AccidentsController {
   })
   @Post('upload')
   @UseInterceptors(FilesInterceptor('images', 10))
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
   uploadImages(@UploadedFiles() files: Array<Express.Multer.File>) {
     return this.accidentsService.uploadImages(files);
   }
@@ -111,6 +118,7 @@ export class AccidentsController {
   @ApiResponse({ status: 200, description: 'Images set successfully' })
   @ApiResponse({ status: 404, description: 'Accident not found' })
   @Post(':id/images')
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
   setImages(@Param('id') id: string, @Body() manageImagesDto: ManageImagesDto) {
     return this.accidentsService.setImages(id, manageImagesDto.images);
   }
@@ -121,6 +129,7 @@ export class AccidentsController {
   @ApiResponse({ status: 200, description: 'Image deleted successfully' })
   @ApiResponse({ status: 404, description: 'Accident or image not found' })
   @Delete(':id/images/:imageId')
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
   deleteImage(@Param('id') id: string, @Param('imageId') imageId: string) {
     return this.accidentsService.deleteImage(id, imageId);
   }

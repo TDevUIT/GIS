@@ -9,7 +9,9 @@ import {
   ValidationPipe,
   UsePipes,
   Query,
+  UseGuards,
 } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import {
   ApiTags,
   ApiOperation,
@@ -23,6 +25,7 @@ import { WardsService } from '../wards/wards.service';
 import { CreateDistrictDto } from './dto/create-district.dto';
 import { UpdateDistrictDto } from './dto/update-district.dto';
 import { ContainsPointDto, IntersectsWktDto } from './dto/query-gis.dto';
+import { AdminGuard } from '../../auth/admin.guard';
 
 @ApiTags('districts')
 @Controller('districts')
@@ -66,6 +69,7 @@ export class DistrictsController {
   @ApiResponse({ status: 400, description: 'Bad request' })
   @Post()
   @UsePipes(new ValidationPipe({ whitelist: true }))
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
   create(@Body() createDistrictDto: CreateDistrictDto) {
     return this.districtsService.create(createDistrictDto);
   }
@@ -92,6 +96,7 @@ export class DistrictsController {
   @ApiResponse({ status: 404, description: 'District not found' })
   @Patch(':id')
   @UsePipes(new ValidationPipe({ whitelist: true }))
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
   update(
     @Param('id') id: string,
     @Body() updateDistrictDto: UpdateDistrictDto,
@@ -104,6 +109,7 @@ export class DistrictsController {
   @ApiResponse({ status: 200, description: 'District deleted successfully' })
   @ApiResponse({ status: 404, description: 'District not found' })
   @Delete(':id')
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
   remove(@Param('id') id: string) {
     return this.districtsService.remove(id);
   }

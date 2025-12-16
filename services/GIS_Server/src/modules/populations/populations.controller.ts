@@ -7,7 +7,9 @@ import {
   Param,
   Delete,
   Query,
+  UseGuards,
 } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import {
   ApiTags,
   ApiOperation,
@@ -18,6 +20,7 @@ import {
 import { PopulationsService } from './populations.service';
 import { CreatePopulationDto } from './dto/create-population.dto';
 import { UpdatePopulationDto } from './dto/update-population.dto';
+import { AdminGuard } from '../../auth/admin.guard';
 
 @ApiTags('populations')
 @Controller('populations')
@@ -31,6 +34,7 @@ export class PopulationsController {
   })
   @ApiResponse({ status: 400, description: 'Bad request' })
   @Post()
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
   create(@Body() createPopulationDto: CreatePopulationDto) {
     return this.populationsService.create(createPopulationDto);
   }
@@ -78,6 +82,7 @@ export class PopulationsController {
   })
   @ApiResponse({ status: 404, description: 'Population record not found' })
   @Patch(':id')
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
   update(
     @Param('id') id: string,
     @Body() updatePopulationDto: UpdatePopulationDto,
@@ -93,6 +98,7 @@ export class PopulationsController {
   })
   @ApiResponse({ status: 404, description: 'Population record not found' })
   @Delete(':id')
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
   remove(@Param('id') id: string) {
     return this.populationsService.remove(id);
   }

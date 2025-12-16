@@ -7,7 +7,9 @@ import {
   Param,
   Delete,
   Query,
+  UseGuards,
 } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import {
   ApiTags,
   ApiOperation,
@@ -20,6 +22,7 @@ import { WardsService } from './wards.service';
 import { CreateWardDto } from './dto/create-ward.dto';
 import { UpdateWardDto } from './dto/update-ward.dto';
 import { ContainsPointDto, IntersectsWktDto } from './dto/query-gis.dto';
+import { AdminGuard } from '../../auth/admin.guard';
 
 @ApiTags('wards')
 @Controller('wards')
@@ -54,6 +57,7 @@ export class WardsController {
   @ApiResponse({ status: 201, description: 'Ward created successfully' })
   @ApiResponse({ status: 400, description: 'Bad request' })
   @Post()
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
   create(@Body() createWardDto: CreateWardDto) {
     return this.wardsService.create(createWardDto);
   }
@@ -80,6 +84,7 @@ export class WardsController {
   @ApiResponse({ status: 200, description: 'Ward updated successfully' })
   @ApiResponse({ status: 404, description: 'Ward not found' })
   @Patch(':id')
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
   update(@Param('id') id: string, @Body() updateWardDto: UpdateWardDto) {
     return this.wardsService.update(id, updateWardDto);
   }
@@ -89,6 +94,7 @@ export class WardsController {
   @ApiResponse({ status: 200, description: 'Ward deleted successfully' })
   @ApiResponse({ status: 404, description: 'Ward not found' })
   @Delete(':id')
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
   remove(@Param('id') id: string) {
     return this.wardsService.remove(id);
   }
