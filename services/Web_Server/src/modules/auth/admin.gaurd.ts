@@ -7,7 +7,7 @@ import {
   ExecutionContext,
   ForbiddenException,
 } from '@nestjs/common';
-import { Role } from '../../generated/prisma';
+import { Role } from 'generated/prisma';
 
 @Injectable()
 export class AdminGuard implements CanActivate {

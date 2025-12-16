@@ -7,7 +7,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
-import { AdminGuard } from 'src/auth/admin.gaurd';
+import { AdminGuard } from '../auth/admin.gaurd';
 import { UserResponseDto } from './dto/user-response.dto';
 
 @ApiTags('User Management')

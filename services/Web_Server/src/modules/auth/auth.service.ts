@@ -12,13 +12,13 @@ import {
   Logger,
 } from '@nestjs/common';
 import * as crypto from 'crypto';
-import { PrismaService } from '../prisma/prisma.service';
+import { PrismaService } from '../../infra/prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { EmailService } from '../email/email.service';
+import { EmailService } from '../../infra/email/email.service';
 import * as bcrypt from 'bcrypt';
 import dayjs = require('dayjs');
-import { Role } from '../../generated/prisma';
+import { Role } from 'generated/prisma';
 import { CreateSupervisorDto } from './dto/create-supervisor.dto';
 import { SetPasswordDto } from './dto/set-password.dto';
 
@@ -175,8 +175,17 @@ export class AuthService implements OnModuleInit {
   }
 
   async generateTokens(userId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { role: true },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
     const accessToken = this.jwtService.sign(
-      { sub: userId },
+      { sub: userId, role: user.role },
       { expiresIn: '24h' },
     );
 
