@@ -13,10 +13,28 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.setGlobalPrefix('api/v1');
 
+  const corsOriginEnv = process.env.CORS_ORIGIN ?? '';
+  const corsOrigins = corsOriginEnv
+    .split(',')
+    .map((o) => o.trim())
+    .filter(Boolean);
+  const corsCredentials = (process.env.CORS_CREDENTIALS ?? '').toLowerCase() === 'true';
+  const corsMaxAge = process.env.CORS_MAX_AGE ? Number(process.env.CORS_MAX_AGE) : undefined;
+  console.log(corsOriginEnv)
   app.enableCors({
-    origin: process.env.CORS_ORIGIN,
-    credentials: process.env.CORS_CREDENTIALS,
-    maxAge: process.env.CORS_MAX_AGE,
+    origin: (origin, callback) => {
+      if (!origin) {
+        return callback(null, true);
+      }
+
+      if (corsOrigins.length === 0 || corsOrigins.includes(origin) || corsOrigins.includes('*')) {
+        return callback(null, true);
+      }
+
+      return callback(null, false);
+    },
+    credentials: corsCredentials,
+    maxAge: corsMaxAge,
     preflightContinue: false,
     optionsSuccessStatus: 204,
   });
