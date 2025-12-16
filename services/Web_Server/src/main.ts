@@ -13,33 +13,12 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.setGlobalPrefix('api/v1');
 
-  const corsOrigin = process.env.CORS_ORIGIN;
-  let origin: boolean | string | RegExp | (string | RegExp)[] = [
-    'http://localhost:3000',
-    'http://localhost:3001',
-    'http://localhost:8000',
-    'https://urbanscale.online',
-    'https://www.urbanscale.online',
-  ];
-
-  if (corsOrigin) {
-    if (corsOrigin === 'true') {
-      origin = true;
-    } else if (corsOrigin === 'false') {
-      origin = false;
-    } else if (corsOrigin.includes(',')) {
-      origin = corsOrigin.split(',').map((o) => o.trim());
-    } else {
-      origin = corsOrigin;
-    }
-  }
-
   app.enableCors({
-    origin,
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-    allowedHeaders: 'Content-Type, Authorization, Accept, x-request-id',
-    exposedHeaders: 'x-request-id',
-    credentials: true,
+    origin: process.env.CORS_ORIGIN,
+    credentials: process.env.CORS_CREDENTIALS,
+    maxAge: process.env.CORS_MAX_AGE,
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
   });
 
   app.use(cookieParser());

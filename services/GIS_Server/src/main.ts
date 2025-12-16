@@ -13,30 +13,12 @@ async function bootstrap() {
   app.use(json({ limit: '50mb' }));
   app.use(urlencoded({ extended: true, limit: '50mb' }));
 
-  const corsOrigin = process.env.CORS_ORIGIN;
-  let origin: boolean | string | RegExp | (string | RegExp)[] = [
-    'http://localhost:3000',
-    'http://localhost:3001',
-    'http://localhost:5000',
-    'https://urbanscale.online',
-    'https://www.urbanscale.online',
-  ];
-
-  if (corsOrigin) {
-    if (corsOrigin === 'true') {
-      origin = true;
-    } else if (corsOrigin === 'false') {
-      origin = false;
-    } else if (corsOrigin.includes(',')) {
-      origin = corsOrigin.split(',').map((o) => o.trim());
-    } else {
-      origin = corsOrigin;
-    }
-  }
-
   app.enableCors({
-    origin,
-    credentials: true,
+    origin: process.env.CORS_ORIGIN,
+    credentials: process.env.CORS_CREDENTIALS,
+    maxAge: process.env.CORS_MAX_AGE,
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
   });
 
   app.useGlobalPipes(
