@@ -2,7 +2,7 @@ import { Module, Global } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { HttpModule } from '@nestjs/axios';
 import { AccidentProcessingModule } from './modules/accident-processing/accident-processing.module';
-import { Ie402MessagingModule } from '@ie402/messaging';
+import { Ie402MessagingModule } from './ie402-messaging.module';
 
 @Global()
 @Module({
