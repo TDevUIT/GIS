@@ -118,6 +118,22 @@ services:
     environment:
       - NODE_ENV=production
 
+  admin-panel:
+    build:
+      context: ../admin-panel
+      dockerfile: Dockerfile
+    container_name: egis-admin-panel
+    restart: always
+    ports:
+      - "3006:3000"
+    networks:
+      - egis-network
+    environment:
+      - NODE_ENV=production
+      - NUXT_PUBLIC_API_BASE_URL=http://web-server:3000/api/v1
+    depends_on:
+      - web-server
+
   gis-server:
     build:
       context: ../services/GIS_Server
@@ -130,6 +146,7 @@ services:
       - egis-network
     env_file: ../services/GIS_Server/.env
     environment:
+      - PORT=3000
       - DATABASE_URL=postgresql://gis_user:gis_password@postgis_db:5432/gis_db?schema=public
       - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
     depends_on:
@@ -152,6 +169,7 @@ services:
       - egis-network
     env_file: ../services/Web_Server/.env
     environment:
+      - PORT=3000
       - GIS_SERVER_URL=http://gis-server:3000
       - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/egis_database?schema=public
       - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
@@ -234,6 +252,7 @@ services:
       - ./ssl:/etc/nginx/ssl:ro
     depends_on:
       - client
+      - admin-panel
       - web-server
       - gis-server
     networks:
