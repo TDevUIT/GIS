@@ -2,9 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { BaseRepository } from '../../shared/repository/base.repository';
 import { withParsedGeom } from '../../shared/geojson/geojson.util';
+import { PrismaService } from '../../infra/prisma/prisma.service';
+
 
 @Injectable()
 export class AnalyticsRepository extends BaseRepository {
+  constructor(prisma: PrismaService) {
+    super(prisma);
+  }
   async getInfrastructureByCategory() {
     const query = Prisma.sql`
       SELECT

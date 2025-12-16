@@ -3,9 +3,13 @@ import { Prisma, QualityLevel } from '@prisma/client';
 import { withParsedGeom } from '../../shared/geojson/geojson.util';
 import { BaseRepository } from '../../shared/repository/base.repository';
 import { FindWaterQualityQueryDto } from './dto/query.dto';
+import { PrismaService } from '../../infra/prisma/prisma.service';
 
 @Injectable()
 export class WaterQualitiesRepository extends BaseRepository {
+  constructor(prisma: PrismaService) {
+    super(prisma);
+  }
   private readonly selectFields = Prisma.sql`
     wq.id, wq.ph, wq.turbidity, wq.contamination_index as "contaminationIndex",
     wq.level, wq.recorded_at as "recordedAt", wq."districtId", d.name as "districtName",
@@ -16,6 +20,8 @@ export class WaterQualitiesRepository extends BaseRepository {
     FROM "public"."water_qualities" wq
     LEFT JOIN "public"."districts" d ON wq."districtId" = d.id
   `;
+
+
 
   async districtExists(districtId: string): Promise<boolean> {
     const district = await this.prisma.district.findUnique({

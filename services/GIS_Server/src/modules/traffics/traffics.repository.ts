@@ -4,9 +4,14 @@ import { BaseRepository } from '../../shared/repository/base.repository';
 import { withParsedGeom } from '../../shared/geojson/geojson.util';
 import { FindTrafficsQueryDto } from './dto/query.dto';
 import { UpdateTrafficItemDto } from './dto/update-traffic-item.dto';
+import { PrismaService } from '../../infra/prisma/prisma.service';
 
 @Injectable()
 export class TrafficsRepository extends BaseRepository {
+  constructor(prisma: PrismaService) {
+    super(prisma);
+  }
+
   private readonly selectFields = Prisma.sql`
     t.id, t.road_name as "roadName", t.traffic_volume as "trafficVolume",
     t."updatedAt", t."districtId", d.name as "districtName",
@@ -17,6 +22,7 @@ export class TrafficsRepository extends BaseRepository {
     FROM "public"."traffics" t
     LEFT JOIN "public"."districts" d ON t."districtId" = d.id
   `;
+
 
   async districtExists(districtId: string): Promise<boolean> {
     const district = await this.prisma.district.findUnique({

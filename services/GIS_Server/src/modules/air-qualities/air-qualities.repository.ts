@@ -3,9 +3,14 @@ import { Prisma, QualityLevel } from '@prisma/client';
 import { BaseRepository } from '../../shared/repository/base.repository';
 import { withParsedGeom } from '../../shared/geojson/geojson.util';
 import { FindAirQualityQueryDto } from './dto/query.dto';
+import { PrismaService } from '../../infra/prisma/prisma.service';
 
 @Injectable()
 export class AirQualitiesRepository extends BaseRepository {
+   constructor(prisma: PrismaService) {
+    super(prisma);
+  }
+
   private readonly selectFields = Prisma.sql`
     aq.id, aq.pm25, aq.co2, aq.no2, aq.level, aq.recorded_at as "recordedAt",
     aq."districtId", d.name as "districtName",
@@ -16,6 +21,7 @@ export class AirQualitiesRepository extends BaseRepository {
     FROM "public"."air_qualities" aq
     LEFT JOIN "public"."districts" d ON aq."districtId" = d.id
   `;
+
 
   async districtExists(districtId: string): Promise<boolean> {
     const district = await this.prisma.district.findUnique({

@@ -2,9 +2,13 @@ import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { BaseRepository } from '../../shared/repository/base.repository';
 import { withParsedGeom } from '../../shared/geojson/geojson.util';
+import { PrismaService } from '../../infra/prisma/prisma.service';
 
 @Injectable()
 export class WardsRepository extends BaseRepository {
+  constructor(prisma: PrismaService) {
+    super(prisma);
+  }
   private readonly selectFields = Prisma.sql`
     w.id, w.code, w.name, w."districtId", d.name as "districtName",
     w."createdAt", w."updatedAt", ST_AsGeoJSON(w.geom) as geom

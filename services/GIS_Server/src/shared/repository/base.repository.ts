@@ -5,7 +5,13 @@ export type RawRow = Record<string, unknown>;
 export type RowMapper<TRow extends RawRow, TResult> = (row: TRow) => TResult;
 
 export abstract class BaseRepository {
-  constructor(protected readonly prisma: PrismaService) {}
+  constructor(protected readonly prisma: PrismaService) {
+    if (!prisma) {
+      throw new Error(
+        'PrismaService was not injected into repository. Ensure the repository defines a constructor(prisma: PrismaService) { super(prisma) } and that PrismaModule is imported.',
+      );
+    }
+  }
 
   protected async queryMany<TRow extends RawRow, TResult = TRow>(
     query: Prisma.Sql,

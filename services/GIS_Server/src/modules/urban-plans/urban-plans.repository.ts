@@ -3,9 +3,13 @@ import { Prisma } from '@prisma/client';
 import { BaseRepository } from '../../shared/repository/base.repository';
 import { withParsedGeom } from '../../shared/geojson/geojson.util';
 import { FindUrbanPlansQueryDto } from './dto/query.dto';
+import { PrismaService } from '../../infra/prisma/prisma.service';
 
 @Injectable()
 export class UrbanPlansRepository extends BaseRepository {
+  constructor(prisma: PrismaService) {
+    super(prisma);
+  }
   private readonly selectFields = Prisma.sql`
     up.id, up.plan_name as "planName", up.zoning_type as "zoningType", up.description,
     up.issued_date as "issuedDate", up."createdAt", up."updatedAt",

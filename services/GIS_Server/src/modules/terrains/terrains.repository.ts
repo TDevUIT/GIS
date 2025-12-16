@@ -1,10 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
+import { PrismaService } from '../../infra/prisma/prisma.service';
 import { BaseRepository } from '../../shared/repository/base.repository';
 import { withParsedGeom } from '../../shared/geojson/geojson.util';
 
 @Injectable()
 export class TerrainsRepository extends BaseRepository {
+  constructor(protected readonly prisma: PrismaService) {
+      super(prisma);
+    }
+
   private readonly selectFields = Prisma.sql`
     t.id, t.elevation, t.slope, t.soil_type as "soilType",
     t."districtId", d.name as "districtName",

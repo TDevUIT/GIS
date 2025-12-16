@@ -3,9 +3,13 @@ import { Prisma } from '@prisma/client';
 import { BaseRepository } from '../../shared/repository/base.repository';
 import { withParsedGeom } from '../../shared/geojson/geojson.util';
 import { FindLandUsesQueryDto } from './dto/query.dto';
+import { PrismaService } from '../../infra/prisma/prisma.service';
 
 @Injectable()
 export class LandUsesRepository extends BaseRepository {
+  constructor(prisma: PrismaService) {
+    super(prisma);
+  }
   private readonly selectFields = Prisma.sql`
     lu.id, lu.type, lu.area_km2 as "areaKm2", lu.year,
     lu."createdAt", lu."updatedAt", lu."districtId", d.name as "districtName",

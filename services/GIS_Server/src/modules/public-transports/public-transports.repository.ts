@@ -3,9 +3,14 @@ import { Prisma, TransportMode } from '@prisma/client';
 import { BaseRepository } from '../../shared/repository/base.repository';
 import { withParsedGeom } from '../../shared/geojson/geojson.util';
 import { FindPublicTransportsQueryDto } from './dto/query.dto';
+import { PrismaService } from '../../infra/prisma/prisma.service';
 
 @Injectable()
 export class PublicTransportsRepository extends BaseRepository {
+  constructor(protected readonly prisma: PrismaService) {
+    super(prisma);
+  }
+
   private readonly selectFields = Prisma.sql`
     pt.id, pt.route_name as "routeName", pt.mode, pt.capacity,
     pt.stops_count as "stopsCount", pt.frequency_min as "frequencyMin", pt.operating_hours as "operatingHours",
