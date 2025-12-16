@@ -17,11 +17,13 @@ import { UrbanPlansModule } from './modules/urban-plans/urban-plans.module';
 import { CloudinaryModule } from './infra/cloudinary/cloudinary.module';
 import { AnalyticsModule } from './modules/analytics/analytics.module';
 import { GlobalRabbitMQModule } from './shared/rabbitmq/rabbitmq.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     GlobalRabbitMQModule,
+    AuthModule,
     CommonModule,
     PrismaModule,
     CloudinaryModule,
