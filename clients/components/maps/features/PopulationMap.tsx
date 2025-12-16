@@ -39,9 +39,9 @@ export default function PopulationMap({ onPointClick }: PopulationMapProps) {
           });
 
         if (points.length === 0 && populations.length > 0) {
-          console.warn('?? No population points have valid coordinates.');
+          console.warn('No population points have valid coordinates.');
         } else {
-          console.log(`? Loaded ${points.length} population points`);
+          console.log(`Loaded ${points.length} population points`);
         }
 
         setPopulationData(points);

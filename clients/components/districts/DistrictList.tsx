@@ -95,7 +95,7 @@ export default function DistrictList({
         <div className="flex items-start gap-3">
           <AlertCircle className="w-6 h-6 text-red-500 flex-shrink-0 mt-0.5" />
           <div className="flex-1">
-            <h3 className="font-semibold text-red-700 mb-1">Lá»—i táº£i dá»¯ liá»‡u</h3>
+            <h3 className="font-semibold text-red-700 mb-1">Lỗi tải dữ liệu</h3>
             <p className="text-sm text-red-600 mb-3">
               {(error as Error)?.message || 'Không thể tải danh sách quận/huyện'}
             </p>
@@ -171,7 +171,7 @@ export default function DistrictList({
             onClick={() => handleSearch('')}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
-            XÃ³a bá»™ lá»c
+            Xóa bộ lọc
           </button>
         </div>
       ) : (
