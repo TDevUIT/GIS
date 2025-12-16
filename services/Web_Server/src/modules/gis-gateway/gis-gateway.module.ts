@@ -1,4 +1,9 @@
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import {
+  MiddlewareConsumer,
+  Module,
+  NestModule,
+  RequestMethod,
+} from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { HttpModule } from '@nestjs/axios';
 import { GisGatewayController } from './gis-gateway.controller';
@@ -10,6 +15,8 @@ import { GisRouteTableMiddleware } from './gis-route-table.middleware';
 })
 export class GisGatewayModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(GisRouteTableMiddleware).forRoutes('*');
+    consumer
+      .apply(GisRouteTableMiddleware)
+      .forRoutes({ path: '*', method: RequestMethod.ALL });
   }
 }

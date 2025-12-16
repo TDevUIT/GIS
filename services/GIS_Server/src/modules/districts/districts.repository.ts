@@ -1,10 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
+import { PrismaService } from '../../infra/prisma/prisma.service';
 import { BaseRepository } from '../../shared/repository/base.repository';
 import { withParsedGeom } from '../../shared/geojson/geojson.util';
 
 @Injectable()
 export class DistrictsRepository extends BaseRepository {
+  constructor(protected readonly prisma: PrismaService) {
+    super(prisma);
+  }
+
   private readonly selectFields = Prisma.sql`
     id, code, name, area_km2 as "areaKm2", density_per_km2 as "densityPerKm2",
     "createdAt", "updatedAt", ST_AsGeoJSON(geom) as geom
