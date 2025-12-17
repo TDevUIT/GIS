@@ -178,6 +178,8 @@ const router = useRouter()
 const { confirmDelete, toastSuccess, toastError } = useSwal()
 const { subscribe, unsubscribe } = useRealtime()
 
+const extractData = (response: any) => response?.data?.data?.data || response?.data?.data || response?.data || response || []
+
 const searchQuery = ref('')
 const selectedDistrictId = ref('')
 const allTraffics = ref<(Traffic & { accidents: Accident[] })[]>([])
@@ -208,12 +210,12 @@ const { refresh: refreshAllData } = useAsyncData(
             $api.analytics.getAccidentsByDayOfWeek(),
         ])
 
-        const traffics = (trafficRes.data.data || []).map((t: any) => ({
+        const traffics = extractData(trafficRes).map((t: any) => ({
             ...t,
             geom: typeof t.geom === 'string' ? JSON.parse(t.geom) : t.geom,
         }))
 
-        const accidents = accidentRes.data.data || []
+        const accidents = extractData(accidentRes) || []
         const accidentsByTrafficId = accidents.reduce((acc: any, current: Accident) => {
             (acc[current.trafficId] = acc[current.trafficId] || []).push(current)
             return acc
@@ -224,13 +226,13 @@ const { refresh: refreshAllData } = useAsyncData(
             accidents: (accidentsByTrafficId[t.id] || []).sort((a: Accident, b: Accident) => new Date(b.accidentDate).getTime() - new Date(a.accidentDate).getTime()),
         }))
 
-        analyticsData.riskAssessment = riskRes.data.data || []
-        const timeData = timeOfDayRes.data.data || []
+        analyticsData.riskAssessment = extractData(riskRes) || []
+        const timeData = extractData(timeOfDayRes) || []
         analyticsData.byTimeOfDay = {
             labels: timeData.map((d: any) => d.timeOfDay.replace(/\s/g, '')),
             values: timeData.map((d: any) => d.accidentCount),
         }
-        const dayData = dayOfWeekRes.data.data || []
+        const dayData = extractData(dayOfWeekRes) || []
         analyticsData.byDayOfWeek = {
             labels: dayData.map((d: any) => d.dayOfWeek.trim()),
             values: dayData.map((d: any) => d.accidentCount),

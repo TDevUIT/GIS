@@ -234,11 +234,11 @@ const qualityOfLifeChartOptions = computed(() => ({
 }));
 
 const airQualityRanking = computed(() => (dashboardData.value?.airRanking || []).map((d: AirQualityRanking) => ({
-  id: d.districtCode, label: d.districtName, value: d.avgPm25
+  id: d.districtCode, label: d.districtName, value: Number(d.avgPm25)
 })));
 
 const waterQualityRanking = computed(() => (dashboardData.value?.waterRanking || []).map((d: WaterQualityRanking) => ({
-  id: d.districtCode, label: d.districtName, value: d.avgContaminationIndex
+  id: d.districtCode, label: d.districtName, value: Number(d.avgContaminationIndex)
 })));
 
 const accidentHotspots = computed(() => (dashboardData.value?.accidentHotspots || []).map((h: AccidentHotspot) => ({

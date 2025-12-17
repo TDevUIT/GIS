@@ -67,6 +67,8 @@ const emit = defineEmits(['images-updated']);
 const { $api } = useNuxtApp();
 const { toastSuccess, toastError, confirmDelete } = useSwal();
 
+const extractData = (response: any) => response?.data?.data?.data || response?.data?.data || response?.data || response || [];
+
 const currentImages = ref<Image[]>([]);
 const selectedFiles = ref<File[]>([]);
 const previews = ref<string[]>([]);
@@ -108,7 +110,7 @@ async function handleUploadAndSet() {
     isUploading.value = true;
     try {
         const uploadedImagesResponse = await $api.infrastructures.uploadImages(selectedFiles.value);
-        const uploadedImages = uploadedImagesResponse.data.data;
+        const uploadedImages = extractData(uploadedImagesResponse);
 
         const setImagesBody = { images: uploadedImages };
         await $api.infrastructures.setImages(props.infraId, setImagesBody);

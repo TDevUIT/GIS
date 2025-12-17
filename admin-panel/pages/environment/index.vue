@@ -55,7 +55,7 @@
                         <button @click="activeTab = 'water'" :class="activeTab === 'water' ? 'btn-tab-active' : 'btn-tab'">Water</button>
                     </div>
                 </div>
-                
+
                 <div class="flex-grow flex flex-col min-h-0">
                     <div class="overflow-y-auto">
                         <UiDataTable
@@ -166,6 +166,8 @@ const mapCenter = ref<[number, number]>([10.7769, 106.7009]);
 const currentPage = ref(1);
 const itemsPerPage = 5;
 
+const extractData = (response: any) => response?.data?.data?.data || response?.data?.data || response?.data || response || [];
+
 const { data: pageData, pending, refresh: refreshAllData } = useAsyncData('environment-page-data', async () => {
     selectedRecord.value = null;
 
@@ -177,7 +179,7 @@ const { data: pageData, pending, refresh: refreshAllData } = useAsyncData('envir
         $api.analytics.getWaterQualityRankingByDistrict()
     ]);
 
-    const districts = (districtsRes.data.data || []);
+    const districts = extractData(districtsRes);
     districtOptions.value = [
         { label: 'All Districts', value: '' },
         ...districts.map((d: District) => ({ label: d.name, value: d.id }))
@@ -192,10 +194,10 @@ const { data: pageData, pending, refresh: refreshAllData } = useAsyncData('envir
     const sortDescByDate = (a: EnvironmentRecord, b: EnvironmentRecord) => new Date(b.recordedAt).getTime() - new Date(a.recordedAt).getTime();
 
     return {
-        air: (airRes.data.data || []).map(parseGeom).sort(sortDescByDate),
-        water: (waterRes.data.data || []).map(parseGeom).sort(sortDescByDate),
-        airRanking: (airRankRes.data.data || []).map(d => ({ ...d, value: parseFloat(d.avgPm25) })),
-        waterRanking: (waterRankRes.data.data || []).map(d => ({ ...d, value: parseFloat(d.avgContaminationIndex) }))
+        air: extractData(airRes).map(parseGeom).sort(sortDescByDate),
+        water: extractData(waterRes).map(parseGeom).sort(sortDescByDate),
+        airRanking: extractData(airRankRes).map((d: any) => ({ ...d, value: Number(d.avgPm25) })),
+        waterRanking: extractData(waterRankRes).map((d: any) => ({ ...d, value: Number(d.avgContaminationIndex) }))
     };
 });
 
@@ -205,10 +207,10 @@ const { data: historyData, pending: historyPending } = useAsyncData(
         if (!selectedDistrictId.value) return null;
         if (activeTab.value === 'air') {
             const res = await $api.analytics.getAirQualityHistory(selectedDistrictId.value);
-            return res.data.data;
+            return extractData(res);
         } else {
             const res = await $api.analytics.getWaterQualityHistory(selectedDistrictId.value);
-            return res.data.data;
+            return extractData(res);
         }
     },
     { watch: [selectedDistrictId, activeTab] }

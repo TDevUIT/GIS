@@ -35,7 +35,9 @@ const router = useRouter();
 const { toastSuccess, toastError } = useSwal();
 const isSubmitting = ref(false);
 
-const { data: districts } = useAsyncData('districts-for-env-form', async () => (await $api.districts.getAll()).data.data);
+const extractData = (response: any) => response?.data?.data?.data || response?.data?.data || response?.data || response || [];
+
+const { data: districts } = useAsyncData('districts-for-env-form', async () => extractData(await $api.districts.getAll()));
 
 async function handleSubmit({ type, payload }: { type: 'air' | 'water', payload: CreateAirQualityDTO | CreateWaterQualityDTO }) {
     isSubmitting.value = true;

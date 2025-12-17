@@ -6,7 +6,7 @@
                 Back to Districts
             </NuxtLink>
             <h1 class="text-2xl font-bold text-white">Edit District</h1>
-            <p class="mt-1 text-sm text-gray-400">Update the details for "{{ district?.data.data.name }}".</p>
+            <p class="mt-1 text-sm text-gray-400">Update the details for "{{ district?.name }}".</p>
         </header>
 
         <div v-if="pending" class="text-center py-10">Loading district data...</div>
@@ -14,7 +14,7 @@
 
         <div v-else-if="district" class="rounded-lg border border-gray-700 bg-gray-800/50 p-6">
             <FeaturesDistrictsDistrictForm
-                :initial-data="district.data.data"
+                :initial-data="district"
                 :is-submitting="isSubmitting"
                 @submit="handleSubmit"
             />
@@ -36,9 +36,14 @@ const router = useRouter();
 const { toastSuccess, toastError } = useSwal();
 const isSubmitting = ref(false);
 
+const extractData = (response: any) => response?.data?.data?.data || response?.data?.data || response?.data || response || [];
+
 const { data: district, pending, error } = await useAsyncData(
     `district-${districtId}`,
-    () => $api.districts.getById(districtId)
+    async () => {
+        const res = await $api.districts.getById(districtId);
+        return extractData(res);
+    }
 );
 
 async function handleSubmit(formData: UpdateDistrictDTO) {

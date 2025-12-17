@@ -35,16 +35,18 @@ const router = useRouter();
 const { toastSuccess, toastError } = useSwal();
 const isSubmitting = ref(false);
 
+const extractData = (response: any) => response?.data?.data?.data || response?.data?.data || response?.data || response || [];
+
 const { data: pageData, pending, error } = await useAsyncData(`publictransport-edit-${routeId}`, async () => {
     const [routeRes, districtsRes] = await Promise.all([
         $api.publicTransports.getById(routeId),
         $api.districts.getAll()
     ]);
-    const data = routeRes.data.data;
+    const data = extractData(routeRes);
     if (data && typeof data.geom === 'string') {
         data.geom = JSON.parse(data.geom);
     }
-    return { routeData: data, districts: districtsRes.data.data };
+    return { routeData: data, districts: extractData(districtsRes) };
 });
 
 const routeData = computed(() => pageData.value?.routeData);

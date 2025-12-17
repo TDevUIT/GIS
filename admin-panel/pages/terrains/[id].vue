@@ -35,16 +35,18 @@ const router = useRouter();
 const { toastSuccess, toastError } = useSwal();
 const isSubmitting = ref(false);
 
+const extractData = (response: any) => response?.data?.data?.data || response?.data?.data || response?.data || response || [];
+
 const { data: pageData, pending, error } = await useAsyncData(`terrain-edit-${terrainId}`, async () => {
     const [terrainRes, districtsRes] = await Promise.all([
         $api.terrains.getById(terrainId),
         $api.districts.getAll()
     ]);
-    const data = terrainRes.data.data;
+    const data = extractData(terrainRes);
     if (data && typeof data.geom === 'string') {
         data.geom = JSON.parse(data.geom);
     }
-    return { terrainData: data, districts: districtsRes.data.data };
+    return { terrainData: data, districts: extractData(districtsRes) };
 });
 
 const terrainData = computed(() => pageData.value?.terrainData);

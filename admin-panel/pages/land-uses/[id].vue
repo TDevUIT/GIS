@@ -37,14 +37,16 @@ const router = useRouter();
 const { toastSuccess, toastError } = useSwal();
 const isSubmitting = ref(false);
 
+const extractData = (response: any) => response?.data?.data?.data || response?.data?.data || response?.data || response || [];
+
 const { data: pageData, pending, error } = await useAsyncData(`landuse-edit-${landUseId}`, async () => {
     const [landUseRes, districtsRes] = await Promise.all([
         $api.landUses.getById(landUseId),
         $api.districts.getAll()
     ]);
     return {
-        landUse: landUseRes.data.data,
-        districts: districtsRes.data.data
+        landUse: extractData(landUseRes),
+        districts: extractData(districtsRes)
     };
 });
 

@@ -145,6 +145,8 @@ const router = useRouter();
 const { $api } = useNuxtApp();
 const { confirmDelete, toastSuccess, toastError } = useSwal();
 
+const extractData = (response: any) => response?.data?.data?.data || response?.data?.data || response?.data || response || [];
+
 const mapRef = ref();
 const mapCenter = ref<[number, number]>([10.7769, 106.7009]);
 const selectedTerrain = ref<Terrain | null>(null);
@@ -158,7 +160,7 @@ const analyticsData = reactive<{
 
 const { data: allTerrains, pending, refresh: refreshAllData } = useAsyncData('terrains-data', async () => {
     const res = await $api.terrains.getAll();
-    return (res.data.data || []).map((t: any) => ({
+    return extractData(res).map((t: any) => ({
         ...t,
         geom: typeof t.geom === 'string' ? JSON.parse(t.geom) : t.geom,
     }));
@@ -169,8 +171,8 @@ useAsyncData('terrains-analytics', async () => {
         $api.analytics.getTerrainSummaryByDistrict(),
         $api.analytics.getSoilTypeDistribution(),
     ]);
-    analyticsData.summary = summaryRes.data.data || [];
-    analyticsData.soilDistribution = soilRes.data.data || [];
+    analyticsData.summary = extractData(summaryRes) || [];
+    analyticsData.soilDistribution = extractData(soilRes) || [];
 });
 
 const filteredData = computed(() => {
