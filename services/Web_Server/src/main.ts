@@ -4,48 +4,49 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
 import passport from 'passport';
-import { ResponseInterceptor } from './common/interceptors/response.interceptor';
-import { HttpExceptionFilter } from './common/filters/http-exception.filter';
+import { ResponseInterceptor } from './shared/interceptors/response.interceptor';
+import { HttpExceptionFilter } from './shared/filters/http-exception.filter';
+import { requestIdMiddleware } from './shared/middlewares/request-id.middleware';
+import { LoggingInterceptor } from './shared/interceptors/logging.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.setGlobalPrefix('api/v1');
 
-  const corsOrigin = process.env.CORS_ORIGIN;
-  let origin: boolean | string | RegExp | (string | RegExp)[] = [
-    'http://localhost:3000',
-    'http://localhost:3001',
-    'http://localhost:8000',
-    'https://urbanscale.online',
-    'https://www.urbanscale.online',
-  ];
-
-  if (corsOrigin) {
-    if (corsOrigin === 'true') {
-      origin = true;
-    } else if (corsOrigin === 'false') {
-      origin = false;
-    } else if (corsOrigin.includes(',')) {
-      origin = corsOrigin.split(',').map((o) => o.trim());
-    } else {
-      origin = corsOrigin;
-    }
-  }
-
+  const corsOriginEnv = process.env.CORS_ORIGIN ?? '';
+  const corsOrigins = corsOriginEnv
+    .split(',')
+    .map((o) => o.trim())
+    .filter(Boolean);
+  const corsCredentials = (process.env.CORS_CREDENTIALS ?? '').toLowerCase() === 'true';
+  const corsMaxAge = process.env.CORS_MAX_AGE ? Number(process.env.CORS_MAX_AGE) : undefined;
+  console.log(corsOriginEnv)
   app.enableCors({
-    origin,
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-    allowedHeaders: 'Content-Type, Authorization, Accept',
-    credentials: true,
+    origin: (origin, callback) => {
+      if (!origin) {
+        return callback(null, true);
+      }
+
+      if (corsOrigins.length === 0 || corsOrigins.includes(origin) || corsOrigins.includes('*')) {
+        return callback(null, true);
+      }
+
+      return callback(null, false);
+    },
+    credentials: corsCredentials,
+    maxAge: corsMaxAge,
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
   });
 
   app.use(cookieParser());
   app.use(passport.initialize());
+  app.use(requestIdMiddleware);
 
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
-      forbidNonWhitelisted: false,
+      forbidNonWhitelisted: true,
       transform: true,
       transformOptions: {
         enableImplicitConversion: true,
@@ -54,7 +55,10 @@ async function bootstrap() {
   );
 
   const reflector = app.get(Reflector);
-  app.useGlobalInterceptors(new ResponseInterceptor(reflector));
+  app.useGlobalInterceptors(
+    new LoggingInterceptor(),
+    new ResponseInterceptor(reflector),
+  );
   app.useGlobalFilters(new HttpExceptionFilter());
 
   const config = new DocumentBuilder()

@@ -1,0 +1,14 @@
+**/node_modules
+**/dist
+**/.dist
+**/coverage
+**/.next
+**/.nuxt
+**/.output
+**/.env
+**/.env.*
+.git
+.gitignore
+.vscode
+.idea
+*.log

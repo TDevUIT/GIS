@@ -36,16 +36,18 @@ const router = useRouter();
 const { toastSuccess, toastError } = useSwal();
 const isSubmitting = ref(false);
 
+const extractData = (response: any) => response?.data?.data?.data || response?.data?.data || response?.data || response || [];
+
 const { data: pageData, pending, error } = await useAsyncData(`traffic-edit-${trafficId}`, async () => {
     const [trafficRes, districtsRes] = await Promise.all([
         $api.traffics.getById(trafficId),
         $api.districts.getAll()
     ]);
-    const trafficData = trafficRes.data.data;
+    const trafficData = extractData(trafficRes);
     if (trafficData && typeof trafficData.geom === 'string') {
         trafficData.geom = JSON.parse(trafficData.geom);
     }
-    return { traffic: trafficData, districts: districtsRes.data.data };
+    return { traffic: trafficData, districts: extractData(districtsRes) };
 });
 
 const traffic = computed(() => pageData.value?.traffic);

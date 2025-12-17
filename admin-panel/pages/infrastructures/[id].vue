@@ -50,14 +50,16 @@ const router = useRouter();
 const { toastSuccess, toastError } = useSwal();
 const isSubmitting = ref(false);
 
+const extractData = (response: any) => response?.data?.data?.data || response?.data?.data || response?.data || response || [];
+
 const { data: pageData, pending, error, refresh } = await useAsyncData(
     `infra-edit-${infraId}`,
     async () => {
         const infraRes = await $api.infrastructures.getById(infraId);
         const districtsRes = await $api.districts.getAll();
         return {
-            infra: infraRes.data.data,
-            districts: districtsRes.data.data,
+            infra: extractData(infraRes),
+            districts: extractData(districtsRes),
         };
     },
     { lazy: false }

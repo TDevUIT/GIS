@@ -151,6 +151,8 @@ const router = useRouter();
 const { confirmDelete, toastSuccess, toastError } = useSwal();
 const { subscribe, unsubscribe } = useRealtime();
 
+const extractData = (response: any) => response?.data?.data?.data || response?.data?.data || response?.data || response || [];
+
 const filterMode = ref('');
 const selectedDistrictId = ref('');
 const districtOptions = ref<{ label: string; value: string }[]>([]);
@@ -175,7 +177,7 @@ const analyticsData = reactive({
 
 useAsyncData('districts-for-filter', async () => {
     const response = await $api.districts.getAll();
-    const districtData = response.data.data;
+    const districtData = extractData(response);
     if (Array.isArray(districtData)) {
         districtOptions.value = [
             { label: 'All Districts', value: '' },
@@ -197,24 +199,24 @@ const { refresh: refreshAllData } = useAsyncData('public-transports-data', async
         $api.analytics.getMostFrequentRoutes()
     ]);
 
-    allRoutes.value = (routesRes.data.data || []).map((r: any) => ({
+    allRoutes.value = extractData(routesRes).map((r: any) => ({
         ...r,
         geom: typeof r.geom === 'string' ? JSON.parse(r.geom) : r.geom
     }));
 
-    const summaryData = summaryRes.data.data || [];
+    const summaryData = extractData(summaryRes);
     analyticsData.summary = {
         labels: summaryData.map((d: any) => d.mode),
         values: summaryData.map((d: any) => d.routeCount)
     };
 
-    const capacityData = capacityRes.data.data || [];
+    const capacityData = extractData(capacityRes);
     analyticsData.capacity = {
         labels: capacityData.map((d: any) => d.mode),
         values: capacityData.map((d: any) => d.totalCapacity)
     };
 
-    analyticsData.frequentRoutes = frequentRes.data.data || [];
+    analyticsData.frequentRoutes = extractData(frequentRes) || [];
 }, { watch: [selectedDistrictId, filterMode] });
 
 const columns: DataTableColumn[] = [

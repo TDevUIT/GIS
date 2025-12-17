@@ -1,8 +1,10 @@
+
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { BullModule } from '@nestjs/bullmq';
 import { HttpModule } from '@nestjs/axios';
-import { AccidentsModule } from './jobs/accidents/accidents.module';
+import { AccidentsModule } from './modules/jobs/accidents/accidents.module';
+import { Ie402MessagingModule } from './ie402-messaging.module';
 
 @Module({
   imports: [
@@ -10,6 +12,7 @@ import { AccidentsModule } from './jobs/accidents/accidents.module';
       isGlobal: true,
       envFilePath: '.env',
     }),
+    Ie402MessagingModule,
     BullModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],

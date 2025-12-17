@@ -1,28 +1,13 @@
 import { Module, Global } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
+import { ConfigModule } from '@nestjs/config';
 import { HttpModule } from '@nestjs/axios';
-import { AccidentProcessingModule } from './accident-processing/accident-processing.module';
+import { AccidentProcessingModule } from './modules/accident-processing/accident-processing.module';
+import { Ie402MessagingModule } from './ie402-messaging.module';
 
 @Global()
 @Module({
-  imports: [
-    RabbitMQModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        exchanges: [
-          {
-            name: 'amq.topic',
-            type: 'topic',
-          },
-        ],
-        uri: configService.get<string>('RABBITMQ_URL'),
-        connectionInitOptions: { wait: false },
-      }),
-    }),
-  ],
-  exports: [RabbitMQModule],
+  imports: [Ie402MessagingModule],
+  exports: [Ie402MessagingModule],
 })
 class GlobalRabbitMQModule {}
 

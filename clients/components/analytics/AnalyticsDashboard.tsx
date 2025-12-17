@@ -47,34 +47,34 @@ export default function AnalyticsDashboard() {
           <BarChart3 className="w-6 h-6 text-gray-700" />
           Analytics Dashboard
         </h2>
-        <p className="text-gray-500 mt-1">PhÃ¢n tÃ­ch dá»¯ liá»‡u há»‡ thá»‘ng GIS</p>
+        <p className="text-gray-500 mt-1">Phân tích dữ liệu hệ thống GIS</p>
       </div>
 
       {/* Overview Section */}
       <div className="space-y-6">
         <div className="flex items-center gap-2">
           <Activity className="w-5 h-5 text-gray-700" />
-          <h3 className="text-xl font-bold text-gray-900">Tá»•ng quan há»‡ thá»‘ng</h3>
+          <h3 className="text-xl font-bold text-gray-900">Tổng quan hệ thống</h3>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard
-            title="Quáº­n/Huyá»‡n"
+            title="Quận/Huyện"
             value={summary?.totalDistricts?.toLocaleString() || 'N/A'}
             icon={Building2}
           />
           <StatCard
-            title="CÆ¡ sá»Ÿ háº¡ táº§ng"
+            title="Cơ sở hạ tầng"
             value={summary?.totalInfrastructures?.toLocaleString() || 'N/A'}
             icon={Building2}
           />
           <StatCard
-            title="Tuyáº¿n giao thÃ´ng"
+            title="Tuyến giao thông"
             value={summary?.totalTrafficRoutes?.toLocaleString() || 'N/A'}
             icon={Bus}
           />
           <StatCard
-            title="Quy hoáº¡ch Ä‘Ã´ thá»‹"
+            title="Quy hoạch đô thị"
             value={summary?.totalUrbanPlans?.toLocaleString() || 'N/A'}
             icon={Activity}
           />
@@ -83,7 +83,7 @@ export default function AnalyticsDashboard() {
         {infrastructure && Array.isArray(infrastructure) && infrastructure.length > 0 && (
           <div className="bg-gray-50 rounded-lg p-6 border border-gray-200">
             <h4 className="text-lg font-semibold text-gray-900 mb-4">
-              PhÃ¢n bá»‘ cÆ¡ sá»Ÿ háº¡ táº§ng
+              Phân bố cơ sở hạ tầng
             </h4>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={infrastructure}>
@@ -102,7 +102,7 @@ export default function AnalyticsDashboard() {
       <div className="space-y-6">
         <div className="flex items-center gap-2">
           <Wind className="w-5 h-5 text-gray-700" />
-          <h3 className="text-xl font-bold text-gray-900">Cháº¥t lÆ°á»£ng mÃ´i trÆ°á»ng</h3>
+          <h3 className="text-xl font-bold text-gray-900">Chất lượng môi trường</h3>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -110,7 +110,7 @@ export default function AnalyticsDashboard() {
             <div className="bg-gray-50 rounded-lg p-6 border border-gray-200">
               <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                 <Wind className="w-5 h-5 text-gray-700" />
-                Cháº¥t lÆ°á»£ng khÃ´ng khÃ­ (PM2.5)
+                Chất lượng không khí (PM2.5)
               </h4>
               <ResponsiveContainer width="100%" height={250}>
                 <BarChart data={airQuality.slice(0, 5)} layout="vertical">
@@ -128,7 +128,7 @@ export default function AnalyticsDashboard() {
             <div className="bg-gray-50 rounded-lg p-6 border border-gray-200">
               <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                 <Droplets className="w-5 h-5 text-gray-700" />
-                Cháº¥t lÆ°á»£ng nÆ°á»›c (CI)
+                Chất lượng nước (CI)
               </h4>
               <ResponsiveContainer width="100%" height={250}>
                 <BarChart data={waterQuality.slice(0, 5)} layout="vertical">
@@ -148,13 +148,13 @@ export default function AnalyticsDashboard() {
       <div className="space-y-6">
         <div className="flex items-center gap-2">
           <Bus className="w-5 h-5 text-gray-700" />
-          <h3 className="text-xl font-bold text-gray-900">Giao thÃ´ng cÃ´ng cá»™ng</h3>
+          <h3 className="text-xl font-bold text-gray-900">Giao thông công cộng</h3>
         </div>
 
         {publicTransport && Array.isArray(publicTransport) && publicTransport.length > 0 && (
           <div className="bg-gray-50 rounded-lg p-6 border border-gray-200">
             <h4 className="text-lg font-semibold text-gray-900 mb-4">
-              PhÃ¢n bá»‘ tuyáº¿n giao thÃ´ng cÃ´ng cá»™ng
+              Phân bố tuyến giao thông công cộng
             </h4>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={publicTransport}>

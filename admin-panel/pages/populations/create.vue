@@ -33,9 +33,11 @@ const router = useRouter();
 const { toastSuccess, toastError } = useSwal();
 const isSubmitting = ref(false);
 
+const extractData = (response: any) => response?.data?.data?.data || response?.data?.data || response?.data || response || [];
+
 const { data: districts, pending, error } = await useAsyncData('districts-for-form', async () => {
     const response = await $api.districts.getAll();
-    return response.data.data;
+    return extractData(response);
 });
 
 async function handleSubmit(formData: CreatePopulationDTO) {

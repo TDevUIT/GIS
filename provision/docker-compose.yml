@@ -1,3 +1,4 @@
+
 services:
   postgres:
     image: postgres:14
@@ -112,10 +113,26 @@ services:
     restart: always
     ports:
       - "3000:3000"
+    env_file:
+      - ../clients/.env
     networks:
       - egis-network
     environment:
       - NODE_ENV=production
+
+  admin-panel:
+    build:
+      context: ../admin-panel
+      dockerfile: Dockerfile
+    container_name: egis-admin-panel
+    restart: always
+    ports:
+      - "3006:3000"
+    networks:
+      - egis-network
+    env_file: ../admin-panel/.env
+    depends_on:
+      - web-server
 
   gis-server:
     build:
@@ -123,11 +140,15 @@ services:
       dockerfile: Dockerfile
     container_name: egis-gis-server
     restart: always
-    ports:
-      - "3001:3000"
+    expose:
+      - "3000"
     networks:
       - egis-network
     env_file: ../services/GIS_Server/.env
+    environment:
+      - PORT=3000
+      - DATABASE_URL=postgresql://gis_user:gis_password@postgis_db:5432/gis_db?schema=public
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
     depends_on:
       postgis_db:
         condition: service_healthy
@@ -147,6 +168,11 @@ services:
     networks:
       - egis-network
     env_file: ../services/Web_Server/.env
+    environment:
+      - PORT=3000
+      - GIS_SERVER_URL=http://gis-server:3000
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/egis_database?schema=public
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
 
     depends_on:
       postgres:
@@ -166,6 +192,10 @@ services:
       - "3003:3000"
     networks:
       - egis-network
+    env_file: ../services/processing-service/.env
+    environment:
+      - GIS_SERVER_URL=http://gis-server:3000
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -180,6 +210,11 @@ services:
       - "3004:3000"
     networks:
       - egis-network
+    env_file:
+      - ../services/scraper-service/.env
+    environment:
+      - GIS_SERVER_URL=http://gis-server:3000
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -196,6 +231,11 @@ services:
       - "3005:3000"
     networks:
       - egis-network
+    env_file:
+      - ../services/simulation-server/.env
+    environment:
+      - GIS_SERVER_URL=http://gis-server:3000
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -212,6 +252,7 @@ services:
       - ./ssl:/etc/nginx/ssl:ro
     depends_on:
       - client
+      - admin-panel
       - web-server
       - gis-server
     networks:

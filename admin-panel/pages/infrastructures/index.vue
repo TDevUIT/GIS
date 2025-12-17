@@ -111,6 +111,8 @@ const { $api } = useNuxtApp();
 const router = useRouter();
 const { confirmDelete, toastSuccess, toastError } = useSwal();
 
+const extractData = (response: any) => response?.data?.data?.data || response?.data?.data || response?.data || response || [];
+
 const searchQuery = ref('');
 const selectedDistrictId = ref('');
 const allInfrastructures = ref<Infrastructure[]>([]);
@@ -123,7 +125,7 @@ const itemsPerPage = 5;
 
 useAsyncData('districts-for-filter', async () => {
     const response = await $api.districts.getAll();
-    const districtData = response.data.data;
+    const districtData = extractData(response);
     if (Array.isArray(districtData)) {
         districtOptions.value = [
             { label: 'All Districts', value: '' },
@@ -137,7 +139,7 @@ const { refresh: refreshInfrastructures } = useAsyncData(
     'infrastructures-list',
     async () => {
         const response = await $api.infrastructures.getAll({ districtId: selectedDistrictId.value || undefined });
-        allInfrastructures.value = response.data.data || [];
+        allInfrastructures.value = extractData(response) || [];
         if (selectedInfrastructure.value && !allInfrastructures.value.some(i => i.id === selectedInfrastructure.value?.id)) {
             selectedInfrastructure.value = null;
         }
@@ -202,7 +204,7 @@ async function handleRowClick(infra: Infrastructure) {
     } else {
         try {
             const response = await $api.infrastructures.getById(infra.id);
-            selectedInfrastructure.value = response.data.data;
+            selectedInfrastructure.value = extractData(response);
         } catch {
             toastError('Error', 'Could not fetch infrastructure details.');
             selectedInfrastructure.value = infra;

@@ -142,6 +142,8 @@ const { $api } = useNuxtApp()
 const router = useRouter()
 const { confirmDelete, toastSuccess, toastError } = useSwal()
 
+const extractData = (response: any) => response?.data?.data?.data || response?.data?.data || response?.data || response || []
+
 const searchQuery = ref('')
 const selectedDistrictId = ref('')
 const districtOptions = ref<{ label: string; value: string }[]>([])
@@ -155,7 +157,7 @@ const itemsPerPage = 5
 
 useAsyncData('districts-for-filter', async () => {
     const response = await $api.districts.getAll()
-    const districtData = response.data.data
+    const districtData = extractData(response)
     if (Array.isArray(districtData)) {
         districtOptions.value = [
             { label: 'All Districts', value: '' },
@@ -170,7 +172,7 @@ const { refresh: refreshWards } = useAsyncData(
     async () => {
         const params = { districtId: selectedDistrictId.value || undefined }
         const response = await $api.wards.getAll(params)
-        const wardsData = response.data.data || []
+        const wardsData = extractData(response) || []
         allWards.value = wardsData.map((ward: any) => ({
             ...ward,
             geom: typeof ward.geom === 'string' ? JSON.parse(ward.geom) : ward.geom

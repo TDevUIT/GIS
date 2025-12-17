@@ -45,22 +45,24 @@ const router = useRouter();
 const { toastSuccess, toastError } = useSwal();
 const isSubmitting = ref(false);
 
+const extractData = (response: any) => response?.data?.data?.data || response?.data?.data || response?.data || response || [];
+
 const { data: pageData, pending, error } = await useAsyncData(`env-edit-${recordId}`, async () => {
     const api = recordType === 'air' ? $api.airQualities : $api.waterQualities;
-    
+
     const [recordRes, districtsRes] = await Promise.all([
         api.getById(recordId),
         $api.districts.getAll()
     ]);
 
-    const data = recordRes.data.data;
+    const data = extractData(recordRes);
     if (data && typeof data.geom === 'string') {
         data.geom = JSON.parse(data.geom);
     }
-    
-    return { 
-        recordData: { ...data, type: recordType }, 
-        districts: districtsRes.data.data 
+
+    return {
+        recordData: { ...data, type: recordType },
+        districts: extractData(districtsRes)
     };
 });
 

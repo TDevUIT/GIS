@@ -13,30 +13,30 @@ async function bootstrap() {
   app.use(json({ limit: '50mb' }));
   app.use(urlencoded({ extended: true, limit: '50mb' }));
 
-  const corsOrigin = process.env.CORS_ORIGIN;
-  let origin: boolean | string | RegExp | (string | RegExp)[] = [
-    'http://localhost:3000',
-    'http://localhost:3001',
-    'http://localhost:5000',
-    'https://urbanscale.online',
-    'https://www.urbanscale.online',
-  ];
-
-  if (corsOrigin) {
-    if (corsOrigin === 'true') {
-      origin = true;
-    } else if (corsOrigin === 'false') {
-      origin = false;
-    } else if (corsOrigin.includes(',')) {
-      origin = corsOrigin.split(',').map((o) => o.trim());
-    } else {
-      origin = corsOrigin;
-    }
-  }
+  const corsOriginEnv = process.env.CORS_ORIGIN ?? '';
+  const corsOrigins = corsOriginEnv
+    .split(',')
+    .map((o) => o.trim())
+    .filter(Boolean);
+  const corsCredentials = (process.env.CORS_CREDENTIALS ?? '').toLowerCase() === 'true';
+  const corsMaxAge = process.env.CORS_MAX_AGE ? Number(process.env.CORS_MAX_AGE) : undefined;
 
   app.enableCors({
-    origin,
-    credentials: true,
+    origin: (origin, callback) => {
+      if (!origin) {
+        return callback(null, true);
+      }
+
+      if (corsOrigins.length === 0 || corsOrigins.includes(origin) || corsOrigins.includes('*')) {
+        return callback(null, true);
+      }
+
+      return callback(null, false);
+    },
+    credentials: corsCredentials,
+    maxAge: corsMaxAge,
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
   });
 
   app.useGlobalPipes(

@@ -36,14 +36,16 @@ const router = useRouter();
 const { toastSuccess, toastError } = useSwal();
 const isSubmitting = ref(false);
 
+const extractData = (response: any) => response?.data?.data?.data || response?.data?.data || response?.data || response || [];
+
 const { data: pageData, pending, error } = await useAsyncData(`urbanplan-edit-${planId}`, async () => {
     const [planRes, districtsRes] = await Promise.all([
         $api.urbanPlans.getById(planId),
         $api.districts.getAll()
     ]);
     return {
-        urbanPlan: planRes.data.data,
-        districts: districtsRes.data.data
+        urbanPlan: extractData(planRes),
+        districts: extractData(districtsRes)
     };
 });
 

@@ -58,7 +58,7 @@ export default function AirQualityMap({ onPointClick }: AirQualityMapProps) {
       <div className="absolute top-20 left-1/2 -translate-x-1/2 z-[1000] bg-white/95 backdrop-blur-md px-6 py-3 rounded-lg shadow-lg border border-green-200">
         <div className="flex items-center gap-3 text-green-600">
           <Loader2 className="w-5 h-5 animate-spin" />
-          <span className="font-medium">Äang táº£i dá»¯ liá»‡u cháº¥t lÆ°á»£ng khÃ´ng khÃ­...</span>
+          <span className="font-medium">Đang tải dữ liệu chất lượng không khí...</span>
         </div>
       </div>
     );
@@ -70,7 +70,7 @@ export default function AirQualityMap({ onPointClick }: AirQualityMapProps) {
         <div className="flex items-start gap-3">
           <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
           <div>
-            <h3 className="font-semibold text-red-700 mb-1">Lá»—i táº£i dá»¯ liá»‡u</h3>
+            <h3 className="font-semibold text-red-700 mb-1">Lỗi tải dữ liệu</h3>
             <p className="text-sm text-red-600">
               {(error as Error)?.message || 'Không thể tải dữ liệu chất lượng không khí'}
             </p>
@@ -92,9 +92,9 @@ export default function AirQualityMap({ onPointClick }: AirQualityMapProps) {
           <div className="flex items-start gap-3">
             <AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
             <div>
-              <h3 className="font-semibold text-yellow-800 mb-1">KhÃ´ng cÃ³ tá»a Ä‘á»™</h3>
+              <h3 className="font-semibold text-yellow-800 mb-1">Không có tọa độ</h3>
               <p className="text-sm text-yellow-700">
-                Dá»¯ liá»‡u cháº¥t lÆ°á»£ng khÃ´ng khÃ­ khÃ´ng cÃ³ thÃ´ng tin tá»a Ä‘á»™ (location).
+                Dữ liệu chất lượng không khí không có thông tin tọa độ (location).
               </p>
             </div>
           </div>
@@ -107,39 +107,39 @@ export default function AirQualityMap({ onPointClick }: AirQualityMapProps) {
       >
         <div className="space-y-2">
           <div className="flex items-center justify-between gap-4">
-            <span className="text-sm font-semibold text-green-800">Cháº¥t lÆ°á»£ng khÃ´ng khÃ­</span>
+            <span className="text-sm font-semibold text-green-800">Chất lượng không khí</span>
             <Wind className="w-4 h-4 text-green-600" />
           </div>
 
           <div className="space-y-1 text-xs">
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 rounded-full" style={{ backgroundColor: '#10b981' }}></div>
-              <span className="text-gray-700">Tá»‘t</span>
+              <span className="text-gray-700">Tốt</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 rounded-full" style={{ backgroundColor: '#f59e0b' }}></div>
-              <span className="text-gray-700">Trung bÃ¬nh</span>
+              <span className="text-gray-700">Trung bình</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 rounded-full" style={{ backgroundColor: '#f97316' }}></div>
-              <span className="text-gray-700">NhÃ³m nháº¡y cáº£m</span>
+              <span className="text-gray-700">Nhóm nhạy cảm</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 rounded-full" style={{ backgroundColor: '#ef4444' }}></div>
-              <span className="text-gray-700">Xáº¥u</span>
+              <span className="text-gray-700">Xấu</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 rounded-full" style={{ backgroundColor: '#dc2626' }}></div>
-              <span className="text-gray-700">Ráº¥t xáº¥u</span>
+              <span className="text-gray-700">Rất xấu</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 rounded-full" style={{ backgroundColor: '#7f1d1d' }}></div>
-              <span className="text-gray-700">Nguy háº¡i</span>
+              <span className="text-gray-700">Nguy hại</span>
             </div>
           </div>
 
           <div className="pt-2 border-t text-xs text-gray-500">
-            <strong>{airQualityData.length}</strong> Ä‘iá»ƒm Ä‘o
+            <strong>{airQualityData.length}</strong> điểm đo
           </div>
         </div>
       </div>
@@ -186,7 +186,7 @@ export default function AirQualityMap({ onPointClick }: AirQualityMapProps) {
                 <h3 className="font-bold text-base mb-2">{point.districtName}</h3>
                 <div className="space-y-1.5 text-sm">
                   <div className="flex justify-between items-center">
-                    <span className="text-gray-600">Má»©c Ä‘á»™:</span>
+                    <span className="text-gray-600">Mức độ:</span>
                     <span
                       className="font-semibold px-2 py-0.5 rounded text-white text-xs"
                       style={{ backgroundColor: color }}
@@ -197,23 +197,23 @@ export default function AirQualityMap({ onPointClick }: AirQualityMapProps) {
                   <div className="flex justify-between items-center">
                     <span className="text-gray-600">PM2.5:</span>
                     <span className="font-semibold text-gray-800">
-                      {point.pm25} Âµg/mÂ³
+                      {point.pm25} µg/m³
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-gray-600">COâ‚‚:</span>
+                    <span className="text-gray-600">CO₂:</span>
                     <span className="font-semibold text-gray-800">
                       {point.co2} ppm
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-gray-600">NOâ‚‚:</span>
+                    <span className="text-gray-600">NO₂:</span>
                     <span className="font-semibold text-gray-800">
                       {point.no2} ppb
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-gray-600">Thá»i gian:</span>
+                    <span className="text-gray-600">Thời gian:</span>
                     <span className="text-xs text-gray-600">
                       {new Date(point.recordedAt).toLocaleString('vi-VN')}
                     </span>

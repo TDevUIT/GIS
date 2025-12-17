@@ -136,6 +136,8 @@ const router = useRouter()
 const { confirmDelete, toastSuccess, toastError } = useSwal()
 const { subscribe, unsubscribe } = useRealtime()
 
+const extractData = (response: any) => response?.data?.data?.data || response?.data?.data || response?.data || response || []
+
 const selectedDistrictId = ref('')
 const selectedYear = ref<string>('')
 const districtOptions = ref<{ label: string; value: string }[]>([])
@@ -154,7 +156,7 @@ const yearOptions = [
 
 useAsyncData('districts-for-filter', async () => {
     const response = await $api.districts.getAll()
-    const districtData = response.data.data
+    const districtData = extractData(response)
     if (Array.isArray(districtData)) {
         districtOptions.value = [
             { label: 'All Districts', value: '' },
@@ -172,7 +174,7 @@ const { refresh: refreshPopulations } = useAsyncData(
         if (selectedYear.value) params.year = parseInt(selectedYear.value, 10)
 
         const response = await $api.populations.getAll(params)
-        allPopulations.value = response.data.data || []
+        allPopulations.value = extractData(response) || []
 
         if (selectedPopulation.value && !allPopulations.value.some(p => p.id === selectedPopulation.value?.id)) {
             selectedPopulation.value = null
@@ -204,8 +206,8 @@ watch(selectedPopulation, async (newSelection) => {
                 $api.analytics.getDemographicsSummary(newSelection.id),
                 $api.analytics.getHouseholdsSummary(newSelection.id)
             ])
-            demographicsData.value = demoRes.data.data
-            householdsData.value = houseRes.data.data
+            demographicsData.value = extractData(demoRes)
+            householdsData.value = extractData(houseRes)
         } catch (e) {
             toastError('Failed to fetch chart data')
             demographicsData.value = undefined
@@ -224,7 +226,7 @@ async function handleRowClick(population: Population) {
     }
     try {
         const response = await $api.populations.getById(population.id)
-        selectedPopulation.value = response.data.data
+        selectedPopulation.value = extractData(response)
     } catch {
         toastError('Error', 'Could not fetch population details.')
         selectedPopulation.value = population

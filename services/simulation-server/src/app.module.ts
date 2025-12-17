@@ -3,10 +3,10 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { BullModule } from '@nestjs/bullmq';
 import { HttpModule } from '@nestjs/axios';
 
-import { AccidentsModule } from './jobs/accidents/accidents.module';
-import { PopulationsModule } from './jobs/populations/populations.module';
-import { EnvironmentModule } from './jobs/environment/environment.module';
-import { PublicTransportsModule } from './jobs/public-transports/public-transports.module';
+import { AccidentsModule } from './modules/jobs/accidents/accidents.module';
+import { PopulationsModule } from './modules/jobs/populations/populations.module';
+import { EnvironmentModule } from './modules/jobs/environment/environment.module';
+import { PublicTransportsModule } from './modules/jobs/public-transports/public-transports.module';
 
 @Module({
   imports: [

@@ -106,6 +106,8 @@ const { $api } = useNuxtApp();
 const router = useRouter();
 const { confirmDelete, toastSuccess, toastError } = useSwal();
 
+const extractData = (response: any) => response?.data?.data?.data || response?.data?.data || response?.data || response || [];
+
 const allDistricts = ref<District[]>([]);
 const selectedDistrict = ref<District | null>(null);
 const searchQuery = ref('');
@@ -117,7 +119,7 @@ const itemsPerPage = 5;
 
 const { pending, error, refresh: refreshDistricts } = useAsyncData('districts-list', async () => {
     const response = await $api.districts.getAll();
-    const data = response.data.data || [];
+    const data = extractData(response) || [];
     allDistricts.value = data.map((d: any) => ({
         ...d,
         geom: typeof d.geom === 'string' ? JSON.parse(d.geom) : d.geom,

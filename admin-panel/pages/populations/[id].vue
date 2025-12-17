@@ -49,14 +49,16 @@ const router = useRouter();
 const { toastSuccess, toastError } = useSwal();
 const isSubmitting = ref(false);
 
+const extractData = (response: any) => response?.data?.data?.data || response?.data?.data || response?.data || response || [];
+
 const { data: pageData, pending, error } = await useAsyncData(`population-edit-${populationId}`, async () => {
     const [popRes, districtsRes] = await Promise.all([
         $api.populations.getById(populationId),
         $api.districts.getAll()
     ]);
     return {
-        population: popRes.data.data,
-        districts: districtsRes.data.data
+        population: extractData(popRes),
+        districts: extractData(districtsRes)
     };
 });
 

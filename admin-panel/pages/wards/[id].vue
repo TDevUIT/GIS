@@ -6,13 +6,13 @@
                 Back to Wards
             </NuxtLink>
             <h1 class="text-2xl font-bold text-white">Edit Ward</h1>
-            <p v-if="ward" class="mt-1 text-sm text-gray-400">Update the details for "{{ ward.data.data.name }}".</p>
+            <p v-if="ward" class="mt-1 text-sm text-gray-400">Update the details for "{{ ward.name }}".</p>
         </header>
         <div v-if="pending" class="text-center py-10">Loading ward data...</div>
         <div v-else-if="error" class="text-red-400">Failed to load data: {{ error.message }}</div>
         <div v-else-if="ward && districts" class="rounded-lg border border-gray-700 bg-gray-800/50 p-6">
             <FeaturesWardsWardForm
-                :initial-data="ward.data.data"
+                :initial-data="ward"
                 :districts="districts"
                 :is-submitting="isSubmitting"
                 @submit="handleSubmit"
@@ -36,14 +36,16 @@ const router = useRouter();
 const { toastSuccess, toastError } = useSwal();
 const isSubmitting = ref(false);
 
+const extractData = (response: any) => response?.data?.data?.data || response?.data?.data || response?.data || response || [];
+
 const { data: pageData, pending, error } = await useAsyncData(`ward-edit-${wardId}`, async () => {
     const [wardRes, districtsRes] = await Promise.all([
         $api.wards.getById(wardId),
         $api.districts.getAll()
     ]);
     return {
-        ward: wardRes,
-        districts: districtsRes.data.data
+        ward: extractData(wardRes),
+        districts: extractData(districtsRes)
     };
 });
 
