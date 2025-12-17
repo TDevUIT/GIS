@@ -4,8 +4,6 @@
 /* eslint-disable prettier/prettier */
 
 import { v2 as cloudinary } from 'cloudinary';
-import * as dotenv from 'dotenv';
-dotenv.config();
 export const CloudinaryProvider = {
   provide: 'CLOUDINARY',
   useFactory: () => {
