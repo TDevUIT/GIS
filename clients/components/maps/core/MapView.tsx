@@ -11,7 +11,6 @@ import MapToolbar from '@/components/maps/controls/MapToolbar'
 import BackButton from '@/components/maps/controls/BackButton'
 import FeatureNotification from '@/components/maps/ui/FeatureNotification'
 import UnifiedBottomToolbar from '@/components/maps/controls/UnifiedBottomToolbar'
-import MapSearchBar from '@/components/maps/search/MapSearchBar'
 import MapInstanceProvider from '@/components/maps/core/MapInstanceProvider'
 import DistrictMap from '@/components/maps/features/DistrictMap'
 import WardMap from '@/components/maps/features/WardMap'
@@ -26,7 +25,6 @@ import TerrainMap from '@/components/maps/features/TerrainMap'
 import UrbanPlanMap from '@/components/maps/features/UrbanPlanMap'
 import AnalyticsPanel from '@/components/maps/panels/AnalyticsPanel'
 import { MAP_LOCATIONS, DEFAULT_MAP_CENTER, DEFAULT_MAP_ZOOM } from '@/constants/mapLocations'
-import { Z_INDEX } from '@/constants/zIndex'
 import { useMapState } from '@/hooks/map/useMapState'
 import LayerControlGroup from '@/components/maps/controls/LayerControlGroup'
 import MapInfoPanels from '@/components/maps/panels/MapInfoPanels'
@@ -49,18 +47,6 @@ const currentLocationIcon = new L.Icon({
   iconSize: [32, 32],
   iconAnchor: [16, 16],
   popupAnchor: [0, -16],
-})
-
-const searchResultIcon = new L.Icon({
-  iconUrl: 'data:image/svg+xml;base64,' + btoa(`
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="36" height="36">
-      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="#ef4444" stroke="white" stroke-width="1.5"/>
-      <circle cx="12" cy="9" r="3" fill="white"/>
-    </svg>
-  `),
-  iconSize: [36, 36],
-  iconAnchor: [18, 36],
-  popupAnchor: [0, -36],
 })
 
 export default function MapView() {
@@ -86,8 +72,6 @@ export default function MapView() {
     showLayerPanel, setShowLayerPanel,
     showAnalyticsPanel, setShowAnalyticsPanel,
     activeLayer, setActiveLayer,
-    searchMarker,
-    searchResult,
     setMapInstance,
     activeFeature, setActiveFeature,
 
@@ -103,8 +87,6 @@ export default function MapView() {
     handleTerrainClick,
     handleUrbanPlanClick,
     handleLocationFound,
-    handleLocationSelect,
-    handleCurrentLocationClick
   } = useMapState()
 
   return (
@@ -213,20 +195,6 @@ export default function MapView() {
           </Marker>
         )}
 
-        {searchMarker && searchResult && (
-          <Marker position={searchMarker} icon={searchResultIcon}>
-            <Popup>
-              <div className="text-sm">
-                <h3 className="font-bold text-base mb-1">🔍 {searchResult.display_name.split(',')[0]}</h3>
-                <p className="text-gray-600 mb-1">{searchResult.display_name}</p>
-                <p className="text-gray-500 text-xs">
-                  {searchResult.lat.toFixed(6)}, {searchResult.lon.toFixed(6)}
-                </p>
-              </div>
-            </Popup>
-          </Marker>
-        )}
-
         {MAP_LOCATIONS.map((location, index) => (
           <Marker
             key={index}
@@ -251,16 +219,6 @@ export default function MapView() {
 
       <BackButton />
       <MapToolbar />
-
-      <div
-        className="absolute top-6 left-1/2 -translate-x-1/2 w-full max-w-2xl px-6"
-        style={{ zIndex: Z_INDEX.SEARCH_BAR }}
-      >
-        <MapSearchBar
-          onLocationSelect={handleLocationSelect}
-          onCurrentLocationClick={handleCurrentLocationClick}
-        />
-      </div>
 
       <LayerControlGroup
         showLayerPanel={showLayerPanel}
@@ -315,7 +273,7 @@ export default function MapView() {
       />
 
       {showAnalyticsPanel && (
-        <AnalyticsPanel />
+        <AnalyticsPanel onClose={() => setShowAnalyticsPanel(false)} />
       )}
 
       <FeatureNotification

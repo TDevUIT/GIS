@@ -28,13 +28,29 @@ export default function TerrainMap({ onPolygonClick }: TerrainMapProps) {
   useEffect(() => {
     if (gisTerrainData?.data) {
       try {
-        const terrains = Array.isArray(gisTerrainData.data)
-          ? gisTerrainData.data
-          : [gisTerrainData.data];
+        const raw = gisTerrainData.data as any;
+
+        const terrains = Array.isArray(raw)
+          ? raw
+          : raw?.type === 'FeatureCollection'
+            ? (raw.features ?? [])
+            : [raw];
 
         const polygons = terrains
-          .map(convertTerrainToPolygon)
-          .filter((polygon) => polygon.geometry !== null);
+          .map((item: any) => {
+            // If we get a GeoJSON Feature, merge its geometry into a terrain-like object
+            if (item?.type === 'Feature' && item?.geometry) {
+              const props = item.properties ?? {};
+              return convertTerrainToPolygon({
+                ...props,
+                id: props.id ?? props._id ?? item.id ?? item.properties?.id ?? item.properties?._id,
+                geometry: item.geometry,
+              });
+            }
+
+            return convertTerrainToPolygon(item);
+          })
+          .filter((polygon: TerrainPolygon) => polygon.id && polygon.geometry !== null);
 
         if (polygons.length === 0 && terrains.length > 0) {
           console.warn('⚠️ No terrain polygons have valid geometry.');

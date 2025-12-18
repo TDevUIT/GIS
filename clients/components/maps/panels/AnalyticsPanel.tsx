@@ -14,7 +14,11 @@ import { X, BarChart3 } from 'lucide-react';
 
 const COLORS = ['#374151', '#6b7280', '#9ca3af', '#d1d5db', '#e5e7eb'];
 
-export default function AnalyticsPanel() {
+interface AnalyticsPanelProps {
+  onClose: () => void;
+}
+
+export default function AnalyticsPanel({ onClose }: AnalyticsPanelProps) {
   const [activeChart, setActiveChart] = useState<'infrastructure' | 'accidents' | 'transport'>('infrastructure');
 
   const { data: summaryResponse } = useAnalyticsSummary();
@@ -35,7 +39,10 @@ export default function AnalyticsPanel() {
           <h3 className="font-semibold text-gray-900">Thống kê</h3>
         </div>
         <button
-          className="p-1 hover:bg-gray-100 rounded transition-colors"
+          onClick={onClose}
+          type="button"
+          className="p-1 hover:bg-gray-100 rounded transition-colors pointer-events-auto"
+          aria-label="Close statistics"
         >
           <X className="w-5 h-5 text-gray-600" />
         </button>
