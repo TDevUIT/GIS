@@ -68,19 +68,8 @@ async function bootstrap() {
     )
     .setVersion('1.0')
     .addTag('Authentication', 'User authentication and authorization endpoints')
-    .addTag('Districts', 'District management endpoints')
-    .addTag('Wards', 'Ward management endpoints')
-    .addTag('Infrastructures', 'Infrastructure data management')
-    .addTag('Populations', 'Population statistics and demographics')
-    .addTag('Terrains', 'Terrain and topography data')
-    .addTag('Air Quality', 'Air quality monitoring data')
-    .addTag('Water Quality', 'Water quality monitoring data')
-    .addTag('Traffic', 'Traffic data and analysis')
-    .addTag('Accidents', 'Traffic accident records')
-    .addTag('Public Transport', 'Public transportation data')
-    .addTag('Land Use', 'Land use planning and zoning')
-    .addTag('Urban Plans', 'Urban development plans')
-    .addTag('Analytics', 'Data analytics and insights')
+    .addTag('User Management', 'User management endpoints')
+    .addTag('GIS Gateway', 'Proxy for GIS Server endpoints')
     .addBearerAuth(
       {
         type: 'http',

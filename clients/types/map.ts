@@ -5,13 +5,13 @@ export interface LocationData {
   coordinates: [number, number]
 }
 
-export type MapLayer = 
-  | 'street' 
-  | 'satellite' 
-  | 'dark' 
-  | 'light' 
-  | 'terrain' 
-  | 'topo' 
+export type MapLayer =
+  | 'street'
+  | 'satellite'
+  | 'dark'
+  | 'light'
+  | 'terrain'
+  | 'topo'
   | 'watercolor'
 
 export interface LayerOption {
@@ -19,4 +19,5 @@ export interface LayerOption {
   name: string
   description: string
   gradient: string
+  previewUrl?: string
 }

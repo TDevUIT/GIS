@@ -40,10 +40,10 @@ export interface TerrainPolygon {
 
 export function convertTerrainToPolygon(terrain: any): TerrainPolygon {
   return {
-    id: terrain.id,
-    elevation: terrain.elevation || 0,
-    slope: terrain.slope || 0,
-    aspect: terrain.aspect || null,
+    id: String(terrain?.id ?? terrain?._id ?? terrain?.gid ?? ''),
+    elevation: Number(terrain?.elevation ?? terrain?.elev ?? 0),
+    slope: Number(terrain?.slope ?? 0),
+    aspect: terrain?.aspect ?? null,
     terrainType: terrain.terrainType || terrain.terrain_type || 'FLAT',
     geometry: terrain.geom || terrain.geometry || null,
   };
@@ -51,9 +51,31 @@ export function convertTerrainToPolygon(terrain: any): TerrainPolygon {
 
 export function parseGeoJSON(geom: any): any {
   try {
+    if (!geom) return null;
+
     if (typeof geom === 'string') {
       return JSON.parse(geom);
     }
+
+    // Accept common GeoJSON shapes
+    if (geom?.type === 'FeatureCollection') {
+      return geom;
+    }
+
+    // If backend returns GeoJSON Feature, wrap it
+    if (geom?.type === 'Feature' && geom?.geometry) {
+      return geom;
+    }
+
+    // If backend returns raw geometry, wrap it as a Feature
+    if (geom?.type && geom?.coordinates) {
+      return {
+        type: 'Feature',
+        properties: {},
+        geometry: geom,
+      };
+    }
+
     return geom;
   } catch (error) {
     console.warn('Failed to parse geometry:', error);
