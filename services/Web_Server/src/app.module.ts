@@ -21,18 +21,28 @@ import { GisGatewayModule } from './modules/gis-gateway/gis-gateway.module';
       isGlobal: true,
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => {
-        const store = await redisStore({
-          socket: {
-            host: configService.get<string>('REDIS_HOST') || 'localhost',
-            port: configService.get<number>('REDIS_PORT') || 6379,
-          },
-          ttl: 5 * 60 * 1000,
-        });
+        const host = configService.get<string>('REDIS_HOST') || 'localhost';
+        const port = configService.get<number>('REDIS_PORT') || 6379;
+        const ttl = 5 * 60 * 1000;
 
-        return {
-          store: store as any,
-          ttl: 5 * 60 * 1000,
-        };
+        try {
+          const store = await redisStore({
+            socket: {
+              host,
+              port,
+            },
+            ttl,
+          });
+
+          return {
+            store: store as any,
+            ttl,
+          };
+        } catch {
+          return {
+            ttl,
+          };
+        }
       },
       inject: [ConfigService],
     }),

@@ -37,17 +37,25 @@ export class GisGatewayController {
 
     delete (headers as any).host;
 
-    const axiosResponse = await firstValueFrom(
-      this.httpService.request({
+    let axiosResponse: any;
+    try {
+      axiosResponse = await firstValueFrom(
+        this.httpService.request({
+          url,
+          method: req.method as any,
+          headers,
+          params: req.query,
+          data: req.body,
+          responseType: 'arraybuffer',
+          validateStatus: () => true,
+        }),
+      );
+    } catch {
+      return res.status(502).json({
+        message: 'Failed to proxy request to GIS server',
         url,
-        method: req.method as any,
-        headers,
-        params: req.query,
-        data: req.body,
-        responseType: 'arraybuffer',
-        validateStatus: () => true,
-      }),
-    );
+      });
+    }
 
     Object.entries(axiosResponse.headers || {}).forEach(([key, value]) => {
       const lower = key.toLowerCase();
