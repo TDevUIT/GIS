@@ -6,30 +6,35 @@ import { NotificationConsumer } from './notification.consumer';
 
 @Global()
 @Module({
-  imports: [
-    RabbitMQModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => {
-        const rabbitUrl = configService.get<string>('RABBITMQ_URL');
-        if (!rabbitUrl) {
-          throw new Error('RABBITMQ_URL is not defined in .env');
-        }
-        return {
-          exchanges: [
-            {
-              name: 'ui_notifications',
-              type: 'fanout',
+  imports:
+    process.env.ENABLE_RABBITMQ === 'false'
+      ? []
+      : [
+          RabbitMQModule.forRootAsync({
+            imports: [ConfigModule],
+            inject: [ConfigService],
+            useFactory: (configService: ConfigService) => {
+              const rabbitUrl =
+                configService.get<string>('RABBITMQ_URL') ||
+                'amqp://guest:guest@localhost:5672';
+              return {
+                exchanges: [
+                  {
+                    name: 'ui_notifications',
+                    type: 'fanout',
+                  },
+                ],
+                uri: rabbitUrl,
+                connectionInitOptions: { wait: false },
+                enableControllerDiscovery: true,
+              };
             },
-          ],
-          uri: rabbitUrl,
-          connectionInitOptions: { wait: false },
-          enableControllerDiscovery: true,
-        };
-      },
-    }),
-  ],
-  providers: [EventsGateway, NotificationConsumer],
+          }),
+        ],
+  providers:
+    process.env.ENABLE_RABBITMQ === 'false'
+      ? [EventsGateway]
+      : [EventsGateway, NotificationConsumer],
   exports: [EventsGateway],
 })
 export class EventsModule {}
