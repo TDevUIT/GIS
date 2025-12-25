@@ -18,6 +18,19 @@ interface TerrainMapProps {
   onPolygonClick?: (polygon: TerrainPolygon) => void;
 }
 
+type GeoJsonLike = {
+  type?: unknown;
+  features?: unknown;
+  geometry?: unknown;
+  properties?: unknown;
+  id?: unknown;
+};
+
+function getRecordValue(obj: unknown, key: string): unknown {
+  if (!obj || typeof obj !== 'object') return undefined;
+  return (obj as Record<string, unknown>)[key];
+}
+
 export default function TerrainMap({ onPolygonClick }: TerrainMapProps) {
   // const map = useMap();
   const [terrainData, setTerrainData] = useState<TerrainPolygon[]>([]);
@@ -28,23 +41,29 @@ export default function TerrainMap({ onPolygonClick }: TerrainMapProps) {
   useEffect(() => {
     if (gisTerrainData?.data) {
       try {
-        const raw = gisTerrainData.data as any;
+        const raw = gisTerrainData.data as unknown;
 
         const terrains = Array.isArray(raw)
           ? raw
-          : raw?.type === 'FeatureCollection'
-            ? (raw.features ?? [])
+          : (raw as GeoJsonLike)?.type === 'FeatureCollection'
+            ? (((raw as GeoJsonLike).features as unknown[]) ?? [])
             : [raw];
 
         const polygons = terrains
-          .map((item: any) => {
+          .map((item: unknown) => {
+            const feature = item as GeoJsonLike;
             // If we get a GeoJSON Feature, merge its geometry into a terrain-like object
-            if (item?.type === 'Feature' && item?.geometry) {
-              const props = item.properties ?? {};
+            if (feature?.type === 'Feature' && feature?.geometry) {
+              const props = (feature.properties ?? {}) as Record<string, unknown>;
+              const idFromProps =
+                getRecordValue(props, 'id') ?? getRecordValue(props, '_id');
+              const idFromFeatureProps =
+                getRecordValue(feature.properties, 'id') ??
+                getRecordValue(feature.properties, '_id');
               return convertTerrainToPolygon({
                 ...props,
-                id: props.id ?? props._id ?? item.id ?? item.properties?.id ?? item.properties?._id,
-                geometry: item.geometry,
+                id: idFromProps ?? feature.id ?? idFromFeatureProps,
+                geometry: feature.geometry,
               });
             }
 

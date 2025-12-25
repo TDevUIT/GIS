@@ -1,6 +1,7 @@
 'use client'
 
 import { Layers, X } from 'lucide-react'
+import Image from 'next/image'
 import { MapLayer } from '@/types/map'
 import { LAYER_OPTIONS } from '@/constants/mapLayers'
 import { Z_INDEX } from '@/constants/zIndex'
@@ -53,12 +54,15 @@ export default function LayerPanel({
             aria-label={`Select ${layer.name}`}
           >
             {layer.previewUrl ? (
-              <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0 shadow-sm border border-gray-200">
-                <img
+              <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0 shadow-sm border border-gray-200 relative">
+                <Image
                   src={layer.previewUrl}
                   alt={layer.name}
-                  className="w-full h-full object-cover"
-                  loading="lazy"
+                  fill
+                  sizes="48px"
+                  className="object-cover"
+                  loader={({ src }) => src}
+                  unoptimized
                 />
               </div>
             ) : (
