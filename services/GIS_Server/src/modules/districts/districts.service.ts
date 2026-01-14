@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateDistrictDto } from './dto/create-district.dto';
@@ -69,7 +67,10 @@ export class DistrictsService {
   }
 
   async findDistrictContainingPoint(lng: string, lat: string) {
-    const district = await this.repository.findDistrictContainingPoint(lng, lat);
+    const district = await this.repository.findDistrictContainingPoint(
+      lng,
+      lat,
+    );
     return district ?? null;
   }
 

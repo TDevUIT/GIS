@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
@@ -121,7 +120,9 @@ export class WaterQualitiesService {
 
     const newPh = otherData.ph !== undefined ? otherData.ph : existingPh;
     const newTurbidity =
-      otherData.turbidity !== undefined ? otherData.turbidity : existingTurbidity;
+      otherData.turbidity !== undefined
+        ? otherData.turbidity
+        : existingTurbidity;
 
     const level =
       otherData.ph !== undefined || otherData.turbidity !== undefined
