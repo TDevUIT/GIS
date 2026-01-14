@@ -31,8 +31,8 @@ export class HttpExceptionFilter implements ExceptionFilter {
       return (
         v &&
         typeof v === 'object' &&
-        typeof (v as any).statusCode === 'number' &&
-        typeof (v as any).success === 'boolean' &&
+        typeof v.statusCode === 'number' &&
+        typeof v.success === 'boolean' &&
         'message' in v
       );
     };
@@ -48,7 +48,8 @@ export class HttpExceptionFilter implements ExceptionFilter {
             statusCode: status,
             success: false,
             message: (exceptionResponse as any).message || message,
-            timestamp: (exceptionResponse as any).timestamp || new Date().toISOString(),
+            timestamp:
+              (exceptionResponse as any).timestamp || new Date().toISOString(),
             path: (exceptionResponse as any).path || request.url,
             traceId,
           },
@@ -71,7 +72,10 @@ export class HttpExceptionFilter implements ExceptionFilter {
             ? extractedMessage.join(', ')
             : extractedMessage) || message;
 
-        if ((exceptionResponse as any).error && typeof (exceptionResponse as any).error === 'object') {
+        if (
+          (exceptionResponse as any).error &&
+          typeof (exceptionResponse as any).error === 'object'
+        ) {
           errorCode = (exceptionResponse as any).error.code;
           errorDetails = (exceptionResponse as any).error.details;
         } else {

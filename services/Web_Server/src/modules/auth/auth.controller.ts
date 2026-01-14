@@ -75,10 +75,7 @@ export class AuthController {
     status: 200,
     description: 'Login successful OR must change password.',
   })
-  async login(
-    @Body() body: LoginDto,
-    @Res() res: Response,
-  ) {
+  async login(@Body() body: LoginDto, @Res() res: Response) {
     const result = await this.authService.login(body);
     if (result.mustChangePassword) {
       return res.status(HttpStatus.OK).json(result);
@@ -195,10 +192,7 @@ export class AuthController {
       },
     },
   })
-  async rulePermissions(
-    @Body() body: RulePermissionsDto,
-    @Req() req: any,
-  ) {
+  async rulePermissions(@Body() body: RulePermissionsDto, @Req() req: any) {
     if (body.userId === req.user.id) {
       throw new ForbiddenException('You cannot change your own role.');
     }

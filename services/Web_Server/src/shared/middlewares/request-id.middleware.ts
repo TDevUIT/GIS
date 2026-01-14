@@ -8,7 +8,8 @@ export function requestIdMiddleware(
   next: NextFunction,
 ) {
   const incoming = req.header('x-request-id');
-  const requestId = incoming && incoming.trim().length > 0 ? incoming : randomUUID();
+  const requestId =
+    incoming && incoming.trim().length > 0 ? incoming : randomUUID();
 
   res.setHeader('x-request-id', requestId);
 

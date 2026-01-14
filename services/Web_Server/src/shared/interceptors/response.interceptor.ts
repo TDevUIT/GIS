@@ -53,7 +53,13 @@ export class ResponseInterceptor<T>
 
     return next.handle().pipe(
       map((data) => {
-        if (data && typeof data === 'object' && 'data' in (data as any) && 'meta' in (data as any) && 'error' in (data as any)) {
+        if (
+          data &&
+          typeof data === 'object' &&
+          'data' in data &&
+          'meta' in data &&
+          'error' in data
+        ) {
           return data;
         }
 

@@ -20,7 +20,8 @@ export class LoggingInterceptor implements NestInterceptor {
     const res = httpCtx.getResponse();
 
     const startedAt = Date.now();
-    const requestId = RequestContext.getRequestId() || req.header?.('x-request-id');
+    const requestId =
+      RequestContext.getRequestId() || req.header?.('x-request-id');
 
     return next.handle().pipe(
       finalize(() => {

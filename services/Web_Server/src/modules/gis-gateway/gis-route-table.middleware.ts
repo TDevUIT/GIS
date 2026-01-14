@@ -52,7 +52,9 @@ export class GisRouteTableMiddleware implements NestMiddleware {
 
     const baseUrl = this.configService.get<string>('GIS_SERVER_URL');
     if (!baseUrl) {
-      return res.status(500).json({ message: 'GIS_SERVER_URL is not configured' });
+      return res
+        .status(500)
+        .json({ message: 'GIS_SERVER_URL is not configured' });
     }
 
     const url = `${baseUrl}${req.originalUrl}`;
@@ -88,7 +90,7 @@ export class GisRouteTableMiddleware implements NestMiddleware {
         return;
       }
       if (typeof value !== 'undefined') {
-        res.setHeader(key, value as any);
+        res.setHeader(key, value);
       }
     });
 

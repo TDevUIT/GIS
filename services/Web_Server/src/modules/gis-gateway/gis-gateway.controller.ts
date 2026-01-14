@@ -16,7 +16,8 @@ export class GisGatewayController {
 
   @ApiOperation({
     summary: 'Proxy to GIS Server',
-    description: 'Forwards all requests starting with /api/v1/gis to the GIS Server.',
+    description:
+      'Forwards all requests starting with /api/v1/gis to the GIS Server.',
   })
   @ApiResponse({
     status: 200,
@@ -26,7 +27,9 @@ export class GisGatewayController {
   async proxy(@Req() req: Request, @Res() res: Response) {
     const baseUrl = this.configService.get<string>('GIS_SERVER_URL');
     if (!baseUrl) {
-      return res.status(500).json({ message: 'GIS_SERVER_URL is not configured' });
+      return res
+        .status(500)
+        .json({ message: 'GIS_SERVER_URL is not configured' });
     }
 
     const url = `${baseUrl}/api/v1${req.url}`;

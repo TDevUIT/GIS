@@ -3,7 +3,10 @@ export class PaginatedIterator<T> implements AsyncIterableIterator<T[]> {
   private hasMore = true;
 
   constructor(
-    private readonly fetchPage: (page: number, limit: number) => Promise<{
+    private readonly fetchPage: (
+      page: number,
+      limit: number,
+    ) => Promise<{
       items: T[];
       total: number;
     }>,
@@ -65,7 +68,10 @@ export class PaginatedIterator<T> implements AsyncIterableIterator<T[]> {
 }
 
 export function createPaginatedIterator<T>(
-  fetchPage: (page: number, limit: number) => Promise<{
+  fetchPage: (
+    page: number,
+    limit: number,
+  ) => Promise<{
     items: T[];
     total: number;
   }>,
