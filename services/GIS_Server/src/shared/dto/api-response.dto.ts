@@ -4,7 +4,10 @@ export class ApiResponse<T> {
   @ApiProperty({ description: 'HTTP status code', example: 200 })
   statusCode: number;
 
-  @ApiProperty({ description: 'Whether the request was successful', example: true })
+  @ApiProperty({
+    description: 'Whether the request was successful',
+    example: true,
+  })
   success: boolean;
 
   @ApiProperty({ description: 'Response message', example: 'Success' })
@@ -16,10 +19,16 @@ export class ApiResponse<T> {
   @ApiPropertyOptional({ description: 'Error details if any' })
   error?: any;
 
-  @ApiProperty({ description: 'Timestamp of the response', example: '2025-10-05T00:18:50.000Z' })
+  @ApiProperty({
+    description: 'Timestamp of the response',
+    example: '2025-10-05T00:18:50.000Z',
+  })
   timestamp: string;
 
-  @ApiPropertyOptional({ description: 'Request path', example: '/api/v1/accidents' })
+  @ApiPropertyOptional({
+    description: 'Request path',
+    example: '/api/v1/accidents',
+  })
   path?: string;
 
   constructor(partial: Partial<ApiResponse<T>>) {
@@ -43,7 +52,10 @@ export class PaginationMeta {
   @ApiProperty({ description: 'Whether there is a next page', example: true })
   hasNextPage: boolean;
 
-  @ApiProperty({ description: 'Whether there is a previous page', example: false })
+  @ApiProperty({
+    description: 'Whether there is a previous page',
+    example: false,
+  })
   hasPreviousPage: boolean;
 }
 

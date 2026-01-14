@@ -38,7 +38,8 @@ export class AllExceptionsFilter implements ExceptionFilter {
       message = exception.message;
       error = {
         name: exception.name,
-        stack: process.env.NODE_ENV === 'development' ? exception.stack : undefined,
+        stack:
+          process.env.NODE_ENV === 'development' ? exception.stack : undefined,
       };
     }
 
