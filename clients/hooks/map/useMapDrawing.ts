@@ -237,12 +237,14 @@ export function useMapDrawing({
         const event = e as L.DrawEvents.Created
         const layer = event.layer
 
-        if ((layer as any).editing) {
-          (layer as any).editing.disable()
+        const layerWithEditing = layer as unknown as { editing?: { disable?: () => void } }
+        if (layerWithEditing.editing?.disable) {
+          layerWithEditing.editing.disable()
         }
 
-        if (layer.options) {
-          (layer.options as any).draggable = false
+        const layerWithOptions = layer as unknown as { options?: Record<string, unknown> }
+        if (layerWithOptions.options) {
+          layerWithOptions.options.draggable = false
         }
 
         drawnItemsRef.addLayer(layer)

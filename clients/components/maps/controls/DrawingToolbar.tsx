@@ -80,9 +80,8 @@ export default function DrawingToolbar() {
   const map = useMap()
   const drawnItemsRef = useRef<L.FeatureGroup | null>(null)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const drawControlRef = useRef<any>(null)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const currentDrawHandlerRef = useRef<any>(null)
+  const drawControlRef = useRef<unknown>(null)
+  const currentDrawHandlerRef = useRef<L.Draw.Feature | null>(null)
 
   useEffect(() => {
     if (!map) return
@@ -110,9 +109,9 @@ export default function DrawingToolbar() {
     drawControlRef.current = drawControl
 
     // Listen for created shapes
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    map.on(L.Draw.Event.CREATED, (e: any) => {
-      const layer = e.layer
+    map.on(L.Draw.Event.CREATED, (e: L.LeafletEvent) => {
+      const event = e as L.DrawEvents.Created
+      const layer = event.layer
       drawnItems.addLayer(layer)
       setActiveTool(null)
     })
@@ -159,16 +158,16 @@ export default function DrawingToolbar() {
       const input = document.createElement('input')
       input.type = 'file'
       input.accept = '.geojson,.json'
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      input.onchange = (e: any) => {
-        const file = e.target.files[0]
+      input.onchange = (e: Event) => {
+        const target = e.target as HTMLInputElement
+        const file = target.files?.[0]
         if (file) {
           const reader = new FileReader()
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          reader.onload = (event: any) => {
+          reader.onload = (event: ProgressEvent<FileReader>) => {
             try {
-              const geojson = JSON.parse(event.target.result)
-              L.geoJSON(geojson).eachLayer((layer) => {
+              if (!event.target?.result) return
+              const geojson: unknown = JSON.parse(event.target.result as string)
+              L.geoJSON(geojson as GeoJSON.GeoJsonObject).eachLayer((layer) => {
                 drawnItemsRef.current?.addLayer(layer)
               })
             } catch (error) {
@@ -193,8 +192,7 @@ export default function DrawingToolbar() {
     setActiveTool(tool.id)
 
     // Create new draw handler based on tool type
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let drawHandler: any
+    let drawHandler: L.Draw.Feature | undefined
 
     switch (tool.type) {
       case 'marker':
