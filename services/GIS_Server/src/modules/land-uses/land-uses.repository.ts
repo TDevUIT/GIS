@@ -29,7 +29,11 @@ export class LandUsesRepository extends BaseRepository {
     return Boolean(district);
   }
 
-  async recordExists(params: { districtId: string; type: string; year: number }) {
+  async recordExists(params: {
+    districtId: string;
+    type: string;
+    year: number;
+  }) {
     const record = await this.prisma.landUse.findUnique({
       where: {
         districtId_type_year: {
