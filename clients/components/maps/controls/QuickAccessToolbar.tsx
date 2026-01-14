@@ -3,6 +3,13 @@
 import { Car, Wind, Droplet, AlertTriangle, Building2, Bus, BarChart3 } from 'lucide-react'
 import { Z_INDEX } from '@/constants/zIndex'
 
+const devLog = (...args: unknown[]) => {
+  if (process.env.NODE_ENV === 'development') {
+    // eslint-disable-next-line no-console
+    console.log(...args)
+  }
+}
+
 interface QuickAccessButton {
   id: string
   name: string
@@ -60,18 +67,18 @@ interface QuickAccessToolbarProps {
   activeButtonId?: string
 }
 
-export default function QuickAccessToolbar({ 
-  onQuickAction, 
-  activeButtonId 
+export default function QuickAccessToolbar({
+  onQuickAction,
+  activeButtonId
 }: QuickAccessToolbarProps) {
   const handleClick = (button: QuickAccessButton) => {
     onQuickAction?.(button)
-    console.log('Quick action:', button.name, '→', button.service)
+    devLog('Quick action:', button.name, '→', button.service)
   }
 
   return (
-    <div 
-      className="absolute top-6 left-1/2 transform -translate-x-1/2" 
+    <div
+      className="absolute top-6 left-1/2 transform -translate-x-1/2"
       style={{ zIndex: Z_INDEX.QUICK_ACCESS_TOOLBAR }}
     >
       <div className="bg-white/90 backdrop-blur-sm rounded-lg shadow-md border border-gray-200/50 px-2 py-1.5">
@@ -86,8 +93,8 @@ export default function QuickAccessToolbar({
                 onClick={() => handleClick(button)}
                 className={`
                   relative flex items-center gap-1.5 px-2.5 py-1.5 rounded-md transition-all
-                  ${isActive 
-                    ? 'bg-gray-900 text-white shadow-sm' 
+                  ${isActive
+                    ? 'bg-gray-900 text-white shadow-sm'
                     : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
                   }
                 `}
@@ -97,7 +104,7 @@ export default function QuickAccessToolbar({
                 <span className="text-xs font-medium whitespace-nowrap">
                   {button.name}
                 </span>
-                
+
                 {/* Simple active indicator */}
                 {isActive && (
                   <div className="absolute -bottom-0.5 left-1/2 transform -translate-x-1/2 w-4 h-0.5 bg-white rounded-full" />

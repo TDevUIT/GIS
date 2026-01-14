@@ -13,6 +13,19 @@ import { UrbanPlanPolygon } from '@/utils/urbanPlanHelpers'
 import { FeatureAction } from '@/constants/featureCategories'
 import type { GeocodingResult } from '@/interfaces/external/geocoding'
 
+interface QuickActionButton {
+  id: string
+  name: string
+  service: string
+}
+
+const devLog = (...args: unknown[]) => {
+  if (process.env.NODE_ENV === 'development') {
+    // eslint-disable-next-line no-console
+    console.log(...args)
+  }
+}
+
 export function useMapState() {
   const [currentLocation, setCurrentLocation] = useState<[number, number] | null>(null)
   const [selectedLocation, setSelectedLocation] = useState<LocationData | null>(null)
@@ -53,85 +66,85 @@ export function useMapState() {
 
   const handleFeatureSelect = (action: FeatureAction) => {
     setActiveFeature(action)
-    console.log('Selected feature:', action.name, 'Service:', action.service)
+    devLog('Selected feature:', action.name, 'Service:', action.service)
   }
 
-  const handleQuickAction = (button: any) => {
+  const handleQuickAction = (button: QuickActionButton) => {
     setActiveQuickAction(button.id)
-    console.log('Quick action:', button.name, 'Service:', button.service)
+    devLog('Quick action:', button.name, 'Service:', button.service)
   }
 
   const handleDistrictClick = (district: DistrictGeoJSON) => {
     setSelectedDistrict(district)
     setShowWardsLayer(true)
-    console.log('Selected district:', district.properties.name)
+    devLog('Selected district:', district.properties.name)
   }
 
   const handleWardClick = (ward: WardGeoJSON) => {
     setSelectedWard(ward)
-    console.log('Selected ward:', ward.properties.name)
+    devLog('Selected ward:', ward.properties.name)
   }
 
   const handleAccidentClick = (accident: AccidentPoint) => {
     setSelectedAccident(accident)
-    console.log('Selected accident:', accident.roadName)
+    devLog('Selected accident:', accident.roadName)
   }
 
   const handleRoadClick = (road: TrafficLine) => {
     setSelectedRoad(road)
-    console.log('Selected road:', road.roadName)
+    devLog('Selected road:', road.roadName)
   }
 
   const handleAirQualityClick = (point: AirQualityPoint) => {
     setSelectedAirQuality(point)
-    console.log('Selected air quality:', point.districtName, point.level)
+    devLog('Selected air quality:', point.districtName, point.level)
   }
 
   const handleWaterQualityClick = (point: WaterQualityPoint) => {
     setSelectedWaterQuality(point)
-    console.log('Selected water quality:', point.sourceName, point.quality)
+    devLog('Selected water quality:', point.sourceName, point.quality)
   }
 
   const handleInfrastructureClick = (point: InfrastructurePoint) => {
     setSelectedInfrastructure(point)
-    console.log('Selected infrastructure:', point.name, point.category)
+    devLog('Selected infrastructure:', point.name, point.category)
   }
 
   const handleLandUseClick = (polygon: LandUsePolygon) => {
     setSelectedLandUse(polygon)
-    console.log('Selected land use:', polygon.type, polygon.area)
+    devLog('Selected land use:', polygon.type, polygon.area)
   }
 
   const handlePopulationClick = (point: PopulationPoint) => {
     setSelectedPopulation(point)
-    console.log('Selected population:', point.districtName, point.density)
+    devLog('Selected population:', point.districtName, point.density)
   }
 
   const handlePublicTransportClick = (route: PublicTransportRoute) => {
     setSelectedPublicTransport(route)
-    console.log('Selected public transport:', route.routeName, route.mode)
+    devLog('Selected public transport:', route.routeName, route.mode)
   }
 
   const handleTerrainClick = (polygon: TerrainPolygon) => {
     setSelectedTerrain(polygon)
-    console.log('Selected terrain:', polygon.elevation, polygon.slope)
+    devLog('Selected terrain:', polygon.elevation, polygon.slope)
   }
 
   const handleUrbanPlanClick = (urbanPlan: UrbanPlanPolygon) => {
     setSelectedUrbanPlan(urbanPlan)
-    console.log('Selected urban plan:', urbanPlan.planName)
+    devLog('Selected urban plan:', urbanPlan.planName)
   }
 
   const handleLocationFound = (lat: number, lng: number) => {
     setCurrentLocation([lat, lng])
-    console.log('Current location:', lat, lng)
+    devLog('Current location:', lat, lng)
   }
 
   const handleLocationSelect = (result: GeocodingResult) => {
     const coords: [number, number] = [result.lat, result.lon]
     setSearchMarker(coords)
     setSearchResult(result)
-    console.log('Selected location:', result.display_name)
+    devLog('Selected location:', result.display_name)
   }
 
   const handleCurrentLocationClick = () => {
@@ -141,7 +154,7 @@ export function useMapState() {
           const lat = position.coords.latitude
           const lng = position.coords.longitude
           setCurrentLocation([lat, lng])
-          console.log('Current location found:', lat, lng)
+          devLog('Current location found:', lat, lng)
         },
         (error) => {
           console.error('Error getting location:', error)
