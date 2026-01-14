@@ -1,4 +1,3 @@
-
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
@@ -9,10 +8,7 @@ import { AmqpConnection, RabbitSubscribe } from '@golevelup/nestjs-rabbitmq';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { firstValueFrom } from 'rxjs';
-import {
-  Exchanges,
-  RoutingKeys,
-} from '../../ie402-contracts';
+import { Exchanges, RoutingKeys } from '../../ie402-contracts';
 import type {
   RawAccidentData,
   CleanedAccidentData,

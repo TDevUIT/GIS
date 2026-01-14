@@ -1,4 +1,3 @@
-
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-redundant-type-constituents */
@@ -17,7 +16,11 @@ import {
   HarmCategory,
   HarmBlockThreshold,
 } from '@google/generative-ai';
-import { Exchanges, RoutingKeys, RawAccidentData } from '../../../ie402-contracts';
+import {
+  Exchanges,
+  RoutingKeys,
+  RawAccidentData,
+} from '../../../ie402-contracts';
 
 @Injectable()
 @Processor('scraper-queue')
