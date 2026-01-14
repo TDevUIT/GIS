@@ -21,8 +21,6 @@ export class WaterQualitiesRepository extends BaseRepository {
     LEFT JOIN "public"."districts" d ON wq."districtId" = d.id
   `;
 
-
-
   async districtExists(districtId: string): Promise<boolean> {
     const district = await this.prisma.district.findUnique({
       where: { id: districtId },
@@ -110,7 +108,9 @@ export class WaterQualitiesRepository extends BaseRepository {
 
     const dataToUpdate: Prisma.WaterQualityUpdateInput = {
       ...(params.ph !== undefined ? { ph: params.ph } : {}),
-      ...(params.turbidity !== undefined ? { turbidity: params.turbidity } : {}),
+      ...(params.turbidity !== undefined
+        ? { turbidity: params.turbidity }
+        : {}),
       ...(params.contaminationIndex !== undefined
         ? { contaminationIndex: params.contaminationIndex }
         : {}),

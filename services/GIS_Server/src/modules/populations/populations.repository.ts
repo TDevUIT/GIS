@@ -28,7 +28,10 @@ export class PopulationsRepository extends BaseRepository {
   async createWithDetails(params: {
     districtId: string;
     year: number;
-    populationData: Omit<Prisma.PopulationCreateInput, 'district' | 'households' | 'demographics'>;
+    populationData: Omit<
+      Prisma.PopulationCreateInput,
+      'district' | 'households' | 'demographics'
+    >;
     households?: Prisma.HouseholdCreateManyInput[];
     demographics?: Prisma.DemographicCreateManyInput[];
   }) {
@@ -44,13 +47,19 @@ export class PopulationsRepository extends BaseRepository {
 
         if (params.households && params.households.length > 0) {
           await tx.household.createMany({
-            data: params.households.map((h) => ({ ...h, populationId: population.id })),
+            data: params.households.map((h) => ({
+              ...h,
+              populationId: population.id,
+            })),
           });
         }
 
         if (params.demographics && params.demographics.length > 0) {
           await tx.demographic.createMany({
-            data: params.demographics.map((d) => ({ ...d, populationId: population.id })),
+            data: params.demographics.map((d) => ({
+              ...d,
+              populationId: population.id,
+            })),
           });
         }
 
@@ -94,10 +103,15 @@ export class PopulationsRepository extends BaseRepository {
         });
 
         if (params.demographics) {
-          await tx.demographic.deleteMany({ where: { populationId: params.id } });
+          await tx.demographic.deleteMany({
+            where: { populationId: params.id },
+          });
           if (params.demographics.length > 0) {
             await tx.demographic.createMany({
-              data: params.demographics.map((d) => ({ ...d, populationId: params.id })),
+              data: params.demographics.map((d) => ({
+                ...d,
+                populationId: params.id,
+              })),
             });
           }
         }
@@ -106,7 +120,10 @@ export class PopulationsRepository extends BaseRepository {
           await tx.household.deleteMany({ where: { populationId: params.id } });
           if (params.households.length > 0) {
             await tx.household.createMany({
-              data: params.households.map((h) => ({ ...h, populationId: params.id })),
+              data: params.households.map((h) => ({
+                ...h,
+                populationId: params.id,
+              })),
             });
           }
         }

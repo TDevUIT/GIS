@@ -66,10 +66,7 @@ export class InfrastructuresRepository extends BaseRepository {
           if (params.school) {
             await tx.school.create({
               data: {
-                ...(params.school as Omit<
-                  Prisma.SchoolUncheckedCreateInput,
-                  'infraId' | 'id'
-                >),
+                ...params.school,
                 infraId: params.infraId,
               },
             });
@@ -79,10 +76,7 @@ export class InfrastructuresRepository extends BaseRepository {
           if (params.hospital) {
             await tx.hospital.create({
               data: {
-                ...(params.hospital as Omit<
-                  Prisma.HospitalUncheckedCreateInput,
-                  'infraId' | 'id'
-                >),
+                ...params.hospital,
                 infraId: params.infraId,
               },
             });
@@ -92,10 +86,7 @@ export class InfrastructuresRepository extends BaseRepository {
           if (params.park) {
             await tx.park.create({
               data: {
-                ...(params.park as Omit<
-                  Prisma.ParkUncheckedCreateInput,
-                  'infraId' | 'id'
-                >),
+                ...params.park,
                 infraId: params.infraId,
               },
             });
@@ -105,10 +96,7 @@ export class InfrastructuresRepository extends BaseRepository {
           if (params.market) {
             await tx.market.create({
               data: {
-                ...(params.market as Omit<
-                  Prisma.MarketUncheckedCreateInput,
-                  'infraId' | 'id'
-                >),
+                ...params.market,
                 infraId: params.infraId,
               },
             });
@@ -118,10 +106,7 @@ export class InfrastructuresRepository extends BaseRepository {
           if (params.utility) {
             await tx.utility.create({
               data: {
-                ...(params.utility as Omit<
-                  Prisma.UtilityUncheckedCreateInput,
-                  'infraId' | 'id'
-                >),
+                ...params.utility,
                 infraId: params.infraId,
               },
             });
@@ -200,14 +185,25 @@ export class InfrastructuresRepository extends BaseRepository {
     utility?: Omit<Prisma.UtilityUncheckedCreateInput, 'infraId' | 'id'>;
   }) {
     return this.prisma.$transaction(async (tx) => {
-      if (params.name !== undefined || params.address !== undefined || params.category !== undefined || params.districtId !== undefined) {
+      if (
+        params.name !== undefined ||
+        params.address !== undefined ||
+        params.category !== undefined ||
+        params.districtId !== undefined
+      ) {
         await tx.infrastructure.update({
           where: { id: params.id },
           data: {
             ...(params.name !== undefined ? { name: params.name } : {}),
-            ...(params.address !== undefined ? { address: params.address } : {}),
-            ...(params.category !== undefined ? { category: params.category } : {}),
-            ...(params.districtId !== undefined ? { districtId: params.districtId } : {}),
+            ...(params.address !== undefined
+              ? { address: params.address }
+              : {}),
+            ...(params.category !== undefined
+              ? { category: params.category }
+              : {}),
+            ...(params.districtId !== undefined
+              ? { districtId: params.districtId }
+              : {}),
           },
         });
       }
@@ -216,7 +212,9 @@ export class InfrastructuresRepository extends BaseRepository {
         await tx.$executeRaw`UPDATE "public"."infrastructures" SET geom = ST_GeomFromText(${params.geomWkt}, 4326), "updatedAt" = NOW() WHERE id = ${params.id};`;
       }
 
-      const existing = await tx.infrastructure.findUnique({ where: { id: params.id } });
+      const existing = await tx.infrastructure.findUnique({
+        where: { id: params.id },
+      });
       const categoryToUpdate = params.category || existing?.category;
 
       if (categoryToUpdate) {
@@ -287,7 +285,10 @@ export class InfrastructuresRepository extends BaseRepository {
     return images as ImageRecord[];
   }
 
-  async replaceImages(infraId: string, imagesData: Array<{ url: string; publicId: string }>) {
+  async replaceImages(
+    infraId: string,
+    imagesData: Array<{ url: string; publicId: string }>,
+  ) {
     return this.prisma.$transaction(async (tx) => {
       const oldImages = await this.findImages(infraId, tx);
 

@@ -118,7 +118,9 @@ export class PublicTransportsRepository extends BaseRepository {
     }
 
     const dataToUpdate: Prisma.PublicTransportUpdateInput = {
-      ...(params.routeName !== undefined ? { routeName: params.routeName } : {}),
+      ...(params.routeName !== undefined
+        ? { routeName: params.routeName }
+        : {}),
       ...(params.mode !== undefined ? { mode: params.mode } : {}),
       ...(params.capacity !== undefined ? { capacity: params.capacity } : {}),
       ...(params.stopsCount !== undefined

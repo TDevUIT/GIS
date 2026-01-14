@@ -7,8 +7,8 @@ import { withParsedGeom } from '../../shared/geojson/geojson.util';
 @Injectable()
 export class TerrainsRepository extends BaseRepository {
   constructor(protected readonly prisma: PrismaService) {
-      super(prisma);
-    }
+    super(prisma);
+  }
 
   private readonly selectFields = Prisma.sql`
     t.id, t.elevation, t.slope, t.soil_type as "soilType",
@@ -102,7 +102,9 @@ export class TerrainsRepository extends BaseRepository {
     }
 
     const dataToUpdate: Prisma.TerrainUpdateInput = {
-      ...(params.elevation !== undefined ? { elevation: params.elevation } : {}),
+      ...(params.elevation !== undefined
+        ? { elevation: params.elevation }
+        : {}),
       ...(params.slope !== undefined ? { slope: params.slope } : {}),
       ...(params.soilType !== undefined ? { soilType: params.soilType } : {}),
       ...(params.districtId !== undefined

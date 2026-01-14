@@ -79,7 +79,9 @@ export class AccidentsRepository extends BaseRepository {
       data: {
         ...params.data,
         ...(params.geomString !== undefined ? { geom: params.geomString } : {}),
-        ...(params.trafficId ? { traffic: { connect: { id: params.trafficId } } } : {}),
+        ...(params.trafficId
+          ? { traffic: { connect: { id: params.trafficId } } }
+          : {}),
       },
       include: this.includeOptions,
     });
@@ -98,7 +100,10 @@ export class AccidentsRepository extends BaseRepository {
     });
   }
 
-  async replaceImages(accidentId: string, imagesData: Array<{ url: string; publicId: string }>) {
+  async replaceImages(
+    accidentId: string,
+    imagesData: Array<{ url: string; publicId: string }>,
+  ) {
     return this.prisma.$transaction(async (tx) => {
       const oldImages = await this.findImages(accidentId, tx);
 
