@@ -18,8 +18,11 @@ async function bootstrap() {
     .split(',')
     .map((o) => o.trim())
     .filter(Boolean);
-  const corsCredentials = (process.env.CORS_CREDENTIALS ?? '').toLowerCase() === 'true';
-  const corsMaxAge = process.env.CORS_MAX_AGE ? Number(process.env.CORS_MAX_AGE) : undefined;
+  const corsCredentials =
+    (process.env.CORS_CREDENTIALS ?? '').toLowerCase() === 'true';
+  const corsMaxAge = process.env.CORS_MAX_AGE
+    ? Number(process.env.CORS_MAX_AGE)
+    : undefined;
 
   app.enableCors({
     origin: (origin, callback) => {
@@ -27,7 +30,11 @@ async function bootstrap() {
         return callback(null, true);
       }
 
-      if (corsOrigins.length === 0 || corsOrigins.includes(origin) || corsOrigins.includes('*')) {
+      if (
+        corsOrigins.length === 0 ||
+        corsOrigins.includes(origin) ||
+        corsOrigins.includes('*')
+      ) {
         return callback(null, true);
       }
 
