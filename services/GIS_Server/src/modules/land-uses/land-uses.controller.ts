@@ -22,7 +22,10 @@ import { LandUsesService } from './land-uses.service';
 import { CreateLandUseDto } from './dto/create-land-use.dto';
 import { UpdateLandUseDto } from './dto/update-land-use.dto';
 import { FindLandUsesQueryDto } from './dto/query.dto';
-import { GisPointQueryDto, GisWktBodyDto } from '../../shared/dto/gis-query.dto';
+import {
+  GisPointQueryDto,
+  GisWktBodyDto,
+} from '../../shared/dto/gis-query.dto';
 import { AdminGuard } from '../../auth/admin.guard';
 
 @ApiTags('land-uses')

@@ -62,7 +62,10 @@ export class AnalyticsService {
     if (!targetYear) {
       return { year: null, summary: [] };
     }
-    const summary = await this.repository.getLandUseSummary(districtId, targetYear);
+    const summary = await this.repository.getLandUseSummary(
+      districtId,
+      targetYear,
+    );
     return { year: targetYear, summary };
   }
 

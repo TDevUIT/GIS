@@ -4,7 +4,6 @@ import { BaseRepository } from '../../shared/repository/base.repository';
 import { withParsedGeom } from '../../shared/geojson/geojson.util';
 import { PrismaService } from '../../infra/prisma/prisma.service';
 
-
 @Injectable()
 export class AnalyticsRepository extends BaseRepository {
   constructor(prisma: PrismaService) {

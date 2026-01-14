@@ -23,7 +23,6 @@ export class TrafficsRepository extends BaseRepository {
     LEFT JOIN "public"."districts" d ON t."districtId" = d.id
   `;
 
-
   async districtExists(districtId: string): Promise<boolean> {
     const district = await this.prisma.district.findUnique({
       where: { id: districtId },

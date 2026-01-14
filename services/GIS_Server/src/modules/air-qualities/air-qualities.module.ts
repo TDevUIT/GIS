@@ -4,7 +4,6 @@ import { AirQualitiesController } from './air-qualities.controller';
 import { PrismaModule } from '../../infra/prisma/prisma.module';
 import { AirQualitiesRepository } from './air-qualities.repository';
 
-
 @Module({
   imports: [PrismaModule],
   controllers: [AirQualitiesController],

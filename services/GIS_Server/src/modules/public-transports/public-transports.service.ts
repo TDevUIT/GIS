@@ -88,7 +88,7 @@ export class PublicTransportsService {
       geomWkt: geom,
       districtId,
       routeName: otherData.routeName,
-      mode: otherData.mode as TransportMode | undefined,
+      mode: otherData.mode,
       capacity: otherData.capacity,
       stopsCount: otherData.stopsCount,
       frequencyMin: otherData.frequencyMin,

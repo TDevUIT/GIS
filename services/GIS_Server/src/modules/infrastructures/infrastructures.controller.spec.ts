@@ -11,7 +11,9 @@ describe('InfrastructuresController', () => {
       providers: [InfrastructuresService],
     }).compile();
 
-    controller = module.get<InfrastructuresController>(InfrastructuresController);
+    controller = module.get<InfrastructuresController>(
+      InfrastructuresController,
+    );
   });
 
   it('should be defined', () => {

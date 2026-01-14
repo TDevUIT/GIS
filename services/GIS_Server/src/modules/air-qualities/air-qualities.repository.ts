@@ -7,7 +7,7 @@ import { PrismaService } from '../../infra/prisma/prisma.service';
 
 @Injectable()
 export class AirQualitiesRepository extends BaseRepository {
-   constructor(prisma: PrismaService) {
+  constructor(prisma: PrismaService) {
     super(prisma);
   }
 
@@ -21,7 +21,6 @@ export class AirQualitiesRepository extends BaseRepository {
     FROM "public"."air_qualities" aq
     LEFT JOIN "public"."districts" d ON aq."districtId" = d.id
   `;
-
 
   async districtExists(districtId: string): Promise<boolean> {
     const district = await this.prisma.district.findUnique({

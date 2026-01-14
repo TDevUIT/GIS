@@ -11,7 +11,9 @@ describe('PublicTransportsController', () => {
       providers: [PublicTransportsService],
     }).compile();
 
-    controller = module.get<PublicTransportsController>(PublicTransportsController);
+    controller = module.get<PublicTransportsController>(
+      PublicTransportsController,
+    );
   });
 
   it('should be defined', () => {

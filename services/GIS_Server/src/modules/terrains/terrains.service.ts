@@ -33,7 +33,9 @@ export class TerrainsService {
     });
 
     if (!created) {
-      throw new NotFoundException(`Dữ liệu địa hình với ID "${id}" không tồn tại.`);
+      throw new NotFoundException(
+        `Dữ liệu địa hình với ID "${id}" không tồn tại.`,
+      );
     }
 
     return created;

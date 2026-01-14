@@ -114,7 +114,10 @@ export class InfrastructuresService {
 
     const result = await this.repository.replaceImages(
       infraId,
-      (imagesData || []).map((img) => ({ url: img.url, publicId: img.publicId })),
+      (imagesData || []).map((img) => ({
+        url: img.url,
+        publicId: img.publicId,
+      })),
     );
 
     if (result.oldImages.length > 0) {

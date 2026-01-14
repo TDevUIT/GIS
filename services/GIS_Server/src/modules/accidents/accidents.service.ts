@@ -138,7 +138,10 @@ export class AccidentsService {
 
     const result = await this.repository.replaceImages(
       accidentId,
-      (imagesData || []).map((img) => ({ url: img.url, publicId: img.publicId })),
+      (imagesData || []).map((img) => ({
+        url: img.url,
+        publicId: img.publicId,
+      })),
     );
 
     if (result.oldImages.length > 0) {
@@ -155,7 +158,7 @@ export class AccidentsService {
       timestamp: new Date().toISOString(),
     });
 
-    return result.images as any;
+    return result.images;
   }
 
   async deleteImage(accidentId: string, imageId: string): Promise<void> {
