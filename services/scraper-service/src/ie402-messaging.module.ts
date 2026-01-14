@@ -22,7 +22,8 @@ import { RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
           'amqp://guest:guest@localhost:5672',
         connectionInitOptions: { wait: false },
         enableControllerDiscovery:
-          configService.get<string>('ENABLE_RMQ_CONTROLLER_DISCOVERY') === 'true',
+          configService.get<string>('ENABLE_RMQ_CONTROLLER_DISCOVERY') ===
+          'true',
       }),
     }),
   ],
